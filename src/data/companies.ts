@@ -1,0 +1,88 @@
+import { Company } from '../types';
+
+export const companiesData: Company[] = [
+  {
+    id: 'ts_logistik',
+    name: 'TS Logistik ApS',
+    cvr: '38585290',
+    role: 'Drift (Vognmand)',
+    industryCode: '494100: Vejgodstransport',
+    established: '12-04-2017',
+    owner: 'CESR Holding ApS',
+    director: 'Ümit Cetin',
+    auditor: 'Revisionsfirmaet Christian Danielsen',
+    status: 'Aktiv',
+    notes: 'Primær operationel enhed og finansiel motor. Kilde til kapitaldræn og centrum for verserende skattesag.',
+    riskLevel: 'High'
+  },
+  {
+    id: 'cesr_holding',
+    name: 'CESR Holding ApS',
+    cvr: '43579290',
+    role: 'Holding',
+    industryCode: '642020: Ikke-finansielle holdingselskaber',
+    established: '15-10-2022',
+    owner: 'Ümit Cetin (100%)',
+    director: 'Ümit Cetin',
+    auditor: 'Revisionsfirmaet Christian Danielsen',
+    status: 'Aktiv',
+    notes: 'Kapital-anker. Ejer 100% af TS Logistik, CESR ApS og CESR Ejendomme. Central for kapitalbeskyttelsesstrategien.',
+    riskLevel: 'Medium'
+  },
+  {
+    id: 'cesr_ejendomme',
+    name: 'CESR Ejendomme ApS',
+    cvr: '43712683',
+    role: 'Ejendom',
+    industryCode: '682040: Anden udlejning af boliger',
+    established: '06-12-2022',
+    owner: 'CESR Holding ApS',
+    director: 'Ümit Cetin',
+    auditor: 'Revisionsfirmaet Christian Danielsen',
+    status: 'Aktiv',
+    notes: 'Modtog 5 mio. DKK i udbytte fra TS Logistik til at finansiere ejendomskøb på Vejlebrovej for 6.55 mio. DKK.',
+    riskLevel: 'Low'
+  },
+  {
+    id: 'cesr_aps',
+    name: 'CESR ApS',
+    cvr: '44118033',
+    role: 'Bilsalg',
+    industryCode: '451100: Detailhandel med personbiler',
+    established: '14-06-2023',
+    owner: 'CESR Holding ApS',
+    director: 'Ümit Cetin',
+    auditor: 'N/A',
+    status: 'Aktiv',
+    notes: 'Udvidelse til højrisiko-sektor (brugtbilsalg). Tidligere direktør (Cömert Avci) udtrådt efter uenighed.',
+    riskLevel: 'Medium'
+  },
+  {
+    id: 'lund_capital',
+    name: 'Lund Capital Holding ApS',
+    cvr: '40423249',
+    role: 'Historisk',
+    industryCode: '702200: Virksomhedsrådgivning',
+    established: '01-04-2019',
+    owner: 'Muhamed Danyal Tirpan',
+    director: 'Muhamed Danyal Tirpan',
+    auditor: 'N/A',
+    status: 'Historisk',
+    notes: 'Stiftet af Ümit Cetin, som udtrådte 01.01.2022. Et tidligere sideprojekt, overdraget til M.D. Tirpan.',
+    riskLevel: 'Low'
+  },
+    {
+    id: 'gorm_partnere',
+    name: 'Gorm & Partnere ApS',
+    cvr: '37440183',
+    role: 'Historisk',
+    industryCode: '702200: Virksomhedsrådgivning',
+    established: '01-03-2016',
+    owner: 'Ukendt',
+    director: 'Ukendt',
+    auditor: 'N/A',
+    status: 'Ophørt',
+    notes: 'Tidligere selskab i Ümit Cetins netværk før stiftelsen af Lund Capital. Opløst i 2019.',
+    riskLevel: 'Low'
+  },
+];

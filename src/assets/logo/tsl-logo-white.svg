@@ -1,0 +1,11 @@
+<svg viewBox="0 0 155 50" xmlns="http://www.w3.org/2000/svg">
+   <style>
+    .heavy { font-family: Inter, sans-serif; font-weight: 800; font-size: 50px; letter-spacing: -2px; }
+  </style>
+  <g class="heavy" fill="white">
+    <text x="0" y="45">T</text>
+    <text x="35" y="45">S</text>
+    <path d="M75 0 L 85 0 L 85 40 L 115 40 L 115 50 L 75 50 Z" />
+  </g>
+  <path d="M135 0 L 155 45 L 145 45 L 125 0 Z" fill="#FF8A3C"/>
+</svg>
