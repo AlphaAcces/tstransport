@@ -34,7 +34,7 @@ export const CounterpartiesView: React.FC<CounterpartiesViewProps> = ({ onNaviga
                     Modparter & Relationer (TSL)
                 </h2>
             </div>
-            <div className="bg-component-dark rounded-lg border border-border-dark overflow-x-auto">
+            <div className="bg-component-dark rounded-lg border border-border-dark overflow-x-auto scrollbar-hidden">
                 <table className="min-w-full divide-y divide-border-dark">
                     <thead className="bg-gray-800/50">
                         <tr>

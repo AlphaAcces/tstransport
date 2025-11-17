@@ -1,20 +1,11 @@
 import React from 'react';
 import { Company } from '../../types';
 import { X } from 'lucide-react';
-import { Tag } from '../Shared/Tag';
 
 interface CompanyDetailModalProps {
   company: Company | null;
   onClose: () => void;
 }
-
-const getStatusColor = (status: string): 'green' | 'yellow' | 'gray' => {
-    switch (status) {
-        case 'Aktiv': return 'green';
-        case 'Historisk': return 'yellow';
-        default: return 'gray';
-    }
-};
 
 const DetailRow: React.FC<{ label: string; value: string | undefined }> = ({ label, value }) => (
     <div className="py-2 grid grid-cols-3 gap-4">

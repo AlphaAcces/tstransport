@@ -1,8 +1,8 @@
 import React from 'react';
-import { AreaChart, Area, BarChart, Bar, CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+import { AreaChart, Area, BarChart, Bar, CartesianGrid, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useCaseData } from '../../context/DataContext';
 
-const ChartCard: React.FC<{ title: string; children: React.ReactNode; }> = ({ title, children }) => (
+const ChartCard: React.FC<{ title: string; children: React.ReactElement; }> = ({ title, children }) => (
     <div className="bg-component-dark p-6 rounded-lg border border-border-dark">
         <h3 className="text-lg font-bold text-gray-200 mb-4">{title}</h3>
         <div style={{ width: '100%', height: 300 }}>
@@ -29,7 +29,7 @@ export const FinancialsView: React.FC = () => {
     <div className="space-y-8">
       <div>
         <h2 className="text-xl font-bold text-gray-200 mb-4">Årlige Nøgletal (TS Logistik ApS)</h2>
-        <div className="bg-component-dark border border-border-dark rounded-lg overflow-x-auto">
+        <div className="bg-component-dark border border-border-dark rounded-lg overflow-x-auto scrollbar-hidden">
           <table className="min-w-full divide-y divide-border-dark">
             <thead className="bg-gray-800/50">
               <tr>
@@ -112,7 +112,7 @@ export const FinancialsView: React.FC = () => {
         <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
           <li><span className="font-semibold text-orange-400">Pres på indtjening:</span> EBIT- og netto-margin er faldende sammenlignet med 2022-23, hvilket indikerer stigende omkostninger eller prispres.</li>
           <li><span className="font-semibold text-red-400">Halveret produktivitet:</span> Nettoresultat pr. medarbejder er faldet fra ~170 t.kr. i 2023 til ~85 t.kr. i 2024, på trods af flere ansatte.</li>
-          <li><span className="font-semibold text-green-400">Stærk kapitalisering:</span> Egenkapitalen er voksende og soliditeten er høj (>55%), hvilket giver en buffer mod tab.</li>
+          <li><span className="font-semibold text-green-400">Stærk kapitalisering:</span> Egenkapitalen er voksende og soliditeten er høj (&gt;55%), hvilket giver en buffer mod tab.</li>
           <li><span className="font-semibold text-yellow-500">Likviditetsrisiko:</span> Den stærke balance dækker over en kritisk likviditetskrise. Se "Cashflow & DSO" for detaljeret analyse.</li>
         </ul>
       </div>

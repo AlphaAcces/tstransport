@@ -23,7 +23,7 @@ const CounterpartiesView = lazy(() => import('./components/Counterparties/Counte
 const ScenariosView = lazy(() => import('./components/Scenarios/ScenariosView').then(module => ({ default: module.ScenariosView })));
 
 
-const App: React.FC = () => {
+export const App: React.FC = () => {
   const [authUser, setAuthUser] = useState<{ id: string; role: 'admin' | 'user' } | null>(null);
 
   useEffect(() => {
@@ -121,5 +121,3 @@ const App: React.FC = () => {
     </div>
   );
 };
-
-export default App;

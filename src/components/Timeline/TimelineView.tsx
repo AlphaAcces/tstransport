@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useCaseData } from '../../context/DataContext';
 import { TimelineEvent } from '../../types';
 import { TimelineEventCard } from './TimelineEventCard';
@@ -18,9 +18,6 @@ const filterMap: Record<FilterType, TimelineEvent['type'][]> = {
 export const TimelineView: React.FC = () => {
     const { timelineData } = useCaseData();
 
-    const [events, setEvents] = useState<TimelineEvent[]>(() => 
-        [...timelineData].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    );
     const [activeFilter, setActiveFilter] = useState<FilterType>('Alle');
 
     const filteredEvents = useMemo(() => {

@@ -134,7 +134,7 @@ export const RiskView: React.FC = () => {
                     </div>
                 </div>
 
-                <div className="bg-component-dark border border-border-dark rounded-lg overflow-x-auto">
+                <div className="bg-component-dark border border-border-dark rounded-lg overflow-x-auto scrollbar-hidden">
                     <table className="min-w-full divide-y divide-border-dark">
                         <thead className="bg-gray-800/50">
                             <tr>

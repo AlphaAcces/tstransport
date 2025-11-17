@@ -3,8 +3,7 @@ import { useCaseData } from '../../context/DataContext';
 import { Scenario, ActionItem } from '../../types';
 import { Tag } from '../Shared/Tag';
 import { Route, Check, AlertTriangle, X, LogOut, Loader, ServerCrash, XCircle, Bot } from 'lucide-react';
-import { generateWithModel } from '../../lib/ai';
-import { AVAILABLE_MODELS, DEFAULT_MODEL_KEY } from '../../config/availableModels';
+import { generateGeminiContent } from '../../lib/ai';
 
 const AI_CACHE_KEY = 'ai_scenario_history';
 
@@ -93,7 +92,7 @@ const AIAnalysisPanel: React.FC<{ analysis: string, isLoading: boolean, error: s
                 <h3 className="text-lg font-bold text-gray-200">AI-Analyse: {scenario?.name}</h3>
                 <button onClick={onClose} className="text-gray-400 hover:text-white"><XCircle className="w-6 h-6" /></button>
             </div>
-            <div className="flex-grow overflow-y-auto pr-2 space-y-6">
+            <div className="flex-grow overflow-y-auto scrollbar-hidden pr-2 space-y-6">
                 {isLoading && (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
                         <Loader className="w-8 h-8 animate-spin mb-4" />
@@ -142,7 +141,6 @@ export const ScenariosView: React.FC = () => {
     const [analysisResult, setAnalysisResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [selectedModelKey, setSelectedModelKey] = useState<string>(DEFAULT_MODEL_KEY);
     
     const linkedActions = useMemo(() => {
         if (!selectedScenario) return [];
@@ -208,7 +206,7 @@ export const ScenariosView: React.FC = () => {
                     * **Triggere at Overvåge:** Hvilke 3 konkrete signaler eller hændelser indikerer, at virksomheden er på vej ind i dette scenarie?
                 `;
 
-                const { text: resultText } = await generateWithModel(selectedModelKey, prompt);
+                const resultText = await generateGeminiContent(prompt);
                 setAnalysisResult(resultText);
 
                 const currentCacheData = localStorage.getItem(AI_CACHE_KEY);
@@ -255,27 +253,14 @@ export const ScenariosView: React.FC = () => {
                 </div>
             </div>
             {selectedScenario && (
-                    <div className="w-full md:w-1/3 lg:w-1/4 p-4">
-                        <div className="bg-component-dark rounded-md border border-border-dark p-4">
-                            <label className="text-sm text-gray-400">Vælg AI-model</label>
-                            <select className="w-full mt-2 bg-base-dark text-gray-200 p-2 rounded" value={selectedModelKey} onChange={e => setSelectedModelKey(e.target.value)}>
-                                {AVAILABLE_MODELS.map(m => (
-                                    <option key={m.key} value={m.key}>{m.name} {m.implemented ? '' : ' (ikke implementeret)'}</option>
-                                ))}
-                            </select>
-
-                            <div className="mt-4">
-                                <AIAnalysisPanel 
-                                    analysis={analysisResult} 
-                                    isLoading={isLoading} 
-                                    error={error} 
-                                    onClose={() => setSelectedScenario(null)}
-                                    scenario={selectedScenario}
-                                    linkedActions={linkedActions}
-                                />
-                            </div>
-                        </div>
-                    </div>
+                <AIAnalysisPanel 
+                    analysis={analysisResult} 
+                    isLoading={isLoading} 
+                    error={error} 
+                    onClose={() => setSelectedScenario(null)}
+                    scenario={selectedScenario}
+                    linkedActions={linkedActions}
+                />
             )}
         </div>
     );

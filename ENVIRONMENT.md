@@ -1,18 +1,17 @@
 Environment variables
 
-- `VITE_OPENAI_API_KEY`: Your OpenAI API key used by client-side code (if required). For security, prefer storing API keys on a backend—do not expose them in client bundles for production.
-- `GEMINI_API_KEY`: Your Gemini API key.
+- `VITE_GEMINI_API_KEY`: Your Google Gemini API key. For production deployments, store secrets on a backend service instead of exposing them in the client.
 
 Local setup options:
 
-- Create a `.env.local` file in the project root and add the keys (do NOT commit this file):
+- Create a `.env.local` file in the project root and add the key (do NOT commit this file):
 
-  `VITE_OPENAI_API_KEY=sk-...`
+  `VITE_GEMINI_API_KEY=AIza...`
 
-- PowerShell one-liner to create `.env.local` (replace `your-openai-key-here` with the real key):
+- PowerShell one-liner to create `.env.local` (replace the placeholder with the real key):
 
   ```powershell
-  Set-Content -Path .env.local -Value "VITE_OPENAI_API_KEY=your-openai-key-here" -Encoding UTF8
+  Set-Content -Path .env.local -Value "VITE_GEMINI_API_KEY=your-gemini-key-here" -Encoding UTF8
   ```
 
 Notes:

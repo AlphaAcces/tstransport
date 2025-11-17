@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
-import { TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface KpiCardProps {
     title: string;

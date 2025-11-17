@@ -116,7 +116,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <KpiCard 
                         title="Samlet Risikoniveau" 
-                        value={`${totalRiskScore.score}/100`}
+                        value={`${totalRiskScore.score}/${totalRiskScore.maxScore}`}
                         color="red"
                         icon={<ShieldAlert className="w-4 h-4"/>}
                         onClick={() => onNavigate('risk', { fromDashboard: true })}
