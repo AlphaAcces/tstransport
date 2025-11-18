@@ -59,7 +59,7 @@ const HistoricalSection: React.FC = () => (
 
 export const OwnershipStructure: React.FC = () => {
     return (
-        <div className="flex flex-col items-center p-4 overflow-x-auto">
+        <div className="flex flex-col items-center p-4 overflow-x-auto scrollbar-hidden">
             <Node label="Ümit Cetin" sublabel="Ejer / UBO" level="ubo">
                 <ChildNodeContainer>
                     <Node label="CESR Holding ApS" sublabel="Holding" level="holding">

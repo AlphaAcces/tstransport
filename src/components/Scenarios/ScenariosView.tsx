@@ -2,8 +2,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useCaseData } from '../../context/DataContext';
 import { Scenario, ActionItem } from '../../types';
 import { Tag } from '../Shared/Tag';
-import { Route, Check, AlertTriangle, X, LogOut, Loader, ServerCrash, XCircle, Bot } from 'lucide-react';
+import { Route, Check, AlertTriangle, X, LogOut, Loader, XCircle, Bot } from 'lucide-react';
 import { generateGeminiContent } from '../../lib/ai';
+import { AiErrorMessage } from '../Shared/AiErrorMessage';
 
 const AI_CACHE_KEY = 'ai_scenario_history';
 
@@ -37,6 +38,65 @@ const actionCategoryColor: Record<ActionItem['category'], 'blue' | 'green' | 'ye
     'Regulatorisk': 'blue',
     'Governance': 'blue',
     'Strategisk': 'green'
+};
+
+type ParsedSection = {
+    id: string;
+    heading: string;
+    bullets: string[];
+    paragraphs: string[];
+};
+
+const SECTION_LABELS_IN_ORDER = [
+    '1. Konsekvenser',
+    '2. Kritiske Handlinger',
+    '3. Mini-Playbook (Næste 30 dage)'
+];
+
+const SECTION_REGEX = /##\s*(\d\.\s*[^\n]+)\s*\n?([\s\S]*?)(?=\n##\s*\d\.|$)/g;
+
+const stripMarkdown = (line: string) => line.replace(/\*\*(.*?)\*\*/g, '$1').trim();
+
+const normaliseBullet = (line: string) => stripMarkdown(line.replace(/^[-*•]\s*/, ''));
+
+const parseAnalysisSections = (analysis: string): ParsedSection[] => {
+    if (!analysis) return [];
+
+    const normalised = analysis.replace(/\r\n/g, '\n');
+    const parsedMap = new Map<string, ParsedSection>();
+
+    let match: RegExpExecArray | null;
+    while ((match = SECTION_REGEX.exec(normalised)) !== null) {
+        const sectionId = match[1].trim();
+        const body = (match[2] ?? '').trim();
+        const lines = body.split('\n').map(line => line.trim()).filter(Boolean);
+
+        const bullets: string[] = [];
+        const paragraphs: string[] = [];
+
+        lines.forEach(line => {
+            if (/^[-*•]/.test(line)) {
+                bullets.push(normaliseBullet(line));
+            } else {
+                paragraphs.push(stripMarkdown(line));
+            }
+        });
+
+        parsedMap.set(sectionId, {
+            id: sectionId,
+            heading: sectionId,
+            bullets,
+            paragraphs,
+        });
+    }
+
+    const orderedSections = SECTION_LABELS_IN_ORDER.map(label => parsedMap.get(label)).filter(Boolean) as ParsedSection[];
+
+    if (orderedSections.length > 0) {
+        return orderedSections;
+    }
+
+    return Array.from(parsedMap.values());
 };
 
 
@@ -86,6 +146,8 @@ const ScenarioCard: React.FC<{ scenario: Scenario, onAnalyze: (scenario: Scenari
 };
 
 const AIAnalysisPanel: React.FC<{ analysis: string, isLoading: boolean, error: string | null, onClose: () => void, scenario: Scenario | null, linkedActions: ActionItem[] }> = ({ analysis, isLoading, error, onClose, scenario, linkedActions }) => {
+    const parsedSections = useMemo(() => parseAnalysisSections(analysis), [analysis]);
+
     return (
         <div className="fixed top-16 right-0 h-[calc(100%-4rem)] w-full md:w-1/3 lg:w-1/4 bg-component-dark border-l border-border-dark z-40 p-6 flex flex-col transform transition-transform duration-300 ease-in-out">
             <div className="flex justify-between items-center mb-4">
@@ -100,16 +162,38 @@ const AIAnalysisPanel: React.FC<{ analysis: string, isLoading: boolean, error: s
                     </div>
                 )}
                 {error && (
-                     <div className="flex flex-col items-center justify-center h-full text-red-400 text-center">
-                        <ServerCrash className="w-8 h-8 mb-4" />
-                        <p className="font-semibold">Fejl under analyse</p>
-                        <p className="text-xs text-gray-500 mt-2 bg-base-dark p-2 rounded">{error}</p>
-                    </div>
+                    <AiErrorMessage details={error} />
                 )}
                 {!isLoading && !error && (
                     <>
-                        {analysis && (
-                            <div className="prose prose-sm prose-invert text-gray-300 whitespace-pre-wrap font-sans" dangerouslySetInnerHTML={{ __html: analysis.replace(/\*/g, '•') }} />
+                        {parsedSections.length > 0 ? (
+                            <div className="space-y-6">
+                                {parsedSections.map(section => (
+                                    <section key={section.id} className="border border-border-dark/60 rounded-lg p-4 bg-base-dark/40 space-y-3">
+                                        <h4 className="text-sm font-semibold text-gray-200 tracking-wide uppercase">{section.heading}</h4>
+                                        {section.paragraphs.length > 0 && (
+                                            <div className="space-y-2 text-sm text-gray-300">
+                                                {section.paragraphs.map((paragraph, index) => (
+                                                    <p key={index}>{paragraph}</p>
+                                                ))}
+                                            </div>
+                                        )}
+                                        {section.bullets.length > 0 && (
+                                            <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
+                                                {section.bullets.map((item, index) => (
+                                                    <li key={index}>{item}</li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                    </section>
+                                ))}
+                            </div>
+                        ) : (
+                            analysis && (
+                                <div className="border border-border-dark/60 rounded-lg p-4 bg-base-dark/40 text-sm text-gray-300">
+                                    {analysis}
+                                </div>
+                            )
                         )}
                         
                         {linkedActions.length > 0 && (
