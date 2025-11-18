@@ -2,6 +2,42 @@
   color-scheme: dark;
 }
 
+html,
+body,
+#root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar,
+#root::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.app-root {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.app-root::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.app-zoom {
+  zoom: 0.9;
+}
+
+@media (max-width: 1024px) {
+  .app-zoom {
+    zoom: 1;
+  }
+}
+
 .scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;

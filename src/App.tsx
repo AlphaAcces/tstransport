@@ -96,7 +96,7 @@ export const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="app-root app-zoom min-h-screen">
       <TopBar 
         onToggleNav={() => setIsNavOpen(!isNavOpen)} 
         activeSubject={activeSubject}
