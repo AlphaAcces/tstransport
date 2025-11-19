@@ -38,6 +38,22 @@ body::-webkit-scrollbar,
   }
 }
 
+.surface-card {
+  background-color: #1a1c20;
+  border: 1px solid rgba(45, 55, 72, 0.75);
+  border-radius: 0.75rem;
+  box-shadow: 0 24px 48px -32px rgba(0, 0, 0, 0.8);
+}
+
+.surface-card--muted {
+  background-color: rgba(18, 20, 24, 0.75);
+}
+
+.eyebrow-label {
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
 .scrollbar-hidden {
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -47,4 +63,28 @@ body::-webkit-scrollbar,
   width: 0;
   height: 0;
   display: none;
+}
+
+@keyframes executive-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.executive-card {
+  opacity: 0;
+  animation: executive-fade-in 420ms ease forwards;
+}
+
+.executive-card--delay-1 {
+  animation-delay: 90ms;
+}
+
+.executive-card--delay-2 {
+  animation-delay: 180ms;
 }

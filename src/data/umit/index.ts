@@ -11,6 +11,7 @@ import { sectorBenchmarkYearlyData, sectorComparisonData, sectorDriversData, mac
 import { nodes as networkNodes, edges as networkEdges } from './network';
 import { counterpartiesData } from './counterparties';
 import { scenariosData } from './scenarios';
+import { buildExecutiveSummaryData } from '../executive';
 
 // Placeholder data for the Ümit Cetin (private) case.
 // This ensures the app doesn't crash when switching subjects.
@@ -35,4 +36,11 @@ export const umitData: CaseData = {
     networkEdges,
     counterpartiesData,
     scenariosData,
+    executiveSummary: buildExecutiveSummaryData({
+        financials: financialData,
+        cashflow: cashflowSummary,
+        risks: riskHeatmapData,
+        actions: actionsData,
+        timeline: timelineData,
+    }),
 };

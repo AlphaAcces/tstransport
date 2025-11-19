@@ -1,7 +1,7 @@
 // FIX: import ReactElement to resolve JSX namespace issue and correct the type.
 import type { ReactElement } from 'react';
 
-export type View = 'dashboard' | 'person' | 'companies' | 'financials' | 'hypotheses' | 'cashflow' | 'sector' | 'timeline' | 'risk' | 'actions' | 'counterparties' | 'scenarios';
+export type View = 'dashboard' | 'executive' | 'person' | 'companies' | 'financials' | 'hypotheses' | 'cashflow' | 'sector' | 'timeline' | 'risk' | 'actions' | 'counterparties' | 'scenarios';
 
 export type Subject = 'tsl' | 'umit';
 
@@ -244,6 +244,94 @@ export interface Scenario {
   sourceId?: string;
 }
 
+export interface ExecutiveFinancialTrendPoint {
+  year: number;
+  value: number;
+}
+
+export interface ExecutiveFinancialAlert {
+  id: 'liquidity' | 'dso' | 'intercompany';
+  label: string;
+  value: number;
+  unit: 'DKK' | 'days';
+  description: string;
+}
+
+export interface ExecutiveFinancialHighlights {
+  latestYear: number | null;
+  grossProfit: number | null;
+  profitAfterTax: number | null;
+  yoyGrossChange: number | null;
+  yoyProfitChange: number | null;
+  dso: number | null;
+  liquidity: number | null;
+  intercompanyLoans: number | null;
+  trendGrossProfit: ExecutiveFinancialTrendPoint[];
+  trendProfitAfterTax: ExecutiveFinancialTrendPoint[];
+  alerts: ExecutiveFinancialAlert[];
+}
+
+export interface ExecutiveRiskScoreSummary {
+  category: RiskScore['category'];
+  riskLevel: RiskScore['riskLevel'];
+  justification: string;
+}
+
+export interface ExecutiveRiskHighlights {
+  taxCaseExposure: number | null;
+  complianceIssue: string;
+  sectorRiskSummary: string;
+  riskScores: ExecutiveRiskScoreSummary[];
+  redFlags: string[];
+}
+
+export interface ExecutiveActionItemSummary {
+  id: string;
+  title: string;
+  priority: ActionItem['priority'];
+  ownerRole?: ActionItem['ownerRole'];
+  timeHorizon?: ActionItem['timeHorizon'];
+  description?: string;
+}
+
+export interface ExecutiveTimelineHighlight {
+  date: string;
+  title: string;
+  description: string;
+  isCritical?: boolean;
+}
+
+export interface ExecutiveActionHighlights {
+  upcomingDeadlines: ExecutiveActionItemSummary[];
+  boardActionables: ExecutiveActionItemSummary[];
+  criticalEvents: ExecutiveTimelineHighlight[];
+  upcomingEvents: ExecutiveTimelineHighlight[];
+}
+
+export interface ExecutiveSummaryData {
+  financial: ExecutiveFinancialHighlights;
+  risk: ExecutiveRiskHighlights;
+  actions: ExecutiveActionHighlights;
+}
+
+export interface ExecutiveExportPayload {
+  subject: Subject;
+  generatedAt: string;
+  financial: {
+    latestYear: number | null;
+    grossProfit: number | null;
+    profitAfterTax: number | null;
+    yoyGrossChange: number | null;
+    yoyProfitChange: number | null;
+    dso: number | null;
+    liquidity: number | null;
+    intercompanyLoans: number | null;
+    alerts: ExecutiveFinancialAlert[];
+  };
+  risk: ExecutiveRiskHighlights;
+  actions: ExecutiveActionHighlights;
+}
+
 // A single, unified type for all data related to a specific case/subject.
 export interface CaseData {
     personData: PersonData;
@@ -265,4 +353,5 @@ export interface CaseData {
     networkEdges: NetworkEdge[];
     counterpartiesData: Counterparty[];
     scenariosData: Scenario[];
+    executiveSummary: ExecutiveSummaryData;
 }

@@ -6,6 +6,7 @@ import { NavItemConfig } from '../types';
 // The original code used <Icon className="..." />, which is only supported in .tsx files.
 export const NAV_ITEMS: NavItemConfig[] = [
   { id: 'dashboard',  label: 'Dashboard',        icon: React.createElement(LayoutDashboard, { className: "h-5 w-5" }), showFor: ['tsl', 'umit'] },
+  { id: 'executive',  label: 'Executive Summary', icon: React.createElement(LayoutDashboard, { className: "h-5 w-5" }), showFor: ['tsl'] },
   { id: 'person',     label: 'Person & Network', icon: React.createElement(User, { className: "h-5 w-5" }),            showFor: ['tsl', 'umit'] },
   { id: 'companies',  label: 'Companies',        icon: React.createElement(Building2, { className: "h-5 w-5" }),       showFor: ['tsl'] },
   { id: 'financials', label: 'Financials',       icon: React.createElement(BarChart3, { className: "h-5 w-5" }),       showFor: ['tsl'] },

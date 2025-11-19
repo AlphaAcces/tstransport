@@ -21,6 +21,7 @@ const CashflowView = lazy(() => import('./components/Cashflow/CashflowView').the
 const SectorAnalysisView = lazy(() => import('./components/Sector/SectorAnalysisView').then(module => ({ default: module.SectorAnalysisView })));
 const CounterpartiesView = lazy(() => import('./components/Counterparties/CounterpartiesView').then(module => ({ default: module.CounterpartiesView })));
 const ScenariosView = lazy(() => import('./components/Scenarios/ScenariosView').then(module => ({ default: module.ScenariosView })));
+const ExecutiveSummaryView = lazy(() => import('./components/Executive/ExecutiveSummaryView').then(module => ({ default: module.ExecutiveSummaryView })));
 
 
 export const App: React.FC = () => {
@@ -68,6 +69,8 @@ export const App: React.FC = () => {
     switch (navState.activeView) {
       case 'dashboard':
         return <DashboardView activeSubject={activeSubject} onNavigate={navigateTo} />;
+      case 'executive':
+        return <ViewContainer {...commonViewProps}><ExecutiveSummaryView onNavigate={navigateTo} /></ViewContainer>;
       case 'person':
         return <ViewContainer {...commonViewProps}><PersonView /></ViewContainer>;
       case 'companies':
