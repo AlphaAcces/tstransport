@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useMemo, useRef, useState } from 'react';
 import {
     Briefcase,
     Activity,
@@ -12,11 +12,16 @@ import {
     Landmark
 } from 'lucide-react';
 import { SectionHeading } from '../Shared/SectionHeading';
-import { useCaseData, useExecutiveExportPayload } from '../../context/DataContext';
+import { useCaseData, useActiveSubject } from '../../context/DataContext';
 import { Tag } from '../Shared/Tag';
-import { LineChart, Line, ResponsiveContainer, Tooltip } from 'recharts';
 import { View } from '../../types';
 import { ExecutiveCard } from './ExecutiveCard';
+
+const ExecutiveTrendChart = lazy(() => import('./ExecutiveTrendChart').then(module => ({ default: module.ExecutiveTrendChart })));
+
+const ChartSkeleton: React.FC = () => (
+    <div className="h-full w-full rounded bg-gray-900/30 animate-pulse" />
+);
 
 interface ExecutiveSummaryViewProps {
     onNavigate?: (view: View) => void;
@@ -42,7 +47,7 @@ const riskLevelColor: Record<'KRITISK' | 'HØJ' | 'MODERAT' | 'LAV' | 'N/A', 're
 export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNavigate }) => {
     const { executiveSummary } = useCaseData();
     const { financial, risk, actions } = executiveSummary;
-    const executiveExportPayload = useExecutiveExportPayload();
+    const subject = useActiveSubject();
     const [isExporting, setIsExporting] = useState(false);
     const grossChartRef = useRef<HTMLDivElement | null>(null);
     const profitChartRef = useRef<HTMLDivElement | null>(null);
@@ -51,11 +56,13 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
     const handleExport = useCallback(async () => {
         try {
             setIsExporting(true);
-            const [{ generateExecutiveReportPdf }, html2canvasModule] = await Promise.all([
+            const [{ generateExecutiveReportPdf }, html2canvasModule, executiveModule] = await Promise.all([
                 import('../../pdf/executiveReport.ts'),
                 import('html2canvas'),
+                import('../../data/executive'),
             ]);
             const html2canvas = html2canvasModule.default;
+            const exportPayload = executiveModule.createExecutiveExportPayload(subject, executiveSummary);
             const chartNodes = [
                 { ref: grossChartRef, title: 'Bruttofortjeneste trend' },
                 { ref: profitChartRef, title: 'Resultat efter skat' },
@@ -71,7 +78,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
 
                     const canvas = await html2canvas(element, {
                         backgroundColor: '#0F172A',
-                        scale: window.devicePixelRatio || 2,
+                        scale: Math.max(3, window.devicePixelRatio || 1),
                     });
                     return {
                         title,
@@ -82,7 +89,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
                 }),
             );
 
-            await generateExecutiveReportPdf(executiveExportPayload, {
+            await generateExecutiveReportPdf(exportPayload, {
                 charts: charts.filter((chart): chart is { title: string; dataUrl: string; width: number; height: number } => Boolean(chart)),
             });
         } catch (error) {
@@ -90,7 +97,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
         } finally {
             setIsExporting(false);
         }
-    }, [executiveExportPayload]);
+    }, [executiveSummary, subject]);
 
     const grossProfitTrend = useMemo(
         () => financial.trendGrossProfit.map(point => ({
@@ -199,43 +206,25 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div ref={grossChartRef} className="h-32 bg-gray-900/40 border border-border-dark/50 rounded-lg p-3">
                             <p className="text-xs text-gray-500 uppercase tracking-[0.18em] mb-2">Bruttofortjeneste trend</p>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={grossProfitTrend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                                    <Tooltip
-                                        content={({ active, payload }) => {
-                                            if (!active || !payload?.length) return null;
-                                            const point = payload[0];
-                                            return (
-                                                <div className="bg-gray-900 border border-border-dark/60 px-3 py-2 text-xs rounded">
-                                                    <p className="text-gray-300">{point.payload.year}</p>
-                                                    <p className="text-accent-green font-semibold">{Number(point.value ?? 0).toFixed(1)} mio. kr.</p>
-                                                </div>
-                                            );
-                                        }}
-                                    />
-                                    <Line type="monotone" dataKey="value" stroke="#00cc66" strokeWidth={2} dot={false} />
-                                </LineChart>
-                            </ResponsiveContainer>
+                            <Suspense fallback={<ChartSkeleton />}>
+                                <ExecutiveTrendChart
+                                    data={grossProfitTrend}
+                                    lineColor="#00cc66"
+                                    highlightColor="#22c55e"
+                                    valueFormatter={value => (typeof value === 'number' ? `${value.toFixed(1)} mio. kr.` : '—')}
+                                />
+                            </Suspense>
                         </div>
                         <div ref={profitChartRef} className="h-32 bg-gray-900/40 border border-border-dark/50 rounded-lg p-3">
                             <p className="text-xs text-gray-500 uppercase tracking-[0.18em] mb-2">Resultat efter skat</p>
-                            <ResponsiveContainer width="100%" height="100%">
-                                <LineChart data={netResultTrend} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-                                    <Tooltip
-                                        content={({ active, payload }) => {
-                                            if (!active || !payload?.length) return null;
-                                            const point = payload[0];
-                                            return (
-                                                <div className="bg-gray-900 border border-border-dark/60 px-3 py-2 text-xs rounded">
-                                                    <p className="text-gray-300">{point.payload.year}</p>
-                                                    <p className="text-blue-400 font-semibold">{Number(point.value ?? 0).toFixed(1)} mio. kr.</p>
-                                                </div>
-                                            );
-                                        }}
-                                    />
-                                    <Line type="monotone" dataKey="value" stroke="#38bdf8" strokeWidth={2} dot={false} />
-                                </LineChart>
-                            </ResponsiveContainer>
+                            <Suspense fallback={<ChartSkeleton />}>
+                                <ExecutiveTrendChart
+                                    data={netResultTrend}
+                                    lineColor="#38bdf8"
+                                    highlightColor="#60a5fa"
+                                    valueFormatter={value => (typeof value === 'number' ? `${value.toFixed(1)} mio. kr.` : '—')}
+                                />
+                            </Suspense>
                         </div>
                     </div>
 

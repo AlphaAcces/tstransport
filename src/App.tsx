@@ -1,7 +1,6 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { SideNav } from './components/Layout/SideNav';
 import { TopBar } from './components/Layout/TopBar';
-import { DashboardView } from './components/Dashboard/DashboardView';
 import { ViewContainer } from './components/Layout/ViewContainer';
 import { useAppNavigation } from './hooks/useAppNavigation';
 import { DataProvider } from './context/DataContext';
@@ -10,6 +9,7 @@ import { Loader } from 'lucide-react';
 import { View } from './types';
 
 // Lazy load heavy components
+const DashboardView = lazy(() => import('./components/Dashboard/DashboardView').then(module => ({ default: module.DashboardView })));
 const PersonView = lazy(() => import('./components/Person/PersonView').then(module => ({ default: module.PersonView })));
 const CompaniesView = lazy(() => import('./components/Companies/CompaniesView').then(module => ({ default: module.CompaniesView })));
 const FinancialsView = lazy(() => import('./components/Financials/FinancialsView').then(module => ({ default: module.FinancialsView })));
@@ -55,7 +55,7 @@ export const App: React.FC = () => {
     canGoBackToDashboard,
     setIsNavOpen,
   } = useAppNavigation();
-  
+
   if (!authUser) {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
@@ -100,15 +100,15 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-root app-zoom min-h-screen">
-      <TopBar 
-        onToggleNav={() => setIsNavOpen(!isNavOpen)} 
+      <TopBar
+        onToggleNav={() => setIsNavOpen(!isNavOpen)}
         activeSubject={activeSubject}
         onSubjectChange={handleSubjectChange}
       />
-      <SideNav 
-        currentView={navState.activeView} 
+      <SideNav
+        currentView={navState.activeView}
         activeSubject={activeSubject}
-        onNavigate={(view) => navigateTo(view)} 
+        onNavigate={(view) => navigateTo(view)}
         isOpen={isNavOpen}
       />
       <main className="lg:pl-64 pt-16 transition-all duration-300 ease-in-out">

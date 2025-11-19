@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { View, Subject } from '../../types';
 import { useCaseData } from '../../context/DataContext';
 import { KpiCard } from '../Shared/KpiCard';
-import { PriorityActionsCard } from './PriorityActionsCard';
-import { IntelligenceSummaryCard } from './IntelligenceSummaryCard';
-import { RecentEventsCard } from './RecentEventsCard';
 import { ShieldAlert, TrendingUp, DollarSign, Banknote, Users } from 'lucide-react';
 import { FileWarning } from 'lucide-react';
+
+const PriorityActionsCard = lazy(() => import('./PriorityActionsCard').then(module => ({ default: module.PriorityActionsCard })));
+const IntelligenceSummaryCard = lazy(() => import('./IntelligenceSummaryCard').then(module => ({ default: module.IntelligenceSummaryCard })));
+const RecentEventsCard = lazy(() => import('./RecentEventsCard').then(module => ({ default: module.RecentEventsCard })));
+
+const CardSkeleton: React.FC = () => (
+    <div className="h-full min-h-[8rem] rounded-lg border border-border-dark/60 bg-component-dark/40 animate-pulse" />
+);
 
 interface DashboardViewProps {
   onNavigate: (view: View, options?: { fromDashboard?: boolean }) => void;
@@ -20,7 +25,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
         const legalRisk = riskHeatmapData.find(r => r.category === 'Legal/Compliance');
         const financialRisk = riskHeatmapData.find(r => r.category === 'Financial');
         const governanceRisk = riskHeatmapData.find(r => r.category === 'Governance');
-        
+
         const primaryDrivers = [...riskHeatmapData]
             .sort((a, b) => b.assignedScore - a.assignedScore)
             .slice(0, 2)
@@ -34,8 +39,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                 </div>
                 <section>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <KpiCard 
-                            title="Samlet Personlig Risiko" 
+                        <KpiCard
+                            title="Samlet Personlig Risiko"
                             value={`${totalRiskScore.score}/${totalRiskScore.maxScore}`}
                             color="red"
                             icon={<ShieldAlert className="w-4 h-4"/>}
@@ -78,13 +83,19 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                  <section>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
-                            <IntelligenceSummaryCard activeSubject={activeSubject} />
+                            <Suspense fallback={<CardSkeleton />}>
+                                <IntelligenceSummaryCard activeSubject={activeSubject} />
+                            </Suspense>
                         </div>
-                        <PriorityActionsCard onNavigate={(view) => onNavigate(view, {fromDashboard: true})} />
+                        <Suspense fallback={<CardSkeleton />}>
+                            <PriorityActionsCard onNavigate={(view) => onNavigate(view, {fromDashboard: true})} />
+                        </Suspense>
                     </div>
                 </section>
                 <section>
-                    <RecentEventsCard />
+                    <Suspense fallback={<CardSkeleton />}>
+                        <RecentEventsCard />
+                    </Suspense>
                 </section>
             </div>
         )
@@ -94,15 +105,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
     const prevFinancials = financialData.length > 1 ? financialData[financialData.length - 2] : null;
 
     const netResultChange = latestFinancials && prevFinancials && prevFinancials.profitAfterTax !== 0
-      ? ((latestFinancials.profitAfterTax - prevFinancials.profitAfterTax) / Math.abs(prevFinancials.profitAfterTax)) * 100 
+      ? ((latestFinancials.profitAfterTax - prevFinancials.profitAfterTax) / Math.abs(prevFinancials.profitAfterTax)) * 100
       : 0;
-    
+
     const primaryDrivers = [...riskHeatmapData]
         .sort((a, b) => b.assignedScore - a.assignedScore)
         .slice(0, 2)
         .map(r => (r.category === 'Financial' ? 'Likviditet' : r.category === 'Legal/Compliance' ? 'Skat' : r.category))
         .join(' & ');
-        
+
     const equitySparkline = financialData.map(d => ({ year: d.year, value: d.equityEndOfYear }));
     const resultSparkline = financialData.map(d => ({ year: d.year, value: d.profitAfterTax }));
 
@@ -114,8 +125,8 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
             {/* Section 1: Mission Status */}
             <section>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <KpiCard 
-                        title="Samlet Risikoniveau" 
+                    <KpiCard
+                        title="Samlet Risikoniveau"
                         value={`${totalRiskScore.score}/${totalRiskScore.maxScore}`}
                         color="red"
                         icon={<ShieldAlert className="w-4 h-4"/>}
@@ -162,15 +173,21 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
             <section>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2">
-                        <IntelligenceSummaryCard activeSubject={activeSubject} />
+                        <Suspense fallback={<CardSkeleton />}>
+                            <IntelligenceSummaryCard activeSubject={activeSubject} />
+                        </Suspense>
                     </div>
-                    <PriorityActionsCard onNavigate={(view) => onNavigate(view, {fromDashboard: true})} />
+                    <Suspense fallback={<CardSkeleton />}>
+                        <PriorityActionsCard onNavigate={(view) => onNavigate(view, {fromDashboard: true})} />
+                    </Suspense>
                 </div>
             </section>
-            
+
             {/* Section 3: Recent Activity */}
             <section>
-                <RecentEventsCard />
+                <Suspense fallback={<CardSkeleton />}>
+                    <RecentEventsCard />
+                </Suspense>
             </section>
         </div>
     );

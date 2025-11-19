@@ -30,6 +30,7 @@ const categoryConfig: Record<Hypothesis['category'], { color: 'blue' | 'green' |
 
 const viewLabels: { [key in Hypothesis['relatedViews'][0]]: string } = {
     dashboard: 'Dashboard',
+    executive: 'Executive Summary',
     person: 'Person & Network',
     companies: 'Selskaber',
     financials: 'Financials',

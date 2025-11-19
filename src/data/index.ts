@@ -1,15 +1,18 @@
 import { Subject, CaseData } from '../types';
-import { tslData } from './tsl';
-import { umitData } from './umit';
 
-export const getDataForSubject = (subject: Subject): CaseData => {
+export const getDataForSubject = async (subject: Subject): Promise<CaseData> => {
   switch (subject) {
-    case 'tsl':
-      return tslData;
-    case 'umit':
-      return umitData;
-    default:
-      // Fallback to TSL data if subject is unknown
-      return tslData;
+    case 'tsl': {
+      const module = await import('./tsl');
+      return module.tslData;
+    }
+    case 'umit': {
+      const module = await import('./umit');
+      return module.umitData;
+    }
+    default: {
+      const module = await import('./tsl');
+      return module.tslData;
+    }
   }
 };
