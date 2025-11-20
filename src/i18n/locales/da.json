@@ -1,0 +1,11 @@
+{
+  "app": {
+    "title": "Bestyrelsesoverblik",
+    "exportPdf": "Eksporter PDF",
+    "exporting": "Eksporterer…"
+  },
+  "nav": {
+    "business": "Erhverv",
+    "personal": "Privat"
+  }
+}

@@ -1,5 +1,6 @@
 import React from 'react';
 import { TslLogo } from '../Shared/TslLogo';
+import { LanguageToggle } from '../Shared/LanguageToggle';
 import { Subject } from '../../types';
 
 interface TopBarProps {
@@ -43,7 +44,10 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
                  <span className={`text-sm font-bold ${activeSubject === 'umit' ? 'text-accent-green' : 'text-gray-200'}`}>Ümit Cetin</span>
                 <span className="text-xs text-gray-500">Privat</span>
             </button>
-        </div>
+            <div className="ml-2">
+              <LanguageToggle />
+            </div>
+          </div>
       </div>
     </header>
   );

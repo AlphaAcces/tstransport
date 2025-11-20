@@ -12,6 +12,8 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@reduxjs/toolkit": "^1.9.5",
+    "react-redux": "^8.1.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.4",
     "lucide-react": "^0.378.0",

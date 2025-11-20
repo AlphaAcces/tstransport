@@ -1,0 +1,11 @@
+{
+  "app": {
+    "title": "Executive Summary",
+    "exportPdf": "Export PDF",
+    "exporting": "Exporting…"
+  },
+  "nav": {
+    "business": "Business",
+    "personal": "Personal"
+  }
+}

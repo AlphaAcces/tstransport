@@ -7,6 +7,9 @@ import { DataProvider } from './context/DataContext';
 import { LoginPage } from './components/Auth/LoginPage';
 import { Loader } from 'lucide-react';
 import { View } from './types';
+import './i18n';
+import { Provider as ReduxProvider } from 'react-redux';
+import { store } from './store';
 
 // Lazy load heavy components
 const DashboardView = lazy(() => import('./components/Dashboard/DashboardView').then(module => ({ default: module.DashboardView })));
@@ -99,6 +102,7 @@ export const App: React.FC = () => {
   };
 
   return (
+    <ReduxProvider store={store}>
     <div className="app-root app-zoom min-h-screen">
       <TopBar
         onToggleNav={() => setIsNavOpen(!isNavOpen)}
@@ -122,5 +126,6 @@ export const App: React.FC = () => {
       </main>
       {isNavOpen && <div className="fixed inset-0 bg-black/60 z-20 lg:hidden" onClick={() => setIsNavOpen(false)}></div>}
     </div>
+    </ReduxProvider>
   );
 };
