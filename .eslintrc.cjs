@@ -30,4 +30,13 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'react/display-name': 'off',
   },
+  overrides: [
+    {
+      files: ['**/__tests__/**', 'src/test/**', '**/*.test.ts', '**/*.test.tsx'],
+      env: { jest: true },
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+  ],
 };
