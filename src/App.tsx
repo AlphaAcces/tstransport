@@ -109,6 +109,8 @@ export const App: React.FC = () => {
         activeSubject={activeSubject}
         onSubjectChange={handleSubjectChange}
         currentViewId={navState.activeView}
+        currentBreadcrumbs={navState.breadcrumbs}
+        navigateTo={navigateTo}
       />
       <SideNav
         currentView={navState.activeView}

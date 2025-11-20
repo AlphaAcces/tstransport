@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 type SavedView = {
   id: string;
-  payload: any;
+  payload: { view: string; breadcrumbs?: string[]; label?: string };
 };
 
 interface UserPreferencesState {

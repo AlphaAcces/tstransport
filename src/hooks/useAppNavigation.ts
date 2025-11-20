@@ -22,11 +22,24 @@ export const useAppNavigation = () => {
   };
 
   const navigateTo = (view: View, options?: { fromDashboard?: boolean; breadcrumbs?: string[] }) => {
+    // Lazy import buildBreadcrumbs to avoid circular imports
+    let breadcrumbs = options?.breadcrumbs;
+    try {
+      if (!breadcrumbs) {
+        // dynamic require to avoid ESM interop issues in some environments
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { buildBreadcrumbs } = require('../utils/breadcrumbs');
+        breadcrumbs = buildBreadcrumbs(view as View);
+      }
+    } catch (e) {
+      breadcrumbs = [view.charAt(0).toUpperCase() + view.slice(1)];
+    }
+
     setNavState(prevState => ({
       activeView: view,
       previousView: prevState.activeView,
       lastCameFromDashboard: options?.fromDashboard ?? false,
-      breadcrumbs: options?.breadcrumbs ?? [view.charAt(0).toUpperCase() + view.slice(1)],
+      breadcrumbs,
     }));
     setIsNavOpen(false);
   };

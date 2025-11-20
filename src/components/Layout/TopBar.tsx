@@ -2,16 +2,18 @@ import React from 'react';
 import { TslLogo } from '../Shared/TslLogo';
 import { LanguageToggle } from '../Shared/LanguageToggle';
 import { PreferencesPanel } from '../Shared/PreferencesPanel';
-import { Subject } from '../../types';
+import { Subject, View } from '../../types';
 
 interface TopBarProps {
   onToggleNav: () => void;
   activeSubject: Subject;
   onSubjectChange: (subject: Subject) => void;
   currentViewId?: string;
+  currentBreadcrumbs?: string[];
+  navigateTo?: (view: View, options?: { fromDashboard?: boolean; breadcrumbs?: string[] }) => void;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSubjectChange, currentViewId }) => {
+export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSubjectChange, currentViewId, currentBreadcrumbs, navigateTo }) => {
   const getButtonClass = (subject: Subject) => {
     const baseClass = "flex flex-col items-center px-4 py-1 rounded-md transition-colors duration-200";
     if (activeSubject === subject) {
@@ -50,7 +52,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
               <LanguageToggle />
             </div>
             <div className="ml-4">
-              <PreferencesPanel currentViewId={currentViewId ?? 'dashboard'} />
+              <PreferencesPanel currentViewId={currentViewId ?? 'dashboard'} currentBreadcrumbs={currentBreadcrumbs} navigateTo={navigateTo} />
             </div>
           </div>
       </div>

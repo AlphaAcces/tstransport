@@ -5,10 +5,10 @@ import { store } from '../../../store';
 import { PreferencesPanel } from '../PreferencesPanel';
 
 describe('PreferencesPanel', () => {
-  test('renders and toggles compact mode and saves view', () => {
+  test('renders and toggles compact mode and saves view', async () => {
     render(
       <Provider store={store}>
-        <PreferencesPanel currentViewId="dashboard" />
+        <PreferencesPanel currentViewId="dashboard" currentBreadcrumbs={["Dashboard"]} navigateTo={() => {}} />
       </Provider>
     );
 
@@ -19,11 +19,23 @@ describe('PreferencesPanel', () => {
     fireEvent.click(checkbox);
     expect(store.getState().userPreferences.compactMode).toBe(true);
 
-    // save view
-    const btn = screen.getByRole('button', { name: /gem visning/i });
-    fireEvent.click(btn);
+    // save view and open list
+    const saveBtn = screen.getByRole('button', { name: /gem visning/i });
+    fireEvent.click(saveBtn);
+
+    const openListBtn = screen.getByRole('button', { name: /gemte visninger/i });
+    fireEvent.click(openListBtn);
+
+    const item = await screen.findByText(/dashboard/i);
+    expect(item).toBeInTheDocument();
+
+    const openBtn = screen.getByRole('button', { name: /åbn/i });
+    expect(openBtn).toBeInTheDocument();
+
+    const delBtn = screen.getByRole('button', { name: /slet/i });
+    fireEvent.click(delBtn);
+    // confirm it was removed
     const saved = store.getState().userPreferences.savedViews;
-    expect(saved.length).toBeGreaterThanOrEqual(1);
-    expect(saved[saved.length - 1].payload.view).toBe('dashboard');
+    expect(saved.find(s => s.payload.view === 'dashboard')).toBeUndefined();
   });
 });
