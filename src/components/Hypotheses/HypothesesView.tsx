@@ -44,6 +44,7 @@ const viewLabels: { [key in Hypothesis['relatedViews'][0]]: string } = {
     scenarios: 'Scenarier',
     business: 'Erhverv',
     personal: 'Privat',
+    'saved-views': 'Gemte visninger',
 };
 
 const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) => {

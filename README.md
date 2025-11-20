@@ -43,3 +43,24 @@ View your app in AI Studio: [https://ai.studio/apps/drive/16vIahFq1nG7S_oXIMVsen
 - **Export payload builder:** unit-test that `createExecutiveExportPayload` derives financial metrics, risk highlights, and action timelines consistently for both TSL and Ümit cases.
 - **Lazy-loaded views:** add render smoke tests to confirm the Suspense fallbacks mount and resolve for dashboard helpers and chart-centric screens.
 - **PDF rendering hooks:** cover the `generateExecutiveReportPdf` flow with mocks for `jspdf`/`html2canvas` to assert card ordering, badge colours, and footer metadata.
+
+## Visual preview & Playwright
+
+To generate deterministic screenshots locally (TopBar, nested breadcrumbs, saved-views):
+
+1. Install Playwright and browsers:
+
+```pwsh
+npm install --save-dev playwright
+npx playwright install --with-deps
+```
+
+2. Run the composite script which starts the dev server, waits for `http://localhost:5173` and runs the screenshot flow:
+
+```pwsh
+npm run preview-shots
+```
+
+Screenshots will be written to the `screenshots/` directory: `screenshot-topbar.png`, `screenshot-nested-breadcrumbs.png`, `screenshot-saved-views.png`.
+
+The app exposes a dev-only helper `window.__navigateTo` for deterministic navigation during screenshotting. Do not rely on this API in production code.
