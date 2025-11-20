@@ -8,7 +8,7 @@ interface DataContextValue {
   subject: Subject;
 }
 
-const DataContext = createContext<DataContextValue | null>(null);
+export const DataContext = createContext<DataContextValue | null>(null);
 
 interface DataProviderProps {
   children: React.ReactNode;

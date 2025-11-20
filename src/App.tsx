@@ -73,29 +73,29 @@ export const App: React.FC = () => {
       case 'dashboard':
         return <DashboardView activeSubject={activeSubject} onNavigate={navigateTo} />;
       case 'executive':
-        return <ViewContainer {...commonViewProps}><ExecutiveSummaryView onNavigate={navigateTo} /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><ExecutiveSummaryView onNavigate={navigateTo} /></ViewContainer>;
       case 'person':
-        return <ViewContainer {...commonViewProps}><PersonView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><PersonView /></ViewContainer>;
       case 'companies':
-        return <ViewContainer {...commonViewProps}><CompaniesView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><CompaniesView /></ViewContainer>;
       case 'financials':
-        return <ViewContainer {...commonViewProps}><FinancialsView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><FinancialsView /></ViewContainer>;
       case 'hypotheses':
-        return <ViewContainer {...commonViewProps}><HypothesesView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><HypothesesView /></ViewContainer>;
       case 'cashflow':
-        return <ViewContainer {...commonViewProps}><CashflowView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><CashflowView /></ViewContainer>;
       case 'sector':
-        return <ViewContainer {...commonViewProps}><SectorAnalysisView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><SectorAnalysisView /></ViewContainer>;
       case 'counterparties':
-        return <ViewContainer {...commonViewProps}><CounterpartiesView onNavigate={navigateTo as (view: View) => void} /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><CounterpartiesView onNavigate={navigateTo as (view: View) => void} /></ViewContainer>;
       case 'scenarios':
-        return <ViewContainer {...commonViewProps}><ScenariosView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><ScenariosView /></ViewContainer>;
       case 'timeline':
-        return <ViewContainer {...commonViewProps}><TimelineView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><TimelineView /></ViewContainer>;
       case 'risk':
-        return <ViewContainer {...commonViewProps}><RiskView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><RiskView /></ViewContainer>;
       case 'actions':
-        return <ViewContainer {...commonViewProps}><ActionsView /></ViewContainer>;
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><ActionsView /></ViewContainer>;
       default:
         return <DashboardView activeSubject={activeSubject} onNavigate={navigateTo} />;
     }
@@ -108,6 +108,7 @@ export const App: React.FC = () => {
         onToggleNav={() => setIsNavOpen(!isNavOpen)}
         activeSubject={activeSubject}
         onSubjectChange={handleSubjectChange}
+        currentViewId={navState.activeView}
       />
       <SideNav
         currentView={navState.activeView}

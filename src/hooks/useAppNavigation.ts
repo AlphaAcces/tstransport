@@ -7,6 +7,7 @@ export const useAppNavigation = () => {
     activeView: 'dashboard',
     previousView: null,
     lastCameFromDashboard: false,
+    breadcrumbs: ['Dashboard'],
   });
   const [isNavOpen, setIsNavOpen] = useState(false);
 
@@ -20,11 +21,12 @@ export const useAppNavigation = () => {
     setIsNavOpen(false);
   };
 
-  const navigateTo = (view: View, options?: { fromDashboard?: boolean }) => {
+  const navigateTo = (view: View, options?: { fromDashboard?: boolean; breadcrumbs?: string[] }) => {
     setNavState(prevState => ({
       activeView: view,
       previousView: prevState.activeView,
       lastCameFromDashboard: options?.fromDashboard ?? false,
+      breadcrumbs: options?.breadcrumbs ?? [view.charAt(0).toUpperCase() + view.slice(1)],
     }));
     setIsNavOpen(false);
   };

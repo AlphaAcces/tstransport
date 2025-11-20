@@ -42,6 +42,8 @@ const viewLabels: { [key in Hypothesis['relatedViews'][0]]: string } = {
     actions: 'Actionables',
     counterparties: 'Modparter',
     scenarios: 'Scenarier',
+    business: 'Erhverv',
+    personal: 'Privat',
 };
 
 const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) => {

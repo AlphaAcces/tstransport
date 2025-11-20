@@ -1,15 +1,17 @@
 import React from 'react';
 import { TslLogo } from '../Shared/TslLogo';
 import { LanguageToggle } from '../Shared/LanguageToggle';
+import { PreferencesPanel } from '../Shared/PreferencesPanel';
 import { Subject } from '../../types';
 
 interface TopBarProps {
   onToggleNav: () => void;
   activeSubject: Subject;
   onSubjectChange: (subject: Subject) => void;
+  currentViewId?: string;
 }
 
-export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSubjectChange }) => {
+export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSubjectChange, currentViewId }) => {
   const getButtonClass = (subject: Subject) => {
     const baseClass = "flex flex-col items-center px-4 py-1 rounded-md transition-colors duration-200";
     if (activeSubject === subject) {
@@ -34,7 +36,7 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
           </div>
            <h1 className="sm:hidden text-lg font-bold text-gray-200 truncate ml-2">{activeSubject === 'tsl' ? 'TSL' : 'ÜC'} / IC</h1>
         </div>
-        
+
         <div className="flex items-center space-x-2">
             <button onClick={() => onSubjectChange('tsl')} className={getButtonClass('tsl')}>
                 <span className={`text-sm font-bold ${activeSubject === 'tsl' ? 'text-accent-green' : 'text-gray-200'}`}>TS Logistik</span>
@@ -46,6 +48,9 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
             </button>
             <div className="ml-2">
               <LanguageToggle />
+            </div>
+            <div className="ml-4">
+              <PreferencesPanel currentViewId={currentViewId ?? 'dashboard'} />
             </div>
           </div>
       </div>

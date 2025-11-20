@@ -1,15 +1,18 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
+import { Breadcrumbs } from './Breadcrumbs';
 
 interface ViewContainerProps {
   children: React.ReactNode;
   canGoBack: boolean;
   onGoBack: () => void;
+  breadcrumbs?: string[];
 }
 
-export const ViewContainer: React.FC<ViewContainerProps> = ({ children, canGoBack, onGoBack }) => {
+export const ViewContainer: React.FC<ViewContainerProps> = ({ children, canGoBack, onGoBack, breadcrumbs }) => {
   return (
     <div>
+      {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
       {canGoBack && (
         <button
           onClick={onGoBack}

@@ -1,13 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
+type SavedView = {
+  id: string;
+  payload: any;
+};
+
 interface UserPreferencesState {
   compactMode: boolean;
-  savedViews: Record<string, any>;
+  savedViews: SavedView[];
 }
 
 const initialState: UserPreferencesState = {
   compactMode: false,
-  savedViews: {},
+  savedViews: [],
 };
 
 export const userPreferencesSlice = createSlice({
@@ -17,14 +22,17 @@ export const userPreferencesSlice = createSlice({
     setCompactMode(state, action: PayloadAction<boolean>) {
       state.compactMode = action.payload;
     },
-    saveView(state, action: PayloadAction<{ id: string; payload: any }>) {
-      state.savedViews[action.payload.id] = action.payload.payload;
+    saveView(state, action: PayloadAction<SavedView>) {
+      state.savedViews.push(action.payload);
     },
     removeView(state, action: PayloadAction<string>) {
-      delete state.savedViews[action.payload];
+      state.savedViews = state.savedViews.filter((v) => v.id !== action.payload);
+    },
+    clearSavedViews(state) {
+      state.savedViews = [];
     },
   },
 });
 
-export const { setCompactMode, saveView, removeView } = userPreferencesSlice.actions;
+export const { setCompactMode, saveView, removeView, clearSavedViews } = userPreferencesSlice.actions;
 export default userPreferencesSlice.reducer;
