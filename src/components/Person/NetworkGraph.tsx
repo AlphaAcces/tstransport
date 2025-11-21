@@ -57,7 +57,7 @@ const Node: React.FC<{ node: NetworkNode, onMouseEnter: () => void, onMouseLeave
 };
 
 const Tooltip: React.FC<{ node: NetworkNode }> = ({ node }) => {
-    const { t } = useTranslation('person');
+    const { t } = useTranslation();
     const yOffset = node.y - nodeDimensions.height / 2 - 10;
     const xOffset = node.x;
 
@@ -65,7 +65,7 @@ const Tooltip: React.FC<{ node: NetworkNode }> = ({ node }) => {
         <g transform={`translate(${xOffset}, ${yOffset})`} style={{ pointerEvents: 'none' }}>
             <foreignObject x={-125} y={-80} width={250} height={75}>
                  <div className="bg-base-dark p-2 rounded-md border border-border-dark text-center shadow-lg text-xs">
-                     <p className="font-bold text-gray-300">{node.cvr ? t('network.tooltip.cvr', { cvr: node.cvr }) : t('network.tooltip.personFallback')}</p>
+                     <p className="font-bold text-gray-300">{node.cvr ? t('person.network.tooltip.cvr', { cvr: node.cvr }) : t('person.network.tooltip.personFallback')}</p>
                      <p className="text-gray-400 mt-1">{node.notes}</p>
                  </div>
             </foreignObject>

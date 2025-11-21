@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { Breadcrumbs } from './Breadcrumbs';
+import { useTranslation } from 'react-i18next';
 
 interface ViewContainerProps {
   children: React.ReactNode;
@@ -10,6 +11,7 @@ interface ViewContainerProps {
 }
 
 export const ViewContainer: React.FC<ViewContainerProps> = ({ children, canGoBack, onGoBack, breadcrumbs }) => {
+  const { t } = useTranslation();
   return (
     <div>
       {breadcrumbs && <Breadcrumbs items={breadcrumbs} />}
@@ -19,7 +21,7 @@ export const ViewContainer: React.FC<ViewContainerProps> = ({ children, canGoBac
           className="mb-4 inline-flex items-center text-sm text-gray-300 hover:text-accent-green transition-colors duration-200"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
-          Tilbage til Dashboard
+          {t('common.navigation.backToDashboard')}
         </button>
       )}
       {children}

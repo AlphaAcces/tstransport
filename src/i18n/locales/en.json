@@ -2,7 +2,13 @@
   "app": {
     "title": "Executive Summary",
     "exportPdf": "Export PDF",
-    "exporting": "Exporting…"
+    "exporting": "Exporting…",
+    "companyName": "TS Logistik ApS",
+    "userName": "Ümit Cetin",
+    "consoleName": "Intelligence Console",
+    "consoleShort": "IC",
+    "companyLabel": "TS Logistik",
+    "userLabel": "Ümit Cetin"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -48,7 +54,39 @@
       "tsl": {
         "short": "TSL"
       }
+    },
+    "subjects": {
+      "tsl": {
+        "short": "TSL"
+      },
+      "umit": {
+        "short": "ÜC"
+      }
+    },
+    "navigation": {
+      "backToDashboard": "Back to dashboard"
+    },
+    "logo": {
+      "alt": "TS Logistik logo"
     }
+  },
+  "auth": {
+    "title": "Secure access",
+    "subtitle": "Use your TS-Intel credentials to continue",
+    "usernameLabel": "Username",
+    "usernamePlaceholder": "Enter username",
+    "passwordLabel": "Password",
+    "passwordPlaceholder": "Enter password",
+    "submit": "Sign in",
+    "submitting": "Signing in…",
+    "error": {
+      "invalidCredentials": "Invalid username or password"
+    }
+  },
+  "data": {
+    "loading": "Loading case data…",
+    "loadError": "We could not load the latest case data. Please try again.",
+    "unknownError": "Unknown data error"
   },
   "dashboard": {
     "common": {
@@ -99,6 +137,33 @@
         "liquidity": {
           "title": "Liquidity (cash) & DSO",
           "description": "Acute risk · DSO: ~{{dso}}"
+        }
+      }
+    },
+    "summary": {
+      "corporate": {
+        "title": "Case Summary: TS Logistik (Business)",
+        "body": "High/Severe risk (79/100) is driven not by weak earnings but by a dangerous cocktail of <red>acute illiquidity</red>, an <red>ongoing tax case</red>, <orange>weak governance</orange>, and a new <yellow>unresolved Dubai exposure</yellow>."
+      },
+      "personal": {
+        "title": "Case Summary: Ümit Cetin (Personal)",
+        "bullets": {
+          "legal": {
+            "label": "Personal legal risk:",
+            "body": "Direct exposure to management liability in the tax case and any potential bankruptcy in TS Logistik."
+          },
+          "financial": {
+            "label": "High financial exposure:",
+            "body": "Personal finances are tightly coupled to the survival of the TSL group. Wealth is tied up in illiquid assets."
+          },
+          "governance": {
+            "label": "Governance weakness:",
+            "body": "100% UBO control with no independent review enables high-risk strategies such as capital drains."
+          },
+          "protection": {
+            "label": "Strategic asset protection:",
+            "body": "The holding structure effectively shields real-estate investments from ordinary creditors."
+          }
         }
       }
     }
@@ -175,7 +240,16 @@
       }
     },
     "ownership": {
-      "historicalHeading": "Historical / peripheral entities"
+      "historicalHeading": "Historical / peripheral entities",
+      "labels": {
+        "ubo": "Owner / UBO",
+        "holding": "Holding",
+        "operations": "Operations",
+        "realEstate": "Real estate",
+        "auto": "Auto trading",
+        "historicTransferred": "Transferred",
+        "historicClosed": "Dissolved"
+      }
     }
   },
   "actions": {

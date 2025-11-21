@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from '
 import { Loader2 } from 'lucide-react';
 import { Subject, CaseData } from '../types';
 import { getDataForSubject } from '../data';
+import { useTranslation } from 'react-i18next';
 
 interface DataContextValue {
   caseData: CaseData;
@@ -18,12 +19,13 @@ interface DataProviderProps {
 export const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) => {
   const [caseData, setCaseData] = useState<CaseData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [errorKey, setErrorKey] = useState<string | null>(null);
+  const { t } = useTranslation('data');
 
   useEffect(() => {
     let isActive = true;
     setIsLoading(true);
-    setError(null);
+    setErrorKey(null);
     setCaseData(null);
 
     getDataForSubject(activeSubject)
@@ -39,7 +41,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubj
         if (!isActive) {
           return;
         }
-        setError('Kunne ikke indlæse datasættet. Prøv igen.');
+        setErrorKey('loadError');
         setIsLoading(false);
       });
 
@@ -57,15 +59,15 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubj
     return (
       <div className="flex h-64 items-center justify-center text-gray-400">
         <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-        Indlæser datasæt…
+        {t('loading')}
       </div>
     );
   }
 
-  if (error || !value) {
+  if (errorKey || !value) {
     return (
       <div className="rounded-lg border border-red-600/60 bg-red-900/40 p-6 text-sm text-red-200">
-        {error ?? 'Ukendt datafejl. Datasættet kunne ikke indlæses.'}
+        {errorKey ? t(errorKey) : t('unknownError')}
       </div>
     );
   }

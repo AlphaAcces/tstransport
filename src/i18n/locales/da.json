@@ -2,23 +2,29 @@
   "app": {
     "title": "Bestyrelsesoverblik",
     "exportPdf": "Eksporter PDF",
-    "exporting": "Eksporterer…"
+    "exporting": "Eksporterer…",
+    "companyName": "TS Logistik ApS",
+    "userName": "Ümit Cetin",
+    "consoleName": "Intelligence Console",
+    "consoleShort": "IC",
+    "companyLabel": "TS Logistik",
+    "userLabel": "Ümit Cetin"
   },
   "nav": {
     "dashboard": "Dashboard",
     "business": "Erhverv",
     "personal": "Privat",
-    "executive": "Executive Summary",
-    "person": "Person & Network",
-    "companies": "Companies",
-    "financials": "Financials",
-    "hypotheses": "Hypotheses",
+    "executive": "Ledelsesoverblik",
+    "person": "Person & netværk",
+    "companies": "Selskaber",
+    "financials": "Finansielle nøgletal",
+    "hypotheses": "Hypoteser",
     "cashflow": "Cashflow & DSO",
-    "sector": "Sector Analysis",
-    "timeline": "Timeline",
-    "risk": "Risk Heatmap",
-    "actions": "Actionables",
-    "counterparties": "Counterparties",
+    "sector": "Sektoranalyse",
+    "timeline": "Tidslinje",
+    "risk": "Risikomatrix",
+    "actions": "Handlinger",
+    "counterparties": "Modparter",
     "scenarios": "Scenarier",
     "savedViews": "Gemte visninger"
   }
@@ -48,7 +54,39 @@
       "tsl": {
         "short": "TSL"
       }
+    },
+    "subjects": {
+      "tsl": {
+        "short": "TSL"
+      },
+      "umit": {
+        "short": "ÜC"
+      }
+    },
+    "navigation": {
+      "backToDashboard": "Tilbage til dashboard"
+    },
+    "logo": {
+      "alt": "TS Logistik-logo"
     }
+  },
+  "auth": {
+    "title": "Sikker adgang",
+    "subtitle": "Brug dine TS-Intel legitimationsoplysninger",
+    "usernameLabel": "Brugernavn",
+    "usernamePlaceholder": "Indtast brugernavn",
+    "passwordLabel": "Adgangskode",
+    "passwordPlaceholder": "Indtast adgangskode",
+    "submit": "Log ind",
+    "submitting": "Logger ind…",
+    "error": {
+      "invalidCredentials": "Forkert brugernavn eller adgangskode"
+    }
+  },
+  "data": {
+    "loading": "Indlæser casedata…",
+    "loadError": "Kunne ikke indlæse de seneste data. Prøv igen.",
+    "unknownError": "Ukendt datafejl"
   },
   "dashboard": {
     "common": {
@@ -99,6 +137,33 @@
         "liquidity": {
           "title": "Likviditet (cash) & DSO",
           "description": "Akut risiko · DSO: ~{{dso}}"
+        }
+      }
+    },
+    "summary": {
+      "corporate": {
+        "title": "Case Summary: TS Logistik (Erhverv)",
+        "body": "Høj/Alvorlig risiko (79/100) er ikke drevet af svag indtjening, men af en farlig cocktail af <red>akut illikviditet</red>, en <red>verserende skattesag</red>, <orange>svag governance</orange> og en ny <yellow>uafklaret Dubai-eksponering</yellow>."
+      },
+      "personal": {
+        "title": "Case Summary: Ümit Cetin (Privat)",
+        "bullets": {
+          "legal": {
+            "label": "Personlig juridisk risiko:",
+            "body": "Direkte eksponering for ledelsesansvar i skattesagen og ved potentiel konkurs i TS Logistik."
+          },
+          "financial": {
+            "label": "Høj finansiel eksponering:",
+            "body": "Privatøkonomien er tæt sammenkoblet med TSL-koncernens overlevelse. Formuen er bundet i illikvide aktiver."
+          },
+          "governance": {
+            "label": "Governance-svaghed:",
+            "body": "100 % UBO-kontrol uden uafhængig granskning muliggør højrisikostrategier som kapitaldræn."
+          },
+          "protection": {
+            "label": "Strategisk aktivbeskyttelse:",
+            "body": "Holding-strukturen beskytter effektivt ejendomsinvesteringerne mod almindelige kreditorer."
+          }
         }
       }
     }
@@ -175,7 +240,16 @@
       }
     },
     "ownership": {
-      "historicalHeading": "Historiske / perifere enheder"
+      "historicalHeading": "Historiske / perifere enheder",
+      "labels": {
+        "ubo": "Ejer / UBO",
+        "holding": "Holding",
+        "operations": "Drift",
+        "realEstate": "Ejendom",
+        "auto": "Bilsalg",
+        "historicTransferred": "Overdraget",
+        "historicClosed": "Ophørt"
+      }
     }
   },
   "actions": {
@@ -223,13 +297,13 @@
     },
     "views": {
       "cashflow": "Cashflow",
-      "risk": "Risk",
+      "risk": "Risiko",
       "timeline": "Tidslinje",
       "hypotheses": "Hypoteser",
       "companies": "Selskaber",
       "person": "Person",
       "sector": "Sektor",
-      "financials": "Finansiel"
+      "financials": "Finansielle nøgletal"
     },
     "card": {
       "statusHeading": "Status & tidshorisont",

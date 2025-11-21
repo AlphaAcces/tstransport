@@ -26,7 +26,7 @@ const getStatusColor = (status: string): 'green' | 'yellow' | 'gray' => {
 export const CompaniesView: React.FC = () => {
     const { companiesData } = useCaseData();
     const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-    const { t } = useTranslation('companies');
+    const { t } = useTranslation();
 
     const rolePriority: { [key: string]: number } = {
         'Drift (Vognmand)': 1,
@@ -47,26 +47,26 @@ export const CompaniesView: React.FC = () => {
 
     const getStatusLabel = (status: string) => {
         const statusKey = statusKeyByValue[status];
-        return statusKey ? t(`status.${statusKey}`) : status;
+        return statusKey ? t(`companies.status.${statusKey}`) : status;
     };
 
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-xl font-bold text-gray-200 mb-4">{t('heading.structure')}</h2>
+                <h2 className="text-xl font-bold text-gray-200 mb-4">{t('companies.heading.structure')}</h2>
                 <div className="bg-component-dark p-4 rounded-lg border border-border-dark">
                     <OwnershipStructure />
                 </div>
             </div>
 
             <div>
-                 <h2 className="text-xl font-bold text-gray-200 mb-4">{t('heading.overview')}</h2>
+                 <h2 className="text-xl font-bold text-gray-200 mb-4">{t('companies.heading.overview')}</h2>
                  <div className="bg-component-dark rounded-lg border border-border-dark">
                     <div className="hidden md:grid md:grid-cols-12 px-4 py-3 bg-gray-800/50 text-xs font-medium text-gray-400 uppercase tracking-wider">
-                        <div className="col-span-4">{t('table.company')}</div>
-                        <div className="col-span-2">{t('table.cvr')}</div>
-                        <div className="col-span-3">{t('table.role')}</div>
-                        <div className="col-span-3 text-right">{t('table.status')}</div>
+                        <div className="col-span-4">{t('companies.table.company')}</div>
+                        <div className="col-span-2">{t('companies.table.cvr')}</div>
+                        <div className="col-span-3">{t('companies.table.role')}</div>
+                        <div className="col-span-3 text-right">{t('companies.table.status')}</div>
                     </div>
                     <div className="divide-y divide-border-dark/50">
                         {sortedCompanies.map((company) => (
@@ -83,7 +83,7 @@ export const CompaniesView: React.FC = () => {
                                     <span className="text-sm text-gray-500 md:hidden">{company.role}</span>
                                 </div>
                                 <div className="md:col-span-2">
-                                    <span className="text-xs font-medium text-gray-500 md:hidden mr-2">{t('table.mobile.cvrLabel')}</span>
+                                    <span className="text-xs font-medium text-gray-500 md:hidden mr-2">{t('companies.table.mobile.cvrLabel')}</span>
                                     <span className="font-mono text-sm text-gray-400">{company.cvr}</span>
                                 </div>
                                 <div className="hidden md:flex md:col-span-3 items-center text-sm text-gray-400">

@@ -81,7 +81,7 @@ export const ActionsView: React.FC = () => {
   const { actionsWithStatus, updateStatus } = useActionStatuses(actionsData);
   const [activeFilter, setActiveFilter] = useState<FilterOption>('Alle');
   const [activeSort, setActiveSort] = useState<SortOption>('Prioritet');
-  const { t } = useTranslation('actions');
+  const { t } = useTranslation();
 
   const processedActions = useMemo(() => {
     const filtered = actionsWithStatus.filter(action => {
@@ -117,38 +117,38 @@ export const ActionsView: React.FC = () => {
   const sortOptions: SortOption[] = ['Prioritet', 'Kategori', 'Tidshorisont'];
 
   const getFilterLabel = (option: FilterOption) => {
-    if (option === 'Alle') return t('filters.options.all');
-    if (option === 'Påkrævet') return t('filters.options.required');
-    return t(categoryLabelKeys[option]);
+    if (option === 'Alle') return t('actions.filters.options.all');
+    if (option === 'Påkrævet') return t('actions.filters.options.required');
+    return t(`actions.${categoryLabelKeys[option]}`);
   };
 
   const getSortLabel = (option: SortOption) => {
     switch (option) {
       case 'Kategori':
-        return t('sort.options.category');
+        return t('actions.sort.options.category');
       case 'Tidshorisont':
-        return t('sort.options.horizon');
+        return t('actions.sort.options.horizon');
       case 'Prioritet':
       default:
-        return t('sort.options.priority');
+        return t('actions.sort.options.priority');
     }
   };
 
   return (
     <div className="space-y-8">
       <div>
-        <h2 className="text-xl font-bold text-gray-200 mb-6">{t('heading.title')}</h2>
+        <h2 className="text-xl font-bold text-gray-200 mb-6">{t('actions.heading.title')}</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <KpiCard title={t('kpis.required')} value={`${kpiValues.requiredCount}`} icon={<AlertOctagon className="w-8 h-8" />} />
-          <KpiCard title={t('kpis.highPriority')} value={`${kpiValues.highPriorityOpenCount}`} icon={<Target className="w-8 h-8" />} />
-          <KpiCard title={t('kpis.completion')} value={`${kpiValues.progress}%`} icon={<CheckCircle className="w-8 h-8" />} />
+          <KpiCard title={t('actions.kpis.required')} value={`${kpiValues.requiredCount}`} icon={<AlertOctagon className="w-8 h-8" />} />
+          <KpiCard title={t('actions.kpis.highPriority')} value={`${kpiValues.highPriorityOpenCount}`} icon={<Target className="w-8 h-8" />} />
+          <KpiCard title={t('actions.kpis.completion')} value={`${kpiValues.progress}%`} icon={<CheckCircle className="w-8 h-8" />} />
         </div>
       </div>
 
       <div className="bg-component-dark p-4 rounded-lg border border-border-dark space-y-4">
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-semibold text-gray-400">{t('filters.label')}</span>
+                <span className="text-sm font-semibold text-gray-400">{t('actions.filters.label')}</span>
                  {filterOptions.map(opt => (
                     <button key={opt} onClick={() => setActiveFilter(opt)} className={`px-2 py-1 text-xs font-medium rounded-md transition-colors ${activeFilter === opt ? 'bg-accent-green/20 text-accent-green' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700'}`}>
                         {getFilterLabel(opt)}
@@ -156,7 +156,7 @@ export const ActionsView: React.FC = () => {
                 ))}
             </div>
             <div className="flex items-center gap-2">
-                 <span className="text-sm font-semibold text-gray-400">{t('sort.label')}</span>
+                 <span className="text-sm font-semibold text-gray-400">{t('actions.sort.label')}</span>
                  <select value={activeSort} onChange={e => setActiveSort(e.target.value as SortOption)} className="bg-gray-700 border border-gray-600 text-white text-sm rounded-md p-1.5 focus:ring-accent-green focus:border-accent-green">
                     {sortOptions.map(opt => <option key={opt}>{getSortLabel(opt)}</option>)}
                  </select>
@@ -172,7 +172,7 @@ export const ActionsView: React.FC = () => {
         </div>
         {processedActions.length === 0 && (
             <div className="text-center py-12 text-gray-500">
-                <p>{t('emptyState.noMatches')}</p>
+                <p>{t('actions.emptyState.noMatches')}</p>
             </div>
         )}
       </div>

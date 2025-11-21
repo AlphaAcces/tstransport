@@ -67,20 +67,20 @@ interface ActionCardProps {
 
 export const ActionCard: React.FC<ActionCardProps> = ({ action, onStatusChange }) => {
     const [copied, setCopied] = useState(false);
-    const { t } = useTranslation('actions');
+    const { t } = useTranslation();
 
-    const priorityLabel = t(priorityLabelKeys[action.priority]);
-    const categoryLabel = t(categoryLabelKeys[action.category]);
+    const priorityLabel = t(`actions.${priorityLabelKeys[action.priority]}`);
+    const categoryLabel = t(`actions.${categoryLabelKeys[action.category]}`);
 
-    const getStatusLabel = (status: ActionItem['status']) => t(statusLabelKeys[status]);
-    const getHorizonLabel = (horizon: NonNullable<ActionItem['timeHorizon']>) => t(horizonLabelKeys[horizon]);
+    const getStatusLabel = (status: ActionItem['status']) => t(`actions.${statusLabelKeys[status]}`);
+    const getHorizonLabel = (horizon: NonNullable<ActionItem['timeHorizon']>) => t(`actions.${horizonLabelKeys[horizon]}`);
     const getViewLabel = (view: View) => {
       const key = viewLabelKeys[view];
-      return key ? t(key) : view;
+      return key ? t(`actions.${key}`) : view;
     };
 
     const handleCopy = () => {
-        const textToCopy = `[${action.title}] — ${action.description}\n${t('card.copy.priority')}: ${priorityLabel}\n${t('card.copy.category')}: ${categoryLabel}\n${t('card.copy.source')}: ${action.sourceId || t('card.copy.noSource')}`;
+        const textToCopy = `[${action.title}] — ${action.description}\n${t('actions.card.copy.priority')}: ${priorityLabel}\n${t('actions.card.copy.category')}: ${categoryLabel}\n${t('actions.card.copy.source')}: ${action.sourceId || t('actions.card.copy.noSource')}`;
         navigator.clipboard.writeText(textToCopy).then(() => {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
@@ -101,7 +101,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onStatusChange }
         </div>
         <div className="p-4 border-t border-border-dark/50 text-xs space-y-3">
           <div>
-            <span className="font-semibold text-gray-500 block mb-1">{t('card.statusHeading')}</span>
+            <span className="font-semibold text-gray-500 block mb-1">{t('actions.card.statusHeading')}</span>
             <div className="flex items-center gap-2">
               <select
                 value={action.status}
@@ -116,7 +116,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onStatusChange }
             </div>
           </div>
           <div>
-            <span className="font-semibold text-gray-500">{t('card.evidenceHeading')} </span>
+            <span className="font-semibold text-gray-500">{t('actions.card.evidenceHeading')} </span>
             <span className="text-gray-400 italic">{action.evidenceType}</span>
           </div>
            <div className="flex items-center gap-4">
@@ -125,12 +125,12 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onStatusChange }
                     href={action.sourceUrl || '#'}
                     target="_blank"
                     rel="noopener noreferrer"
-                    title={action.sourceId || t('card.viewSource')}
+                    title={action.sourceId || t('actions.card.viewSource')}
                     className="flex items-center text-xs text-blue-400 hover:text-blue-300 transition-colors"
                     onClick={(e) => !action.sourceUrl && e.preventDefault()}
                 >
                     <LinkIcon className="w-3 h-3 mr-1" />
-                    {t('card.viewSource')}
+                    {t('actions.card.viewSource')}
                 </a>
               )}
                <button
@@ -140,19 +140,19 @@ export const ActionCard: React.FC<ActionCardProps> = ({ action, onStatusChange }
                     {copied ? (
                         <>
                             <Check className="w-3 h-3 mr-1 text-accent-green" />
-                            <span className="text-accent-green">{t('card.copy.copied')}</span>
+                            <span className="text-accent-green">{t('actions.card.copy.copied')}</span>
                         </>
                     ) : (
                         <>
                             <Copy className="w-3 h-3 mr-1" />
-                            {t('card.copy.button')}
+                            {t('actions.card.copy.button')}
                         </>
                     )}
                 </button>
            </div>
         </div>
         <div className="p-4 border-t border-border-dark/50 text-xs">
-            <span className="font-semibold text-gray-500 block mb-2">{t('card.relationsHeading')}</span>
+            <span className="font-semibold text-gray-500 block mb-2">{t('actions.card.relationsHeading')}</span>
             <div className="flex flex-wrap gap-1">
                 {action.linkedHypotheses?.map(h => <Tag key={h} label={h} color="yellow" />)}
                 {action.linkedRisks?.map(r => <Tag key={r} label={r.split('/')[0]} color="red" />)}

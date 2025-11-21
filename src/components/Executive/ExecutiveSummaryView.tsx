@@ -173,7 +173,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
         () => risk.riskScores.map(score => ({
             ...score,
             label: riskCategoryLabels[score.category] ?? score.category,
-            justificationLabel: score.justification.startsWith('risk:') ? t(score.justification) : score.justification,
+            justificationLabel: score.justification.startsWith('risk.') ? t(score.justification) : score.justification,
         })),
         [risk.riskScores, riskCategoryLabels, t]
     );

@@ -24,7 +24,12 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
     return `${baseClass} bg-component-dark hover:bg-gray-700/50`;
   };
 
-  const headerTitle = activeSubject === 'tsl' ? t('app.companyName', 'TS Logistik ApS') : t('app.userName', 'Ümit Cetin');
+  const headerTitle = activeSubject === 'tsl' ? t('app.companyName') : t('app.userName');
+  const consoleName = t('app.consoleName');
+  const consoleShort = t('app.consoleShort');
+  const subjectShort = activeSubject === 'tsl'
+    ? t('common.subjects.tsl.short')
+    : t('common.subjects.umit.short');
 
   return (
     <header className="fixed top-0 left-0 right-0 z-20 bg-component-dark/80 backdrop-blur-sm border-b border-border-dark">
@@ -36,18 +41,18 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
           <TslLogo variant="header" className="h-8 w-auto mr-4" />
           <div className="hidden sm:flex items-baseline truncate">
             <h1 className="text-xl font-bold text-gray-200 tracking-tight">{headerTitle}</h1>
-            <span className="font-normal text-gray-400 ml-2 truncate">/ Intelligence Console</span>
+            <span className="font-normal text-gray-400 ml-2 truncate">/ {consoleName}</span>
           </div>
-           <h1 className="sm:hidden text-lg font-bold text-gray-200 truncate ml-2">{activeSubject === 'tsl' ? 'TSL' : 'ÜC'} / IC</h1>
+           <h1 className="sm:hidden text-lg font-bold text-gray-200 truncate ml-2">{subjectShort} / {consoleShort}</h1>
         </div>
 
         <div className="flex items-center space-x-2">
             <button onClick={() => onSubjectChange('tsl')} className={getButtonClass('tsl')}>
-                <span className={`text-sm font-bold ${activeSubject === 'tsl' ? 'text-accent-green' : 'text-gray-200'}`}>TS Logistik</span>
+                <span className={`text-sm font-bold ${activeSubject === 'tsl' ? 'text-accent-green' : 'text-gray-200'}`}>{t('app.companyLabel')}</span>
                 <span className="text-xs text-gray-500">{t('nav.business')}</span>
             </button>
             <button onClick={() => onSubjectChange('umit')} className={getButtonClass('umit')}>
-                 <span className={`text-sm font-bold ${activeSubject === 'umit' ? 'text-accent-green' : 'text-gray-200'}`}>Ümit Cetin</span>
+                 <span className={`text-sm font-bold ${activeSubject === 'umit' ? 'text-accent-green' : 'text-gray-200'}`}>{t('app.userLabel')}</span>
                 <span className="text-xs text-gray-500">{t('nav.personal')}</span>
             </button>
             <div className="ml-2">

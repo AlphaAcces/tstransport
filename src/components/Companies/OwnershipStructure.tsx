@@ -48,14 +48,24 @@ const ChildNodeContainer: React.FC<{ children: React.ReactNode }> = ({ children 
 };
 
 const HistoricalSection: React.FC = () => {
-    const { t } = useTranslation('companies');
+    const { t } = useTranslation();
 
     return (
         <div className="mt-8 pt-6 border-t border-border-dark/50">
-            <h4 className="text-center text-sm font-bold text-gray-400 mb-4">{t('ownership.historicalHeading')}</h4>
+            <h4 className="text-center text-sm font-bold text-gray-400 mb-4">{t('companies.ownership.historicalHeading')}</h4>
             <div className="flex flex-wrap justify-center gap-4">
-                <Node label="Lund Capital Holding ApS" sublabel="Overdraget" level="historical" className="opacity-75" />
-                <Node label="Gorm & Partnere ApS" sublabel="Ophørt" level="historical" className="opacity-75" />
+                <Node
+                    label="Lund Capital Holding ApS"
+                    sublabel={t('companies.ownership.labels.historicTransferred')}
+                    level="historical"
+                    className="opacity-75"
+                />
+                <Node
+                    label="Gorm & Partnere ApS"
+                    sublabel={t('companies.ownership.labels.historicClosed')}
+                    level="historical"
+                    className="opacity-75"
+                />
             </div>
         </div>
     );
@@ -63,19 +73,21 @@ const HistoricalSection: React.FC = () => {
 
 
 export const OwnershipStructure: React.FC = () => {
+    const { t } = useTranslation();
+
     return (
         <div className="flex flex-col items-center p-4 overflow-x-auto scrollbar-hidden">
-            <Node label="Ümit Cetin" sublabel="Ejer / UBO" level="ubo">
+            <Node label="Ümit Cetin" sublabel={t('companies.ownership.labels.ubo')} level="ubo">
                 <ChildNodeContainer>
-                    <Node label="CESR Holding ApS" sublabel="Holding" level="holding">
+                    <Node label="CESR Holding ApS" sublabel={t('companies.ownership.labels.holding')} level="holding">
                         <ChildNodeContainer>
                              {/* Vertical connectors for subsidiaries */}
                             <div className="absolute bottom-full h-6 w-px bg-gray-600 md:hidden"></div>
                             <div className="absolute bottom-full h-6 w-px bg-gray-600 hidden md:block" style={{left: 'calc(50% - 1px)'}}></div>
 
-                            <Node label="TS Logistik ApS" sublabel="Drift" level="subsidiary" />
-                            <Node label="CESR Ejendomme ApS" sublabel="Ejendom" level="subsidiary" />
-                            <Node label="CESR ApS" sublabel="Bilsalg" level="subsidiary" />
+                            <Node label="TS Logistik ApS" sublabel={t('companies.ownership.labels.operations')} level="subsidiary" />
+                            <Node label="CESR Ejendomme ApS" sublabel={t('companies.ownership.labels.realEstate')} level="subsidiary" />
+                            <Node label="CESR ApS" sublabel={t('companies.ownership.labels.auto')} level="subsidiary" />
                         </ChildNodeContainer>
                     </Node>
                 </ChildNodeContainer>

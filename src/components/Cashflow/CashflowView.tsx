@@ -100,10 +100,10 @@ export const CashflowView: React.FC = () => {
 
     const locale = useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);
     const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
-    const currencyLabel = t('common:currency.dkk');
-    const millionAbbrev = t('common:units.millionAbbrev');
-    const thousandAbbrev = t('cashflow:units.thousandAbbrev');
-    const daysFormatter = (value: number) => t('common:units.days', { count: Math.round(value) });
+    const currencyLabel = t('common.currency.dkk');
+    const millionAbbrev = t('common.units.millionAbbrev');
+    const thousandAbbrev = t('cashflow.units.thousandAbbrev');
+    const daysFormatter = (value: number) => t('common.units.days', { count: Math.round(value) });
     const formatCurrency = (value: number) => `${numberFormatter.format(Math.round(value))} ${currencyLabel}`;
     const formatNumber = (value: number) => numberFormatter.format(Math.round(value));
     const formatShortAmount = (value: number) => {
@@ -132,23 +132,23 @@ export const CashflowView: React.FC = () => {
 
     const scenarioSummaries = useMemo(() => ({
         base: {
-            title: t('cashflow:scenarios.summary.base.title'),
-            description: t('cashflow:scenarios.summary.base.description'),
+            title: t('cashflow.scenarios.summary.base.title'),
+            description: t('cashflow.scenarios.summary.base.description'),
         },
         taxClaim: {
-            title: t('cashflow:scenarios.summary.taxClaim.title'),
-            description: t('cashflow:scenarios.summary.taxClaim.description'),
+            title: t('cashflow.scenarios.summary.taxClaim.title'),
+            description: t('cashflow.scenarios.summary.taxClaim.description'),
         },
         repayment: {
-            title: t('cashflow:scenarios.summary.repayment.title'),
-            description: t('cashflow:scenarios.summary.repayment.description'),
+            title: t('cashflow.scenarios.summary.repayment.title'),
+            description: t('cashflow.scenarios.summary.repayment.description'),
         }
     }), [t]);
 
     const scenarioTabs = useMemo(() => ({
-        base: t('cashflow:scenarios.tabs.base'),
-        taxClaim: t('cashflow:scenarios.tabs.taxClaim'),
-        repayment: t('cashflow:scenarios.tabs.repayment'),
+        base: t('cashflow.scenarios.tabs.base'),
+        taxClaim: t('cashflow.scenarios.tabs.taxClaim'),
+        repayment: t('cashflow.scenarios.tabs.repayment'),
     }), [t]);
 
     const scenarioOutput = useMemo(() => {
@@ -195,60 +195,60 @@ export const CashflowView: React.FC = () => {
     const analysisPoints = [
         {
             colorClass: 'text-red-400',
-            title: t('cashflow:analysis.points.acuteRisk.title'),
-            body: t('cashflow:analysis.points.acuteRisk.body'),
+            title: t('cashflow.analysis.points.acuteRisk.title'),
+            body: t('cashflow.analysis.points.acuteRisk.body'),
         },
         {
             colorClass: 'text-yellow-400',
-            title: t('cashflow:analysis.points.capitalDrain.title'),
-            body: t('cashflow:analysis.points.capitalDrain.body'),
+            title: t('cashflow.analysis.points.capitalDrain.title'),
+            body: t('cashflow.analysis.points.capitalDrain.body'),
         },
         {
             colorClass: 'text-orange-400',
-            title: t('cashflow:analysis.points.extremeDso.title'),
-            body: t('cashflow:analysis.points.extremeDso.body'),
+            title: t('cashflow.analysis.points.extremeDso.title'),
+            body: t('cashflow.analysis.points.extremeDso.body'),
         },
         {
             colorClass: 'text-red-500',
-            title: t('cashflow:analysis.points.combinedRisk.title'),
-            body: t('cashflow:analysis.points.combinedRisk.body'),
+            title: t('cashflow.analysis.points.combinedRisk.title'),
+            body: t('cashflow.analysis.points.combinedRisk.body'),
         },
     ];
 
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-xl font-bold text-gray-200 mb-4">{t('cashflow:heading.title')}</h2>
+                <h2 className="text-xl font-bold text-gray-200 mb-4">{t('cashflow.heading.title')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <KpiCard
-                        title={t('cashflow:kpiCards.cashOnHand.title')}
+                        title={t('cashflow.kpiCards.cashOnHand.title')}
                         value={formatCurrency(cashflowSummary.cashOnHand)}
-                        note={t('cashflow:kpiCards.cashOnHand.note')}
+                        note={t('cashflow.kpiCards.cashOnHand.note')}
                         icon={<Banknote className="w-8 h-8"/>}
                     />
                     <KpiCard
-                        title={t('cashflow:kpiCards.internalReceivables.title')}
+                        title={t('cashflow.kpiCards.internalReceivables.title')}
                         value={formatShortAmount(cashflowSummary.internalReceivables)}
-                        note={t('cashflow:kpiCards.internalReceivables.note')}
+                        note={t('cashflow.kpiCards.internalReceivables.note')}
                         icon={<Users className="w-8 h-8"/>}
                     />
                     <KpiCard
-                        title={t('cashflow:kpiCards.dso.title')}
+                        title={t('cashflow.kpiCards.dso.title')}
                         value={daysFormatter(cashflowSummary.dsoDays2024)}
-                        note={t('cashflow:kpiCards.dso.note')}
+                        note={t('cashflow.kpiCards.dso.note')}
                         icon={<Clock className="w-8 h-8"/>}
                     />
                     <KpiCard
-                        title={t('cashflow:kpiCards.taxClaim.title')}
+                        title={t('cashflow.kpiCards.taxClaim.title')}
                         value={formatShortAmount(cashflowSummary.potentialTaxClaim)}
-                        note={t('cashflow:kpiCards.taxClaim.note')}
+                        note={t('cashflow.kpiCards.taxClaim.note')}
                         icon={<FileWarning className="w-8 h-8"/>}
                     />
                 </div>
             </div>
 
             <div className="bg-component-dark p-6 rounded-lg border border-border-dark">
-                 <h2 className="text-xl font-bold text-gray-200 mb-4">{t('cashflow:scenarios.heading')}</h2>
+                 <h2 className="text-xl font-bold text-gray-200 mb-4">{t('cashflow.scenarios.heading')}</h2>
                  <div className="flex flex-col sm:flex-row gap-2 mb-4">
                     <button onClick={() => setActiveScenario('base')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200 border ${activeScenario === 'base' ? 'bg-accent-green/20 text-accent-green border-accent-green/50' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border-transparent'}`}>{scenarioTabs.base}</button>
                     <button onClick={() => setActiveScenario('taxClaim')} className={`px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200 border ${activeScenario === 'taxClaim' ? 'bg-red-800/50 text-red-300 border-red-600/80' : 'bg-gray-700/50 text-gray-300 hover:bg-gray-700 border-transparent'}`}>{scenarioTabs.taxClaim}</button>
@@ -262,21 +262,21 @@ export const CashflowView: React.FC = () => {
 
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <ScenarioKpiCard
-                        title={t('cashflow:scenarios.cards.equity')}
+                        title={t('cashflow.scenarios.cards.equity')}
                         value={formatCurrency(scenarioOutput.equity.value)}
                         change={scenarioOutput.equity.change}
                         icon={<Briefcase className="w-6 h-6"/>}
                         formatChange={formatCurrency}
                     />
                     <ScenarioKpiCard
-                        title={t('cashflow:scenarios.cards.cash')}
+                        title={t('cashflow.scenarios.cards.cash')}
                         value={formatCurrency(scenarioOutput.cash.value)}
                         change={scenarioOutput.cash.change}
                         icon={<Banknote className="w-6 h-6"/>}
                         formatChange={formatCurrency}
                     />
                     <ScenarioKpiCard
-                        title={t('cashflow:scenarios.cards.dso')}
+                        title={t('cashflow.scenarios.cards.dso')}
                         value={daysFormatter(scenarioOutput.dso.value)}
                         change={scenarioOutput.dso.change}
                         icon={<Clock className="w-6 h-6"/>}
@@ -287,7 +287,7 @@ export const CashflowView: React.FC = () => {
 
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
                 <div className="lg:col-span-3 bg-component-dark p-6 rounded-lg border border-border-dark">
-                    <h3 className="text-lg font-bold text-gray-200 mb-4">{t('cashflow:dsoChart.title')}</h3>
+                    <h3 className="text-lg font-bold text-gray-200 mb-4">{t('cashflow.dsoChart.title')}</h3>
                     <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={dsoData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
@@ -295,34 +295,34 @@ export const CashflowView: React.FC = () => {
                             <YAxis tickFormatter={(v) => `${v}`} stroke="#a0aec0" />
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }}
-                                formatter={(value: number) => [t('cashflow:dsoChart.tooltipValue', { value }), t('cashflow:dsoChart.series')]}
+                                formatter={(value: number) => [t('cashflow.dsoChart.tooltipValue', { value }), t('cashflow.dsoChart.series')]}
                                 cursor={{ fill: 'rgba(229, 62, 62, 0.1)' }}
                             />
-                            <Bar dataKey="DSO" name={t('cashflow:dsoChart.series')} fill="#e53e3e" />
+                            <Bar dataKey="DSO" name={t('cashflow.dsoChart.series')} fill="#e53e3e" />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
 
                 <div className="lg:col-span-2 bg-component-dark p-6 rounded-lg border border-border-dark">
-                    <h3 className="text-lg font-bold text-gray-200 mb-4">{t('cashflow:receivablesTable.title')}</h3>
+                    <h3 className="text-lg font-bold text-gray-200 mb-4">{t('cashflow.receivablesTable.title')}</h3>
                     <ReceivablesTable
                         formatNumber={formatNumber}
                         headings={{
-                            item: t('cashflow:receivablesTable.columns.item'),
-                            yearLabel: (year: number) => t('cashflow:receivablesTable.columns.year', { year, currency: currencyLabel }),
+                            item: t('cashflow.receivablesTable.columns.item'),
+                            yearLabel: (year: number) => t('cashflow.receivablesTable.columns.year', { year, currency: currencyLabel }),
                         }}
                         rowLabels={{
-                            internal: t('cashflow:receivablesTable.rows.internal'),
-                            external: t('cashflow:receivablesTable.rows.external'),
-                            total: t('cashflow:receivablesTable.rows.total'),
+                            internal: t('cashflow.receivablesTable.rows.internal'),
+                            external: t('cashflow.receivablesTable.rows.external'),
+                            total: t('cashflow.receivablesTable.rows.total'),
                         }}
-                        noDataLabel={t('cashflow:receivablesTable.noData')}
+                        noDataLabel={t('cashflow.receivablesTable.noData')}
                     />
                 </div>
             </div>
 
             <div className="bg-component-dark p-6 rounded-lg border border-border-dark">
-                <h3 className="text-lg font-bold text-gray-200 mb-2">{t('cashflow:analysis.title')}</h3>
+                <h3 className="text-lg font-bold text-gray-200 mb-2">{t('cashflow.analysis.title')}</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm text-gray-300">
                     {analysisPoints.map(point => (
                         <li key={point.title}>

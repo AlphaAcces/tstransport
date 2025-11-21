@@ -46,19 +46,19 @@ const RiskKpiCard: React.FC<{ title: string; value: string; subValue: string; ic
 
 const SCENARIO_CONFIG = {
     balanced: {
-        buttonKey: 'risk:scenarios.balanced.label',
-        levelKey: 'risk:scenarios.balanced.level',
-        descriptionKey: 'risk:scenarios.balanced.description',
+        buttonKey: 'risk.scenarios.balanced.label',
+        levelKey: 'risk.scenarios.balanced.level',
+        descriptionKey: 'risk.scenarios.balanced.description',
     },
     eddStrict: {
-        buttonKey: 'risk:scenarios.eddStrict.label',
-        levelKey: 'risk:scenarios.eddStrict.level',
-        descriptionKey: 'risk:scenarios.eddStrict.description',
+        buttonKey: 'risk.scenarios.eddStrict.label',
+        levelKey: 'risk.scenarios.eddStrict.level',
+        descriptionKey: 'risk.scenarios.eddStrict.description',
     },
     stress2025: {
-        buttonKey: 'risk:scenarios.stress.label',
-        levelKey: 'risk:scenarios.stress.level',
-        descriptionKey: 'risk:scenarios.stress.description',
+        buttonKey: 'risk.scenarios.stress.label',
+        levelKey: 'risk.scenarios.stress.level',
+        descriptionKey: 'risk.scenarios.stress.description',
     },
 } as const;
 
@@ -98,34 +98,34 @@ export const RiskView: React.FC = () => {
     }), [t]);
 
     const categoryLabels = useMemo(() => ({
-        financial: t('risk:heatmap.categories.financial'),
-        legalCompliance: t('risk:heatmap.categories.legalCompliance'),
-        governance: t('risk:heatmap.categories.governance'),
-        socmintReputation: t('risk:heatmap.categories.socmintReputation'),
-        sectorOperations: t('risk:heatmap.categories.sectorOperations'),
+        financial: t('risk.heatmap.categories.financial'),
+        legalCompliance: t('risk.heatmap.categories.legalCompliance'),
+        governance: t('risk.heatmap.categories.governance'),
+        socmintReputation: t('risk.heatmap.categories.socmintReputation'),
+        sectorOperations: t('risk.heatmap.categories.sectorOperations'),
     }), [t]);
 
     const categoryJustifications = useMemo(() => ({
-        financial: t('risk:heatmap.justifications.financial'),
-        legalCompliance: t('risk:heatmap.justifications.legalCompliance'),
-        governance: t('risk:heatmap.justifications.governance'),
-        socmintReputation: t('risk:heatmap.justifications.socmintReputation'),
-        sectorOperations: t('risk:heatmap.justifications.sectorOperations'),
+        financial: t('risk.heatmap.justifications.financial'),
+        legalCompliance: t('risk.heatmap.justifications.legalCompliance'),
+        governance: t('risk.heatmap.justifications.governance'),
+        socmintReputation: t('risk.heatmap.justifications.socmintReputation'),
+        sectorOperations: t('risk.heatmap.justifications.sectorOperations'),
     }), [t]);
 
     const primaryDriversValue = primaryDriversData
-        .map(r => t(`risk:primaryDrivers.${CATEGORY_KEY_MAP[r.category]}`))
-        .join(t('common:delimiters.and'));
+        .map(r => t(`risk.primaryDrivers.${CATEGORY_KEY_MAP[r.category]}`))
+        .join(t('common.delimiters.and'));
 
     const primaryDriversSubValue = primaryDriversData
         .map(r => categoryLabels[CATEGORY_KEY_MAP[r.category]] ?? r.category)
-        .join(t('common:delimiters.and'));
+        .join(t('common.delimiters.and'));
 
     const riskLevelLabels = useMemo(() => ({
-        KRITISK: t('risk:levels.critical'),
-        HØJ: t('risk:levels.high'),
-        MODERAT: t('risk:levels.medium'),
-        LAV: t('risk:levels.low'),
+        KRITISK: t('risk.levels.critical'),
+        HØJ: t('risk.levels.high'),
+        MODERAT: t('risk.levels.medium'),
+        LAV: t('risk.levels.low'),
     }), [t]);
 
     const scenarioOptions = useMemo(
@@ -148,26 +148,26 @@ export const RiskView: React.FC = () => {
     return (
         <div className="space-y-8">
             <div>
-                <h2 className="text-xl font-bold text-gray-200 mb-4">{t('risk:heading')}</h2>
+                <h2 className="text-xl font-bold text-gray-200 mb-4">{t('risk.heading')}</h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <RiskKpiCard
-                        title={t('risk:kpi.total.title')}
+                        title={t('risk.kpi.total.title')}
                         value={`${totalRiskScore.score} / ${totalRiskScore.maxScore}`}
                         subValue={scenarioSummary.level}
                         icon={<ShieldAlert className="w-8 h-8"/>}
                         color="red"
                     />
                     <RiskKpiCard
-                        title={t('risk:kpi.primaryDrivers.title')}
+                        title={t('risk.kpi.primaryDrivers.title')}
                         value={primaryDriversValue}
                         subValue={primaryDriversSubValue}
                         icon={<Zap className="w-8 h-8"/>}
                         color="orange"
                     />
                     <RiskKpiCard
-                        title={t('risk:kpi.criticalCategories.title')}
+                        title={t('risk.kpi.criticalCategories.title')}
                         value={`${criticalCategoriesCount} / ${riskHeatmapData.length}`}
-                        subValue={t('risk:kpi.criticalCategories.note')}
+                        subValue={t('risk.kpi.criticalCategories.note')}
                         icon={<AlertTriangle className="w-8 h-8"/>}
                         color="yellow"
                     />
@@ -176,7 +176,7 @@ export const RiskView: React.FC = () => {
 
             <div>
                 <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
-                     <h2 className="text-xl font-bold text-gray-200">{t('risk:heatmap.heading')}</h2>
+                     <h2 className="text-xl font-bold text-gray-200">{t('risk.heatmap.heading')}</h2>
                     <div className="flex items-center space-x-1 bg-component-dark p-1 rounded-lg border border-border-dark self-start">
                         {scenarioOptions.map(option => (
                             <button
@@ -194,12 +194,12 @@ export const RiskView: React.FC = () => {
                     <table className="min-w-full divide-y divide-border-dark">
                         <thead className="bg-gray-800/50">
                             <tr>
-                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk:heatmap.columns.category')}</th>
-                                <th scope="col" className="py-3 px-2 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk:heatmap.columns.likelihoodImpact')}</th>
-                                <th scope="col" className="py-3 px-2 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk:heatmap.columns.score')}</th>
-                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk:heatmap.columns.level')}</th>
-                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk:heatmap.columns.justification')}</th>
-                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk:heatmap.columns.relations')}</th>
+                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk.heatmap.columns.category')}</th>
+                                <th scope="col" className="py-3 px-2 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk.heatmap.columns.likelihoodImpact')}</th>
+                                <th scope="col" className="py-3 px-2 text-center text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk.heatmap.columns.score')}</th>
+                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk.heatmap.columns.level')}</th>
+                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk.heatmap.columns.justification')}</th>
+                                <th scope="col" className="py-3 px-4 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">{t('risk.heatmap.columns.relations')}</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-border-dark">
@@ -208,8 +208,8 @@ export const RiskView: React.FC = () => {
                                     <td className="py-4 px-4 align-top font-semibold text-sm text-gray-200">{categoryLabels[CATEGORY_KEY_MAP[item.category]] ?? item.category}</td>
                                     <td className="py-4 px-2 align-top text-center">
                                         <div className="flex flex-col items-center font-mono text-xs">
-                                            <span className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300">{t('risk:heatmap.likelihoodLabel', { value: item.likelihood })}</span>
-                                            <span className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 mt-1">{t('risk:heatmap.impactLabel', { value: item.impact })}</span>
+                                            <span className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300">{t('risk.heatmap.likelihoodLabel', { value: item.likelihood })}</span>
+                                            <span className="bg-gray-700 px-1.5 py-0.5 rounded text-gray-300 mt-1">{t('risk.heatmap.impactLabel', { value: item.impact })}</span>
                                         </div>
                                     </td>
                                     <td className="py-4 px-2 align-top text-center">
@@ -223,19 +223,19 @@ export const RiskView: React.FC = () => {
                                     <td className="py-4 px-4 align-top text-xs min-w-[250px]">
                                         <div className="space-y-2">
                                             <div>
-                                                <p className="font-bold text-gray-500 mb-1">{t('risk:heatmap.sections.hypotheses')}</p>
+                                                <p className="font-bold text-gray-500 mb-1">{t('risk.heatmap.sections.hypotheses')}</p>
                                                 <div className="flex flex-wrap gap-1">
                                                     {item.linkedHypotheses.map(h => <Tag key={h} label={h} color="gray"/>)}
                                                 </div>
                                             </div>
                                             <div>
-                                                <p className="font-bold text-gray-500 mb-1">{t('risk:heatmap.sections.views')}</p>
+                                                <p className="font-bold text-gray-500 mb-1">{t('risk.heatmap.sections.views')}</p>
                                                 <div className="flex flex-wrap gap-1">
                                                      {item.linkedViews.map(v => <Tag key={v} label={viewLabels[v] || v} color="blue"/>)}
                                                 </div>
                                             </div>
                                              <div>
-                                                <p className="font-bold text-gray-500 mb-1">{t('risk:heatmap.sections.actions')}</p>
+                                                <p className="font-bold text-gray-500 mb-1">{t('risk.heatmap.sections.actions')}</p>
                                                 <div className="flex flex-wrap gap-1">
                                                      {item.linkedActions.slice(0,1).map(a => <Tag key={a} label={a.length > 25 ? a.substring(0, 22) + '...' : a} color="green"/>)}
                                                 </div>
@@ -249,8 +249,8 @@ export const RiskView: React.FC = () => {
                 </div>
                  <div className="mt-4 bg-component-dark p-4 rounded-lg border border-border-dark">
                     <h3 className="text-md font-bold text-gray-200 flex items-center">
-                        {t('risk:scenarios.heading')}: <span className="ml-2 font-mono text-accent-green">{scenarioSummary.title}</span>
-                        <InfoTooltip text={t('risk:heatmap.tooltip')} />
+                        {t('risk.scenarios.heading')}: <span className="ml-2 font-mono text-accent-green">{scenarioSummary.title}</span>
+                        <InfoTooltip text={t('risk.heatmap.tooltip')} />
                     </h3>
                     <p className="text-sm text-gray-400 mt-2">{scenarioSummary.description}</p>
                 </div>

@@ -10,13 +10,13 @@ interface TimelineEventCardProps {
 
 // FIX: Mapped color values to those accepted by the Tag component (e.g., 'orange' to 'yellow').
 const EVENT_TYPE_META: Record<TimelineEvent['type'], { icon: React.ReactNode; color: 'blue' | 'green' | 'yellow' | 'red'; labelKey: string; contextKeys?: string[] }> = {
-    'Etablering': { icon: <Building className="h-5 w-5 text-blue-400" />, color: 'blue', labelKey: 'timeline:eventTypes.establishment', contextKeys: ['nav:companies', 'nav:person'] },
-    'Regnskab': { icon: <Calendar className="h-5 w-5 text-indigo-400" />, color: 'blue', labelKey: 'timeline:eventTypes.accounts', contextKeys: ['nav:financials'] },
-    'Struktur': { icon: <Landmark className="h-5 w-5 text-purple-400" />, color: 'blue', labelKey: 'timeline:eventTypes.structure', contextKeys: ['nav:companies', 'nav:person'] },
-    'Finansiel': { icon: <HandCoins className="h-5 w-5 text-green-400" />, color: 'green', labelKey: 'timeline:eventTypes.financial', contextKeys: ['nav:financials', 'nav:cashflow'] },
-    'Operationel': { icon: <Wrench className="h-5 w-5 text-orange-400" />, color: 'yellow', labelKey: 'timeline:eventTypes.operational', contextKeys: ['nav:sector'] },
-    'Adresse': { icon: <MapPin className="h-5 w-5 text-yellow-400" />, color: 'yellow', labelKey: 'timeline:eventTypes.address' },
-    'Compliance': { icon: <ShieldAlert className="h-5 w-5 text-red-400" />, color: 'red', labelKey: 'timeline:eventTypes.compliance', contextKeys: ['nav:risk', 'nav:actions', 'nav:hypotheses'] }
+    'Etablering': { icon: <Building className="h-5 w-5 text-blue-400" />, color: 'blue', labelKey: 'timeline.eventTypes.establishment', contextKeys: ['nav.companies', 'nav.person'] },
+    'Regnskab': { icon: <Calendar className="h-5 w-5 text-indigo-400" />, color: 'blue', labelKey: 'timeline.eventTypes.accounts', contextKeys: ['nav.financials'] },
+    'Struktur': { icon: <Landmark className="h-5 w-5 text-purple-400" />, color: 'blue', labelKey: 'timeline.eventTypes.structure', contextKeys: ['nav.companies', 'nav.person'] },
+    'Finansiel': { icon: <HandCoins className="h-5 w-5 text-green-400" />, color: 'green', labelKey: 'timeline.eventTypes.financial', contextKeys: ['nav.financials', 'nav.cashflow'] },
+    'Operationel': { icon: <Wrench className="h-5 w-5 text-orange-400" />, color: 'yellow', labelKey: 'timeline.eventTypes.operational', contextKeys: ['nav.sector'] },
+    'Adresse': { icon: <MapPin className="h-5 w-5 text-yellow-400" />, color: 'yellow', labelKey: 'timeline.eventTypes.address' },
+    'Compliance': { icon: <ShieldAlert className="h-5 w-5 text-red-400" />, color: 'red', labelKey: 'timeline.eventTypes.compliance', contextKeys: ['nav.risk', 'nav.actions', 'nav.hypotheses'] }
 };
 
 export const TimelineEventCard: React.FC<TimelineEventCardProps> = ({ event }) => {
@@ -27,7 +27,7 @@ export const TimelineEventCard: React.FC<TimelineEventCardProps> = ({ event }) =
     const contextualTags = useMemo(() => config.contextKeys?.map(key => t(key)) ?? [], [config.contextKeys, t]);
     const label = t(config.labelKey);
     const formattedDate = useMemo(() => new Date(event.date).toLocaleDateString(locale, { year: 'numeric', month: 'short', day: 'numeric' }), [event.date, locale]);
-    const sourceTooltip = event.sourceId ? t('timeline:sourceTooltip', { sourceId: event.sourceId }) : t('timeline:viewSource');
+    const sourceTooltip = event.sourceId ? t('timeline.sourceTooltip', { sourceId: event.sourceId }) : t('timeline.viewSource');
 
     return (
         <div className="relative">
@@ -49,7 +49,7 @@ export const TimelineEventCard: React.FC<TimelineEventCardProps> = ({ event }) =
                 <p className="text-sm text-gray-400 mt-2">{event.description}</p>
                 <div className="flex flex-col sm:flex-row justify-between items-start mt-4 pt-3 border-t border-border-dark/50 gap-2">
                     <div className="flex items-center gap-4">
-                        <p className="text-xs text-gray-500">{t('timeline:sourceLabel')}: {event.source}</p>
+                        <p className="text-xs text-gray-500">{t('timeline.sourceLabel')}: {event.source}</p>
                         {(event.sourceUrl || event.sourceId) && (
                             <a
                                 href={event.sourceUrl || '#'}
@@ -60,7 +60,7 @@ export const TimelineEventCard: React.FC<TimelineEventCardProps> = ({ event }) =
                                 onClick={(e) => !event.sourceUrl && e.preventDefault()}
                             >
                                 <LinkIcon className="w-3 h-3 mr-1" />
-                                {t('timeline:viewSource')}
+                                {t('timeline.viewSource')}
                             </a>
                         )}
                     </div>

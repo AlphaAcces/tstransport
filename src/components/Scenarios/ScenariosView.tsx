@@ -329,19 +329,19 @@ export const ScenariosView: React.FC = () => {
     }), [t]);
 
     const actionPriorityLabels = useMemo(() => ({
-        'Påkrævet': t('actions:priorities.required'),
-        'Høj': t('actions:priorities.high'),
-        'Middel': t('actions:priorities.medium'),
+        'Påkrævet': t('actions.priorities.required'),
+        'Høj': t('actions.priorities.high'),
+        'Middel': t('actions.priorities.medium'),
     }), [t]);
 
     const actionCategoryLabels = useMemo(() => ({
-        'Juridisk': t('actions:categories.legal'),
-        'Finansiel': t('actions:categories.financial'),
-        'Efterretning': t('actions:categories.intelligence'),
-        'Kommerciel': t('actions:categories.commercial'),
-        'Regulatorisk': t('actions:categories.regulatory'),
-        'Governance': t('actions:categories.governance'),
-        'Strategisk': t('actions:categories.strategic'),
+        'Juridisk': t('actions.categories.legal'),
+        'Finansiel': t('actions.categories.financial'),
+        'Efterretning': t('actions.categories.intelligence'),
+        'Kommerciel': t('actions.categories.commercial'),
+        'Regulatorisk': t('actions.categories.regulatory'),
+        'Governance': t('actions.categories.governance'),
+        'Strategisk': t('actions.categories.strategic'),
     }), [t]);
 
     const handleAnalyze = (scenario: Scenario) => {
