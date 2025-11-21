@@ -30,47 +30,47 @@ const categoryConfig: Record<Hypothesis['category'], { color: 'blue' | 'green' |
 };
 
 const statusLabelKeys: Record<Hypothesis['status'], string> = {
-    'Bekræftet': 'status.confirmed',
-    'Åben': 'status.open',
-    'Afkræftet': 'status.rejected',
+    'Bekræftet': 'hypotheses.status.confirmed',
+    'Åben': 'hypotheses.status.open',
+    'Afkræftet': 'hypotheses.status.rejected',
 };
 
 const impactLabelKeys: Record<Hypothesis['impact'], string> = {
-    'Høj': 'impact.high',
-    'Middel': 'impact.medium',
-    'Lav': 'impact.low',
+    'Høj': 'hypotheses.impact.high',
+    'Middel': 'hypotheses.impact.medium',
+    'Lav': 'hypotheses.impact.low',
 };
 
 const categoryLabelKeys: Record<Hypothesis['category'], string> = {
-    'Finansiel': 'categories.financial',
-    'Likviditet': 'categories.liquidity',
-    'Skat/Compliance': 'categories.taxCompliance',
-    'Operationel': 'categories.operational',
-    'Strategisk': 'categories.strategic',
+    'Finansiel': 'hypotheses.categories.financial',
+    'Likviditet': 'hypotheses.categories.liquidity',
+    'Skat/Compliance': 'hypotheses.categories.taxCompliance',
+    'Operationel': 'hypotheses.categories.operational',
+    'Strategisk': 'hypotheses.categories.strategic',
 };
 
 const evidenceLabelKeys: Record<Hypothesis['evidenceLevel'], string> = {
-    'Indikation': 'evidence.indication',
-    'Stærk Evidens': 'evidence.strong',
+    'Indikation': 'hypotheses.evidence.indication',
+    'Stærk Evidens': 'hypotheses.evidence.strong',
 };
 
 const viewLabelKeys: { [key in Hypothesis['relatedViews'][0]]: string } = {
-    dashboard: 'views.dashboard',
-    executive: 'views.executive',
-    person: 'views.person',
-    companies: 'views.companies',
-    financials: 'views.financials',
-    hypotheses: 'views.hypotheses',
-    cashflow: 'views.cashflow',
-    sector: 'views.sector',
-    timeline: 'views.timeline',
-    risk: 'views.risk',
-    actions: 'views.actions',
-    counterparties: 'views.counterparties',
-    scenarios: 'views.scenarios',
-    business: 'views.business',
-    personal: 'views.personal',
-    'saved-views': 'views.savedViews',
+    dashboard: 'hypotheses.views.dashboard',
+    executive: 'hypotheses.views.executive',
+    person: 'hypotheses.views.person',
+    companies: 'hypotheses.views.companies',
+    financials: 'hypotheses.views.financials',
+    hypotheses: 'hypotheses.views.hypotheses',
+    cashflow: 'hypotheses.views.cashflow',
+    sector: 'hypotheses.views.sector',
+    timeline: 'hypotheses.views.timeline',
+    risk: 'hypotheses.views.risk',
+    actions: 'hypotheses.views.actions',
+    counterparties: 'hypotheses.views.counterparties',
+    scenarios: 'hypotheses.views.scenarios',
+    business: 'hypotheses.views.business',
+    personal: 'hypotheses.views.personal',
+    'saved-views': 'hypotheses.views.savedViews',
 };
 
 const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) => {
@@ -78,7 +78,7 @@ const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) =>
     const sConf = statusConfig[hypothesis.status];
     const iConf = impactConfig[hypothesis.impact];
     const cConf = categoryConfig[hypothesis.category];
-    const { t } = useTranslation('hypotheses');
+    const { t } = useTranslation();
     const impactLabel = t(impactLabelKeys[hypothesis.impact]);
     const categoryLabel = t(categoryLabelKeys[hypothesis.category]);
     const evidenceLabel = t(evidenceLabelKeys[hypothesis.evidenceLevel]);
@@ -105,13 +105,13 @@ const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) =>
                 <div className="p-4 border-t border-border-dark bg-base-dark/50 flex-grow">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                         <div className="md:col-span-2">
-                            <h4 className="font-semibold text-gray-300 mb-1">{t('card.description')}</h4>
+                            <h4 className="font-semibold text-gray-300 mb-1">{t('hypotheses.card.description')}</h4>
                             <ul className="list-disc list-inside text-gray-400 space-y-1">
                                 {hypothesis.description.map((desc, i) => <li key={i}>{desc}</li>)}
                             </ul>
                         </div>
                         <div>
-                            <h4 className="font-semibold text-gray-300 mb-2">{t('card.details')}</h4>
+                            <h4 className="font-semibold text-gray-300 mb-2">{t('hypotheses.card.details')}</h4>
                             <div className="space-y-2">
                                 <div className="flex items-center"><Tag label={categoryLabel} color={cConf.color} /></div>
                                 <div className="flex items-center"><Tag label={evidenceLabel} color={hypothesis.evidenceLevel === 'Stærk Evidens' ? 'green' : 'yellow'} /></div>
@@ -119,7 +119,7 @@ const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) =>
                         </div>
                     </div>
                     <div className="mt-4 pt-3 border-t border-border-dark/50">
-                        <h4 className="font-semibold text-gray-300 mb-2">{t('card.notesHeading')}</h4>
+                        <h4 className="font-semibold text-gray-300 mb-2">{t('hypotheses.card.notesHeading')}</h4>
                         <p className="text-sm text-gray-400 italic mb-3">"{hypothesis.analysisNote}"</p>
                          <div className="flex items-center flex-wrap gap-2">
                             <LinkIcon className="w-4 h-4 text-gray-500"/>
@@ -139,7 +139,7 @@ const HypothesisCard: React.FC<{ hypothesis: Hypothesis }> = ({ hypothesis }) =>
 export const HypothesesView: React.FC = memo(() => {
     const { hypothesesData } = useCaseData();
     const [activeFilter, setActiveFilter] = useState<StatusFilter>('Alle');
-    const { t } = useTranslation('hypotheses');
+    const { t } = useTranslation();
 
     const filteredHypotheses = useMemo(() => {
         if (activeFilter === 'Alle') return hypothesesData;
@@ -149,7 +149,7 @@ export const HypothesesView: React.FC = memo(() => {
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-6">
-                <h2 className="text-xl font-bold text-gray-200">{t('heading.title')}</h2>
+                <h2 className="text-xl font-bold text-gray-200">{t('hypotheses.heading.title')}</h2>
                 <div className="flex items-center space-x-2 bg-component-dark p-1 rounded-lg border border-border-dark self-start">
                     {statusOptions.map(opt => (
                         <button
@@ -161,7 +161,7 @@ export const HypothesesView: React.FC = memo(() => {
                                 : 'text-gray-400 hover:bg-gray-700/50'
                             }`}
                         >
-                            {opt === 'Alle' ? t('filters.all') : t(statusLabelKeys[opt])}
+                            {opt === 'Alle' ? t('hypotheses.filters.all') : t(statusLabelKeys[opt])}
                         </button>
                     ))}
                 </div>

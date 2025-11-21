@@ -118,7 +118,7 @@ interface ScenarioCardProps {
 }
 
 const ScenarioCard: React.FC<ScenarioCardProps> = ({ scenario, display, probabilityLabel, impactLabel, analyzeLabel, onAnalyze }) => {
-    const { t } = useTranslation('scenarios');
+    const { t } = useTranslation();
     const config = categoryConfig[scenario.category];
 
     return (
@@ -180,7 +180,7 @@ interface AIAnalysisPanelProps {
 }
 
 const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({ analysis, isLoading, error, onClose, scenario, linkedActions, priorityLabels, categoryLabels }) => {
-    const { t } = useTranslation(['scenarios', 'actions']);
+    const { t } = useTranslation();
     const parsedSections = useMemo(() => parseAnalysisSections(analysis), [analysis]);
 
     return (
@@ -256,7 +256,7 @@ const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({ analysis, isLoading, 
 
 export const ScenariosView: React.FC = () => {
     const { scenariosData, actionsData } = useCaseData();
-    const { t } = useTranslation(['scenarios', 'actions']);
+    const { t } = useTranslation();
     const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
     const [analysisResult, setAnalysisResult] = useState('');
     const [isLoading, setIsLoading] = useState(false);

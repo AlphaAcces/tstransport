@@ -17,7 +17,7 @@ type FilterKey = typeof FILTER_CONFIG[number]['key'];
 
 export const TimelineView: React.FC = () => {
     const { timelineData } = useCaseData();
-    const { t } = useTranslation('timeline');
+    const { t } = useTranslation();
 
     const filters = useMemo(() => FILTER_CONFIG.map(config => ({
         ...config,

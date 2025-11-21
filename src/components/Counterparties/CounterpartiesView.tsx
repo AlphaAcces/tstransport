@@ -40,7 +40,7 @@ const riskLevelLabelKeys: Record<'Høj' | 'Middel' | 'Lav', string> = {
 
 export const CounterpartiesView: React.FC<CounterpartiesViewProps> = ({ onNavigate }) => {
     const { counterpartiesData } = useCaseData();
-    const { t } = useTranslation('counterparties');
+    const { t } = useTranslation();
 
     return (
         <div className="space-y-8">

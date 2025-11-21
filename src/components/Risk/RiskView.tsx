@@ -74,7 +74,7 @@ const CATEGORY_KEY_MAP: Record<RiskScore['category'], 'financial' | 'legalCompli
 
 export const RiskView: React.FC = () => {
     const { riskHeatmapData, totalRiskScore } = useCaseData();
-    const { t } = useTranslation(['risk', 'common', 'nav']);
+    const { t } = useTranslation();
     const [activeScenario, setActiveScenario] = useState<ScenarioKey>('balanced');
 
     const criticalCategoriesCount = riskHeatmapData.filter(r => r.riskLevel === 'KRITISK' || r.riskLevel === 'HØJ').length;

@@ -27,7 +27,7 @@ const ComparisonTableRow: React.FC<ComparisonTableRowProps> = ({ data, formatMet
 
 export const SectorAnalysisView: React.FC = () => {
     const { sectorBenchmarkYearlyData, sectorComparisonData, sectorDriversData, macroRiskData } = useCaseData();
-    const { t, i18n } = useTranslation(['sector', 'common', 'actions']);
+    const { t, i18n } = useTranslation();
 
     const locale = useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);
     const percentFormatter = useMemo(() => new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }), [locale]);

@@ -20,7 +20,7 @@ const EVENT_TYPE_META: Record<TimelineEvent['type'], { icon: React.ReactNode; co
 };
 
 export const TimelineEventCard: React.FC<TimelineEventCardProps> = ({ event }) => {
-    const { t, i18n } = useTranslation(['timeline', 'nav']);
+    const { t, i18n } = useTranslation();
 
     const config = EVENT_TYPE_META[event.type];
     const locale = useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);

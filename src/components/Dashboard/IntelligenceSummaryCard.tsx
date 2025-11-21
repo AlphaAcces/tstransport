@@ -15,7 +15,7 @@ const bulletConfig = [
 ];
 
 export const IntelligenceSummaryCard: React.FC<IntelligenceSummaryCardProps> = ({ activeSubject }) => {
-    const { t } = useTranslation('dashboard');
+    const { t } = useTranslation();
     const isTsl = activeSubject === 'tsl';
     const title = isTsl ? t('summary.corporate.title') : t('summary.personal.title');
 

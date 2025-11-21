@@ -16,7 +16,7 @@ const ChartCard: React.FC<{ title: string; children: React.ReactElement; }> = ({
 
 export const FinancialsView: React.FC = () => {
   const { financialData } = useCaseData();
-  const { t, i18n } = useTranslation(['financials', 'common']);
+  const { t, i18n } = useTranslation();
   const locale = i18n.language === 'da' ? 'da-DK' : 'en-GB';
 
   const millionAbbrev = t('common.units.millionAbbrev');

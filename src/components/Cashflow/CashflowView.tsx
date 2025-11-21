@@ -96,7 +96,7 @@ const ReceivablesTable: React.FC<ReceivablesTableProps> = ({ formatNumber, headi
 export const CashflowView: React.FC = () => {
     const { cashflowYearlyData, cashflowSummary, financialData } = useCaseData();
     const [activeScenario, setActiveScenario] = useState<'base' | 'taxClaim' | 'repayment'>('base');
-    const { t, i18n } = useTranslation(['cashflow', 'common']);
+    const { t, i18n } = useTranslation();
 
     const locale = useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);
     const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
