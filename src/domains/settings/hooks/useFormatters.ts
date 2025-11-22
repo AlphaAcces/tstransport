@@ -3,6 +3,8 @@
  *
  * Provides formatters that automatically use the active user settings
  * (currency, locale, timezone, date format).
+ *
+ * All monetary values are stored in DKK and converted to the selected currency.
  */
 
 import { useCallback, useMemo } from 'react';
@@ -20,6 +22,7 @@ import {
   FormatDSOOptions,
 } from '../../../lib/format';
 import { CURRENCY_CONFIGS, LOCALE_CONFIGS } from '../types';
+import { convertFromDKK } from '../services/currencyConversion';
 
 const DATE_STYLE_MAP: Record<'short' | 'medium' | 'long', Intl.DateTimeFormatOptions['dateStyle']> = {
   short: 'short',
@@ -60,9 +63,12 @@ export const useFormatters = () => {
   );
 
   const formatCurrency = useCallback(
-    (value: number | null | undefined, options: Omit<FormatCurrencyOptions, 'currency' | 'locale'> = {}) =>
-      baseFormatCurrency(value, { ...baseCurrencyOptions, ...options }),
-    [baseCurrencyOptions],
+    (value: number | null | undefined, options: Omit<FormatCurrencyOptions, 'currency' | 'locale'> = {}) => {
+      // Convert from DKK to selected currency
+      const converted = convertFromDKK(value, currency);
+      return baseFormatCurrency(converted, { ...baseCurrencyOptions, ...options });
+    },
+    [baseCurrencyOptions, currency],
   );
 
   const formatNumber = useCallback(
@@ -84,8 +90,17 @@ export const useFormatters = () => {
   );
 
   const formatDateTime = useCallback(
-    (value: string | Date | null | undefined, options: Omit<FormatDateOptions, 'locale'> = {}) =>
-      baseFormatDateTime(value, { ...baseDateOptions, timeStyle: 'short', ...options }),
+    (value: string | Date | null | undefined, options: Omit<FormatDateOptions, 'locale'> = {}) => {
+      // For datetime, use timeStyle instead of mixing with dateStyle
+      const dateTimeOptions = {
+        locale: baseDateOptions.locale,
+        timeZone: baseDateOptions.timeZone,
+        dateStyle: baseDateOptions.dateStyle,
+        timeStyle: 'short' as const,
+        ...options,
+      };
+      return baseFormatDateTime(value, dateTimeOptions);
+    },
     [baseDateOptions],
   );
 

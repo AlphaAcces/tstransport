@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TslLogo } from '../Shared/TslLogo';
-import { LanguageToggle } from '../Shared/LanguageToggle';
+import { CaseSelector } from '../Shared/CaseSelector';
 import { PreferencesPanel } from '../Shared/PreferencesPanel';
 import { NotificationBadge } from '../../domains/notifications/components/NotificationBadge';
 import { NotificationDrawer } from '../../domains/notifications/components/NotificationDrawer';
+import { LocaleSwitcher } from '../../domains/settings/components/LocaleSwitcher';
+import { CurrencySwitcher } from '../../domains/settings/components/CurrencySwitcher';
+import { CountrySelector } from '../../domains/settings/components/CountrySelector';
 import { useNotifications } from '../../domains/notifications/hooks';
 import { Subject, View } from '../../types';
 
@@ -30,14 +33,6 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
     clearAll,
   } = useNotifications();
 
-  const getButtonClass = (subject: Subject) => {
-    const baseClass = "flex flex-col items-center px-4 py-1 rounded-md transition-colors duration-200";
-    if (activeSubject === subject) {
-      return `${baseClass} bg-accent-green/10 border border-accent-green/50`;
-    }
-    return `${baseClass} bg-component-dark hover:bg-gray-700/50`;
-  };
-
   const headerTitle = activeSubject === 'tsl' ? t('app.companyName') : t('app.userName');
   const consoleName = t('app.consoleName');
   const consoleShort = t('app.consoleShort');
@@ -60,22 +55,33 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
            <h1 className="sm:hidden text-lg font-bold text-gray-200 truncate ml-2">{subjectShort} / {consoleShort}</h1>
         </div>
 
-        <div className="flex items-center space-x-2">
-            <button onClick={() => onSubjectChange('tsl')} className={getButtonClass('tsl')}>
-                <span className={`text-sm font-bold ${activeSubject === 'tsl' ? 'text-accent-green' : 'text-gray-200'}`}>{t('app.companyLabel')}</span>
-                <span className="text-xs text-gray-500">{t('nav.business')}</span>
-            </button>
-            <button onClick={() => onSubjectChange('umit')} className={getButtonClass('umit')}>
-                 <span className={`text-sm font-bold ${activeSubject === 'umit' ? 'text-accent-green' : 'text-gray-200'}`}>{t('app.userLabel')}</span>
-                <span className="text-xs text-gray-500">{t('nav.personal')}</span>
-            </button>
-            <div className="ml-2">
-              <LanguageToggle />
-            </div>
-            <div className="ml-2">
+        <div className="flex items-center space-x-3">
+            {/* Case Selection */}
+            <CaseSelector activeSubject={activeSubject} onSubjectChange={onSubjectChange} />
+
+            {/* Vertical Separator */}
+            <div className="h-8 w-px bg-border-dark hidden md:block"></div>
+
+            {/* Language & Notifications Group */}
+            <div className="flex items-center space-x-2">
+              <LocaleSwitcher />
               <NotificationBadge count={unreadCount} onClick={() => setIsDrawerOpen(true)} />
             </div>
-            <div className="ml-4">
+
+            {/* Vertical Separator */}
+            <div className="h-8 w-px bg-border-dark hidden lg:block"></div>
+
+            {/* Market Settings Group */}
+            <div className="hidden lg:flex items-center space-x-2">
+              <CountrySelector />
+              <CurrencySwitcher />
+            </div>
+
+            {/* Vertical Separator */}
+            <div className="h-8 w-px bg-border-dark hidden xl:block"></div>
+
+            {/* Saved Views */}
+            <div className="hidden xl:block">
               <PreferencesPanel currentViewId={currentViewId ?? 'dashboard'} currentBreadcrumbs={currentBreadcrumbs} navigateTo={navigateTo} />
             </div>
           </div>

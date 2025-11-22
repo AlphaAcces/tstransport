@@ -10,6 +10,14 @@ const DEFAULT_CURRENCY = 'DKK';
 
 const isFiniteNumber = (value: unknown): value is number => typeof value === 'number' && Number.isFinite(value);
 
+/**
+ * Converts AppLocale enum format (DA_DK, EN_US, etc.) to BCP 47 format (da-DK, en-US, etc.)
+ * for use with Intl APIs.
+ */
+const normalizeLocale = (locale: string): string => {
+  return locale.replace('_', '-');
+};
+
 export interface FormatNumberOptions extends Intl.NumberFormatOptions {
   locale?: string;
 }
@@ -33,7 +41,7 @@ export interface FormatDSOOptions {
 export const formatNumber = (value: number | null | undefined, options: FormatNumberOptions = {}): string => {
   if (!isFiniteNumber(value)) return '–';
   const { locale = DEFAULT_LOCALE, ...rest } = options;
-  return new Intl.NumberFormat(locale, rest).format(value);
+  return new Intl.NumberFormat(normalizeLocale(locale), rest).format(value);
 };
 
 export const formatCurrency = (value: number | null | undefined, options: FormatCurrencyOptions = {}): string => {
@@ -49,7 +57,7 @@ export const formatCurrency = (value: number | null | undefined, options: Format
   const resolvedMinimum = minimumFractionDigits ?? 0;
   const resolvedMaximum = maximumFractionDigits ?? resolvedMinimum;
 
-  return new Intl.NumberFormat(locale, {
+  return new Intl.NumberFormat(normalizeLocale(locale), {
     style: 'currency',
     currency,
     minimumFractionDigits: resolvedMinimum,
@@ -84,7 +92,7 @@ export const formatPercent = (value: number | null | undefined, options: FormatN
     safeMax = 1;
   }
 
-  const formatted = new Intl.NumberFormat(locale, {
+  const formatted = new Intl.NumberFormat(normalizeLocale(locale), {
     ...intlOptions,
     style: 'percent',
     minimumFractionDigits: safeMin,
@@ -96,20 +104,34 @@ export const formatPercent = (value: number | null | undefined, options: FormatN
 };
 
 export const formatDate = (value: string | Date | null | undefined, options: FormatDateOptions = {}): string => {
-  if (!value) return '–';
+  if (value == null) return '–';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '–';
 
   const { locale = DEFAULT_LOCALE, ...rest } = options;
+  
+  // If using dateStyle/timeStyle, don't provide individual component options
   const hasDateStyle = typeof rest.dateStyle !== 'undefined';
-  const baseOptions: Intl.DateTimeFormatOptions = hasDateStyle
-    ? {}
-    : { day: '2-digit', month: 'short', year: 'numeric' };
+  const hasTimeStyle = typeof rest.timeStyle !== 'undefined';
+  const hasIndividualOptions = Object.keys(rest).some(key => 
+    !['dateStyle', 'timeStyle', 'timeZone', 'hour12'].includes(key)
+  );
+  
+  let dateOptions: Intl.DateTimeFormatOptions;
+  if ((hasDateStyle || hasTimeStyle) && !hasIndividualOptions) {
+    // Use dateStyle/timeStyle without component options
+    dateOptions = rest;
+  } else {
+    // Use individual component options (strip out dateStyle/timeStyle if present)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { dateStyle: _ds, timeStyle: _ts, ...componentOptions } = rest;
+    const baseOptions: Intl.DateTimeFormatOptions = Object.keys(componentOptions).length === 0
+      ? { day: '2-digit' as const, month: 'short' as const, year: 'numeric' as const }
+      : {};
+    dateOptions = { ...baseOptions, ...componentOptions };
+  }
 
-  return new Intl.DateTimeFormat(locale, {
-    ...baseOptions,
-    ...rest,
-  }).format(date);
+  return new Intl.DateTimeFormat(normalizeLocale(locale), dateOptions).format(date);
 };
 
 export const formatDateTime = (value: string | Date | null | undefined, options: FormatDateOptions = {}): string => {

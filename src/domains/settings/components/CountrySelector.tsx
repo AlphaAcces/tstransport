@@ -7,14 +7,12 @@
 
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { useTranslation } from 'react-i18next';
 import { MapPin } from 'lucide-react';
 import { Country, COUNTRY_CONFIGS } from '../types';
 import { setCountry, setCurrency, setLocale, setTimezone } from '../../../store/userPreferencesSlice';
 import { useUserSettings } from '../hooks/useUserSettings';
 
 export const CountrySelector: React.FC = () => {
-  const { t } = useTranslation();
   const dispatch = useDispatch();
   const { country } = useUserSettings();
 
@@ -29,13 +27,13 @@ export const CountrySelector: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2" title="Home country/market - Sets jurisdiction context and defaults">
       <MapPin className="w-4 h-4 text-gray-400" />
       <select
         value={country}
         onChange={handleChange}
         className="bg-component-dark text-gray-200 text-sm rounded-lg px-3 py-1.5 border border-border-dark focus:ring-2 focus:ring-accent-green/50 focus:outline-none transition-colors"
-        aria-label={t('settings.country.label')}
+        aria-label="Home country/market - Sets jurisdiction context"
       >
         {Object.values(Country).map((cntry) => {
           const config = COUNTRY_CONFIGS[cntry];

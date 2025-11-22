@@ -11,6 +11,7 @@ export enum Currency {
   GBP = 'GBP',
   SEK = 'SEK',
   NOK = 'NOK',
+  USDT = 'USDT', // Crypto - Tether (USD parity)
 }
 
 export enum AppLocale {
@@ -20,6 +21,13 @@ export enum AppLocale {
   SV_SE = 'sv-SE',
   NB_NO = 'nb-NO',
   DE_DE = 'de-DE',
+  FR_FR = 'fr-FR',
+  ES_ES = 'es-ES',
+  PT_PT = 'pt-PT',
+  RU_RU = 'ru-RU',
+  TR_TR = 'tr-TR',
+  AR_SA = 'ar-SA',
+  ZH_CN = 'zh-CN',
 }
 
 export enum Country {
@@ -115,6 +123,14 @@ export const CURRENCY_CONFIGS: Record<Currency, CurrencyConfig> = {
     thousandsSeparator: ' ',
     decimalSeparator: ',',
   },
+  [Currency.USDT]: {
+    code: Currency.USDT,
+    symbol: '₮',
+    name: 'Tether (USDT)',
+    decimalPlaces: 2,
+    thousandsSeparator: ',',
+    decimalSeparator: '.',
+  },
 };
 
 export const LOCALE_CONFIGS: Record<AppLocale, LocaleConfig> = {
@@ -158,6 +174,55 @@ export const LOCALE_CONFIGS: Record<AppLocale, LocaleConfig> = {
     name: 'Deutsch',
     flag: '🇩🇪',
     dateFormat: 'DD.MM.YYYY',
+    timeFormat: '24h',
+  },
+  [AppLocale.FR_FR]: {
+    code: AppLocale.FR_FR,
+    name: 'Français (EN content)',
+    flag: '🇫🇷',
+    dateFormat: 'DD/MM/YYYY',
+    timeFormat: '24h',
+  },
+  [AppLocale.ES_ES]: {
+    code: AppLocale.ES_ES,
+    name: 'Español (EN content)',
+    flag: '🇪🇸',
+    dateFormat: 'DD/MM/YYYY',
+    timeFormat: '24h',
+  },
+  [AppLocale.PT_PT]: {
+    code: AppLocale.PT_PT,
+    name: 'Português (EN content)',
+    flag: '🇵🇹',
+    dateFormat: 'DD/MM/YYYY',
+    timeFormat: '24h',
+  },
+  [AppLocale.RU_RU]: {
+    code: AppLocale.RU_RU,
+    name: 'Русский (EN content)',
+    flag: '🇷🇺',
+    dateFormat: 'DD.MM.YYYY',
+    timeFormat: '24h',
+  },
+  [AppLocale.TR_TR]: {
+    code: AppLocale.TR_TR,
+    name: 'Türkçe (EN content)',
+    flag: '🇹🇷',
+    dateFormat: 'DD.MM.YYYY',
+    timeFormat: '24h',
+  },
+  [AppLocale.AR_SA]: {
+    code: AppLocale.AR_SA,
+    name: 'العربية (EN content)',
+    flag: '🇸🇦',
+    dateFormat: 'DD/MM/YYYY',
+    timeFormat: '24h',
+  },
+  [AppLocale.ZH_CN]: {
+    code: AppLocale.ZH_CN,
+    name: '中文 (EN content)',
+    flag: '🇨🇳',
+    dateFormat: 'YYYY-MM-DD',
     timeFormat: '24h',
   },
 };

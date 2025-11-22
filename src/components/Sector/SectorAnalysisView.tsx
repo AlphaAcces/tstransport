@@ -4,6 +4,7 @@ import { useCaseData } from '../../context/DataContext';
 import { Tag } from '../Shared/Tag';
 import { SectorComparisonMetric } from '../../types';
 import { useTranslation } from 'react-i18next';
+import { useFormatters } from '../../domains/settings/hooks';
 
 interface ComparisonTableRowProps {
     data: SectorComparisonMetric;
@@ -27,11 +28,8 @@ const ComparisonTableRow: React.FC<ComparisonTableRowProps> = ({ data, formatMet
 
 export const SectorAnalysisView: React.FC = () => {
     const { sectorBenchmarkYearlyData, sectorComparisonData, sectorDriversData, macroRiskData } = useCaseData();
-    const { t, i18n } = useTranslation();
-
-    const locale = useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);
-    const percentFormatter = useMemo(() => new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 }), [locale]);
-    const thousandsFormatter = useMemo(() => new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }), [locale]);
+    const { t } = useTranslation();
+    const { formatNumber } = useFormatters();
 
     const metricLabels = useMemo<Record<string, string>>(() => ({
         'EBIT-margin': t('sector.comparison.metrics.ebitMargin'),
@@ -97,9 +95,9 @@ export const SectorAnalysisView: React.FC = () => {
             return t('common.naShort');
         }
         if (unit === '%') {
-            return `${percentFormatter.format(val)}%`;
+            return `${formatNumber(val, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
         }
-        return `${thousandsFormatter.format(val / 1000)} ${t('sector.comparison.valueSuffix.thousand')}`;
+        return `${formatNumber(val / 1000, { maximumFractionDigits: 0 })} ${t('sector.comparison.valueSuffix.thousand')}`;
     };
 
     const analysisPoints = useMemo(() => ([
@@ -163,10 +161,10 @@ export const SectorAnalysisView: React.FC = () => {
                     <LineChart data={sectorBenchmarkYearlyData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                         <XAxis dataKey="year" stroke="#a0aec0" />
-                        <YAxis tickFormatter={(v) => `${percentFormatter.format(v)}%`} stroke="#a0aec0" />
+                        <YAxis tickFormatter={(v) => `${formatNumber(v, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`} stroke="#a0aec0" />
                         <Tooltip
                             contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }}
-                            formatter={(value: number, name: string) => [`${percentFormatter.format(value)}%`, name]}
+                            formatter={(value: number, name: string) => [`${formatNumber(value, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`, name]}
                         />
                         <Legend />
                         <Line type="monotone" dataKey="ebitMarginTSL" name={t('sector.chart.series.company')} stroke="#00cc66" strokeWidth={2} dot={{ r: 4 }} />

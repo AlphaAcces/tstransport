@@ -6,6 +6,7 @@ import { setCompactMode, saveView, removeView } from '../../store/userPreference
 import { CurrencySwitcher } from '../../domains/settings/components/CurrencySwitcher';
 import { LocaleSwitcher } from '../../domains/settings/components/LocaleSwitcher';
 import { CountrySelector } from '../../domains/settings/components/CountrySelector';
+import { useFormatters } from '../../domains/settings/hooks';
 
 interface PreferencesPanelProps {
   currentViewId: View;
@@ -16,6 +17,7 @@ interface PreferencesPanelProps {
 export const PreferencesPanel: React.FC<PreferencesPanelProps> = ({ currentViewId, currentBreadcrumbs = ['Dashboard'], navigateTo }) => {
   const prefs = useSelector((s: RootState) => s.userPreferences);
   const dispatch = useDispatch<AppDispatch>();
+  const { formatDateTime } = useFormatters();
   const [open, setOpen] = React.useState(false);
 
   const handleSave = () => {
@@ -72,7 +74,7 @@ export const PreferencesPanel: React.FC<PreferencesPanelProps> = ({ currentViewI
               <li key={item.id} className="flex items-center justify-between">
                 <div className="text-xs">
                   <div className="font-medium text-gray-200">{item.payload.label ?? item.payload.view}</div>
-                  <div className="text-gray-400 text-[11px]">{new Date(parseInt(item.id.split('-').pop() || '0', 10)).toLocaleString()}</div>
+                  <div className="text-gray-400 text-[11px]">{formatDateTime(new Date(parseInt(item.id.split('-').pop() || '0', 10)))}</div>
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={() => handleRestore(item.id)} className="text-xs px-2 py-1 bg-accent-green/20 rounded">Åbn</button>
