@@ -12,7 +12,16 @@ import { AppLocale, LOCALE_CONFIGS } from '../types';
 import { setLocale } from '../../../store/userPreferencesSlice';
 import { useUserSettings } from '../hooks/useUserSettings';
 
-export const LocaleSwitcher: React.FC = () => {
+interface LocaleSwitcherProps {
+  variant?: 'standard' | 'condensed';
+}
+
+const getShortCode = (locale: AppLocale) => {
+  const [language, region] = locale.split('-');
+  return `${language?.toUpperCase() ?? ''}${region ? `/${region.toUpperCase()}` : ''}`;
+};
+
+export const LocaleSwitcher: React.FC<LocaleSwitcherProps> = ({ variant = 'standard' }) => {
   const { i18n } = useTranslation();
   const dispatch = useDispatch();
   const { locale } = useUserSettings();
@@ -41,20 +50,27 @@ export const LocaleSwitcher: React.FC = () => {
     i18n.changeLanguage(i18nLang);
   };
 
+  const selectClasses = variant === 'condensed'
+    ? 'w-full sm:w-auto sm:min-w-[110px] bg-component-dark/60 text-xs font-semibold leading-tight px-2 py-1 rounded-lg border border-border-dark/70 text-gray-100'
+    : 'bg-component-dark text-gray-200 text-sm rounded-lg px-3 py-1.5 border border-border-dark focus:ring-2 focus:ring-accent-green/50 focus:outline-none transition-colors';
+
   return (
     <div className="flex items-center gap-2" title="App language - Controls UI text and messages">
-      <Globe className="w-4 h-4 text-gray-400" />
+      <Globe className="w-4 h-4 shrink-0 text-gray-400" />
       <select
         value={locale}
         onChange={handleChange}
-        className="bg-component-dark text-gray-200 text-sm rounded-lg px-3 py-1.5 border border-border-dark focus:ring-2 focus:ring-accent-green/50 focus:outline-none transition-colors"
+        className={`${selectClasses} focus:ring-2 focus:ring-accent-green/40 focus:outline-none transition-colors`}
         aria-label="App language - Controls UI text and messages"
       >
         {Object.values(AppLocale).map((loc) => {
           const config = LOCALE_CONFIGS[loc];
+          const optionLabel = variant === 'condensed'
+            ? `${config.flag} ${getShortCode(loc)}`
+            : `${config.flag} ${config.name}`;
           return (
             <option key={loc} value={loc}>
-              {config.flag} {config.name}
+              {optionLabel}
             </option>
           );
         })}

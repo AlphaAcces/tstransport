@@ -1,13 +1,13 @@
 /**
  * CaseSelector Component
- * 
+ *
  * Unified selector for switching between company and person cases.
  * Provides dropdown with all available companies and persons.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Building2, User } from 'lucide-react';
+import { Building2, User, ChevronDown } from 'lucide-react';
 import { Subject } from '../../types';
 
 interface CaseSelectorProps {
@@ -15,16 +15,20 @@ interface CaseSelectorProps {
   onSubjectChange: (subject: Subject) => void;
 }
 
-// Available cases (in production, fetch from API/store)
-const COMPANY_CASES = [
-  { id: 'tsl', name: 'TS Logistik ApS', subject: 'tsl' as Subject },
-  // Add more companies here as they become available
+type CaseOption = {
+  id: string;
+  name: string;
+  subject: Subject;
+  type: 'business' | 'personal';
+};
+
+const CASE_OPTIONS: CaseOption[] = [
+  { id: 'tsl', name: 'TS Logistik ApS', subject: 'tsl', type: 'business' },
+  { id: 'umit', name: 'Ümit Cetin', subject: 'umit', type: 'personal' },
 ];
 
-const PERSON_CASES = [
-  { id: 'umit', name: 'Ümit Cetin', subject: 'umit' as Subject },
-  // Add more persons here as they become available
-];
+const COMPANY_CASES = CASE_OPTIONS.filter(option => option.type === 'business');
+const PERSON_CASES = CASE_OPTIONS.filter(option => option.type === 'personal');
 
 export const CaseSelector: React.FC<CaseSelectorProps> = ({
   activeSubject,
@@ -32,49 +36,62 @@ export const CaseSelector: React.FC<CaseSelectorProps> = ({
 }) => {
   const { t } = useTranslation();
 
+  const selectedCase = useMemo(() => CASE_OPTIONS.find(option => option.subject === activeSubject), [activeSubject]);
+  const modeLabel = selectedCase?.type === 'business'
+    ? t('nav.business')
+    : t('nav.personal');
+  const contextLabel = t('topbar.caseContext', { defaultValue: 'Case context' });
+  const activeLabel = t('topbar.activeCase', { defaultValue: 'Active case' });
+
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedSubject = e.target.value as Subject;
     onSubjectChange(selectedSubject);
   };
 
   return (
-    <div className="flex items-center gap-2 px-3 py-1 bg-component-dark/50 rounded-lg border border-border-dark/50">
-      {activeSubject === 'tsl' ? (
-        <Building2 className="w-4 h-4 text-accent-green" />
-      ) : (
-        <User className="w-4 h-4 text-accent-green" />
-      )}
+    <div className="relative w-full min-w-0 sm:min-w-[230px]" aria-live="polite">
+      <div className="rounded-2xl border border-border-dark/70 bg-component-dark/70 px-4 py-3 pr-10 shadow-sm">
+        <div className="flex items-center gap-3 min-w-0">
+          {activeSubject === 'tsl' ? (
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green">
+              <Building2 className="h-4 w-4" />
+            </div>
+          ) : (
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent-green/10 text-accent-green">
+              <User className="h-4 w-4" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-wide text-gray-500">{contextLabel}</p>
+            <p className="text-sm font-semibold text-gray-100 truncate" title={selectedCase?.name}>{selectedCase?.name ?? t('topbar.selectCase', { defaultValue: 'Vælg case' })}</p>
+            <p className="text-xs text-accent-green/80 font-medium">{modeLabel}</p>
+          </div>
+        </div>
+        <ChevronDown className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" aria-hidden="true" />
+      </div>
+
       <select
         value={activeSubject}
         onChange={handleChange}
-        className="bg-transparent text-gray-200 text-sm font-medium focus:outline-none cursor-pointer appearance-none pr-6"
-        aria-label="Select case - Switch between company and person profiles"
-        title="Select active case"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23a0aec0'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-          backgroundRepeat: 'no-repeat',
-          backgroundPosition: 'right 0 center',
-          backgroundSize: '1.5rem',
-        }}
+        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        aria-label={t('topbar.caseSelectorAria', { defaultValue: 'Select case - Switch between company and personal profiles' })}
+        title={activeLabel}
       >
         <optgroup label={t('nav.business')}>
           {COMPANY_CASES.map((company) => (
             <option key={company.id} value={company.subject}>
-              {company.name}
+              {company.name} • {t('nav.business')}
             </option>
           ))}
         </optgroup>
         <optgroup label={t('nav.personal')}>
           {PERSON_CASES.map((person) => (
             <option key={person.id} value={person.subject}>
-              {person.name}
+              {person.name} • {t('nav.personal')}
             </option>
           ))}
         </optgroup>
       </select>
-      <span className="text-xs text-gray-500 hidden sm:inline">
-        {activeSubject === 'tsl' ? t('nav.business') : t('nav.personal')}
-      </span>
     </div>
   );
 };

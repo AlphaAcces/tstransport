@@ -109,14 +109,14 @@ export const formatDate = (value: string | Date | null | undefined, options: For
   if (Number.isNaN(date.getTime())) return '–';
 
   const { locale = DEFAULT_LOCALE, ...rest } = options;
-  
+
   // If using dateStyle/timeStyle, don't provide individual component options
   const hasDateStyle = typeof rest.dateStyle !== 'undefined';
   const hasTimeStyle = typeof rest.timeStyle !== 'undefined';
-  const hasIndividualOptions = Object.keys(rest).some(key => 
+  const hasIndividualOptions = Object.keys(rest).some(key =>
     !['dateStyle', 'timeStyle', 'timeZone', 'hour12'].includes(key)
   );
-  
+
   let dateOptions: Intl.DateTimeFormatOptions;
   if ((hasDateStyle || hasTimeStyle) && !hasIndividualOptions) {
     // Use dateStyle/timeStyle without component options

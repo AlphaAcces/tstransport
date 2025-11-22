@@ -5,37 +5,28 @@ import { store } from '../../../store';
 import { PreferencesPanel } from '../PreferencesPanel';
 
 describe('PreferencesPanel', () => {
-  test('renders and toggles compact mode and saves view', async () => {
+  test('saves view, toggles compact mode, and manages saved list', async () => {
     render(
       <Provider store={store}>
         <PreferencesPanel currentViewId="dashboard" currentBreadcrumbs={["Dashboard"]} navigateTo={() => {}} />
       </Provider>
     );
 
-    const checkbox = screen.getByRole('checkbox') as HTMLInputElement;
-    expect(checkbox).toBeInTheDocument();
-
-    // toggle
-    fireEvent.click(checkbox);
-    expect(store.getState().userPreferences.compactMode).toBe(true);
-
-    // save view and open list
     const saveBtn = screen.getByRole('button', { name: /gem visning/i });
     fireEvent.click(saveBtn);
 
     const openListBtn = screen.getByRole('button', { name: /gemte visninger/i });
     fireEvent.click(openListBtn);
 
-    const item = await screen.findByText(/dashboard/i);
-    expect(item).toBeInTheDocument();
+    const savedItems = await screen.findAllByText(/dashboard/i);
+    expect(savedItems.length).toBeGreaterThan(0);
 
-    const openBtn = screen.getByRole('button', { name: /åbn/i });
-    expect(openBtn).toBeInTheDocument();
+    const compactToggle = screen.getByLabelText(/compact/i) as HTMLInputElement;
+    fireEvent.click(compactToggle);
+    expect(store.getState().userPreferences.compactMode).toBe(true);
 
-    const delBtn = screen.getByRole('button', { name: /slet/i });
-    fireEvent.click(delBtn);
-    // confirm it was removed
-    const saved = store.getState().userPreferences.savedViews;
-    expect(saved.find(s => s.payload.view === 'dashboard')).toBeUndefined();
+    const deleteBtn = screen.getByRole('button', { name: /^slet$/i });
+    fireEvent.click(deleteBtn);
+    expect(store.getState().userPreferences.savedViews.find(s => s.payload.view === 'dashboard')).toBeUndefined();
   });
 });

@@ -88,7 +88,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                     <p className="text-sm font-semibold text-gray-300 tracking-wider">{t('dashboard.personal.caseHeader')}</p>
                 </div>
                 <section>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                         <KpiCard
                             title={t('dashboard.personal.cards.totalRisk.title')}
                             value={totalRiskValue}
@@ -182,7 +182,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                 <p className="text-sm font-semibold text-gray-300 tracking-wider">{t('dashboard.corporate.caseHeader')}</p>
             </div>
             <section>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <KpiCard
                         title={t('dashboard.corporate.cards.totalRisk.title')}
                         value={totalRiskValue}
