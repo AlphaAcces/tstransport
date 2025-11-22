@@ -17,14 +17,14 @@ const bulletConfig = [
 export const IntelligenceSummaryCard: React.FC<IntelligenceSummaryCardProps> = ({ activeSubject }) => {
     const { t } = useTranslation();
     const isTsl = activeSubject === 'tsl';
-    const title = isTsl ? t('summary.corporate.title') : t('summary.personal.title');
+    const title = isTsl ? t('dashboard.summary.corporate.title') : t('dashboard.summary.personal.title');
 
     const personalBullets = useMemo(() => (
         bulletConfig.map(({ key, color }) => ({
             key,
             color,
-            label: t(`summary.personal.bullets.${key}.label`),
-            body: t(`summary.personal.bullets.${key}.body`),
+            label: t(`dashboard.summary.personal.bullets.${key}.label`),
+            body: t(`dashboard.summary.personal.bullets.${key}.body`),
         }))
     ), [t]);
 
@@ -37,8 +37,7 @@ export const IntelligenceSummaryCard: React.FC<IntelligenceSummaryCardProps> = (
             {isTsl ? (
                 <p className="text-sm text-gray-300">
                     <Trans
-                        i18nKey="summary.corporate.body"
-                        ns="dashboard"
+                        i18nKey="dashboard.summary.corporate.body"
                         components={{
                             red: <span className="font-semibold text-red-400" />,
                             orange: <span className="font-semibold text-orange-400" />,

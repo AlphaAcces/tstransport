@@ -3,6 +3,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useCaseData } from '../../context/DataContext';
 import { Banknote, FileWarning, Clock, Users, ArrowDown, ArrowUp, Briefcase } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import { useFormatters } from '../../domains/settings/hooks';
 
 const KpiCard: React.FC<{ title: string; value: string; note: string; icon: React.ReactNode }> = ({ title, value, note, icon }) => (
     <div className="bg-component-dark p-4 rounded-lg border border-red-800/80 flex">
@@ -96,25 +97,21 @@ const ReceivablesTable: React.FC<ReceivablesTableProps> = ({ formatNumber, headi
 export const CashflowView: React.FC = () => {
     const { cashflowYearlyData, cashflowSummary, financialData } = useCaseData();
     const [activeScenario, setActiveScenario] = useState<'base' | 'taxClaim' | 'repayment'>('base');
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
+    const { formatCurrency, formatNumber, currency } = useFormatters();
 
-    const locale = useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);
-    const numberFormatter = useMemo(() => new Intl.NumberFormat(locale), [locale]);
-    const currencyLabel = t('common.currency.dkk');
-    const millionAbbrev = t('common.units.millionAbbrev');
-    const thousandAbbrev = t('cashflow.units.thousandAbbrev');
     const daysFormatter = (value: number) => t('common.units.days', { count: Math.round(value) });
-    const formatCurrency = (value: number) => `${numberFormatter.format(Math.round(value))} ${currencyLabel}`;
-    const formatNumber = (value: number) => numberFormatter.format(Math.round(value));
-    const formatShortAmount = (value: number) => {
-        if (Math.abs(value) >= 1_000_000) {
-            return `${(value / 1_000_000).toFixed(1)} ${millionAbbrev}`;
-        }
-        if (Math.abs(value) >= 1_000) {
-            return `${(value / 1_000).toFixed(0)} ${thousandAbbrev}`;
-        }
-        return numberFormatter.format(Math.round(value));
-    };
+    const formatCurrencyValue = (value: number) => formatCurrency(value, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    });
+    const formatNumberValue = (value: number) => formatNumber(value, { maximumFractionDigits: 0 });
+    const formatShortAmount = (value: number) => formatCurrency(value, {
+        notation: 'compact',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 1,
+    });
+    const currencyLabel = currency;
 
     const baseData = useMemo(() => {
         const latestFinancials = financialData.find(d => d.year === 2024);
@@ -222,7 +219,7 @@ export const CashflowView: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <KpiCard
                         title={t('cashflow.kpiCards.cashOnHand.title')}
-                        value={formatCurrency(cashflowSummary.cashOnHand)}
+                        value={formatCurrencyValue(cashflowSummary.cashOnHand)}
                         note={t('cashflow.kpiCards.cashOnHand.note')}
                         icon={<Banknote className="w-8 h-8"/>}
                     />
@@ -263,17 +260,17 @@ export const CashflowView: React.FC = () => {
                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     <ScenarioKpiCard
                         title={t('cashflow.scenarios.cards.equity')}
-                        value={formatCurrency(scenarioOutput.equity.value)}
+                        value={formatCurrencyValue(scenarioOutput.equity.value)}
                         change={scenarioOutput.equity.change}
                         icon={<Briefcase className="w-6 h-6"/>}
-                        formatChange={formatCurrency}
+                        formatChange={formatCurrencyValue}
                     />
                     <ScenarioKpiCard
                         title={t('cashflow.scenarios.cards.cash')}
-                        value={formatCurrency(scenarioOutput.cash.value)}
+                        value={formatCurrencyValue(scenarioOutput.cash.value)}
                         change={scenarioOutput.cash.change}
                         icon={<Banknote className="w-6 h-6"/>}
-                        formatChange={formatCurrency}
+                        formatChange={formatCurrencyValue}
                     />
                     <ScenarioKpiCard
                         title={t('cashflow.scenarios.cards.dso')}
@@ -292,7 +289,7 @@ export const CashflowView: React.FC = () => {
                         <BarChart data={dsoData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                             <XAxis dataKey="year" stroke="#a0aec0" />
-                            <YAxis tickFormatter={(v) => `${v}`} stroke="#a0aec0" />
+                            <YAxis tickFormatter={(value: number) => formatNumberValue(value)} stroke="#a0aec0" />
                             <Tooltip
                                 contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }}
                                 formatter={(value: number) => [t('cashflow.dsoChart.tooltipValue', { value }), t('cashflow.dsoChart.series')]}
@@ -306,7 +303,7 @@ export const CashflowView: React.FC = () => {
                 <div className="lg:col-span-2 bg-component-dark p-6 rounded-lg border border-border-dark">
                     <h3 className="text-lg font-bold text-gray-200 mb-4">{t('cashflow.receivablesTable.title')}</h3>
                     <ReceivablesTable
-                        formatNumber={formatNumber}
+                        formatNumber={formatCurrencyValue}
                         headings={{
                             item: t('cashflow.receivablesTable.columns.item'),
                             yearLabel: (year: number) => t('cashflow.receivablesTable.columns.year', { year, currency: currencyLabel }),

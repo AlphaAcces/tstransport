@@ -5,6 +5,7 @@ import { useCaseData } from '../../context/DataContext';
 import { KpiCard } from '../Shared/KpiCard';
 import { ShieldAlert, TrendingUp, DollarSign, Banknote, Users } from 'lucide-react';
 import { FileWarning } from 'lucide-react';
+import { useFormatters } from '../../domains/settings/hooks';
 
 const PriorityActionsCard = lazy(() => import('./PriorityActionsCard').then(module => ({ default: module.PriorityActionsCard })));
 const IntelligenceSummaryCard = lazy(() => import('./IntelligenceSummaryCard').then(module => ({ default: module.IntelligenceSummaryCard })));
@@ -20,12 +21,10 @@ interface DashboardViewProps {
 }
 
 export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, activeSubject }) => {
-    const { t, i18n } = useTranslation();
+    const { t } = useTranslation();
     const { totalRiskScore, riskHeatmapData, financialData } = useCaseData();
-    const locale = React.useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);
-    const decimalFormatter = React.useMemo(() => new Intl.NumberFormat(locale, {
-        maximumFractionDigits: 0,
-    }), [locale]);
+    const { formatCurrency, formatPercent } = useFormatters();
+
     const riskLevelLabels = React.useMemo(() => ({
         KRITISK: t('common.riskLevel.critical'),
         HØJ: t('common.riskLevel.high'),
@@ -33,6 +32,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
         LAV: t('common.riskLevel.low'),
         'N/A': t('common.riskLevel.na'),
     }), [t]);
+
     const driverLabels = React.useMemo(() => ({
         'Legal/Compliance': t('dashboard.common.drivers.legalCompliance'),
         Governance: t('dashboard.common.drivers.governance'),
@@ -40,6 +40,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
         'Sector/Operations': t('dashboard.common.drivers.sector'),
         'SOCMINT/Reputation': t('dashboard.common.drivers.reputation'),
     }), [t]);
+
     const joiner = t('common.delimiters.and');
     const primaryDrivers = React.useMemo(
         () => [...riskHeatmapData]
@@ -51,20 +52,27 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
     );
     const resolvedPrimaryDrivers = primaryDrivers || t('dashboard.common.noDrivers');
     const riskLevelLabel = riskLevelLabels[totalRiskScore.level] ?? totalRiskScore.level;
-    const millionUnit = t('common.units.millionAbbrev');
-    const currencyUnit = t('common.currency.dkk');
-    const formatMillionValue = (value?: number | null) => {
+
+    const formatCurrencyCompact = React.useCallback((value?: number | null) => {
         if (typeof value !== 'number') {
             return t('common.naShort');
         }
-        return (value / 1_000_000).toFixed(2);
-    };
-    const formatCurrencyValue = (value?: number | null) => {
+        return formatCurrency(value, {
+            notation: 'compact',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 1,
+        });
+    }, [formatCurrency, t]);
+
+    const formatCurrencyValue = React.useCallback((value?: number | null) => {
         if (typeof value !== 'number') {
             return t('common.naShort');
         }
-        return decimalFormatter.format(value);
-    };
+        return formatCurrency(value, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        });
+    }, [formatCurrency, t]);
 
     if (activeSubject === 'umit') {
         const legalRisk = riskHeatmapData.find(r => r.category === 'Legal/Compliance');
@@ -158,11 +166,15 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
 
     const totalRiskValue = `${totalRiskScore.score}/${totalRiskScore.maxScore}`;
     const netResultYear = latestFinancials?.year ?? new Date().getFullYear();
-    const netResultValue = formatMillionValue(latestFinancials?.profitAfterTax ?? null);
-    const equityValue = formatMillionValue(latestFinancials?.equityEndOfYear ?? null);
+    const netResultValue = formatCurrencyCompact(latestFinancials?.profitAfterTax ?? null);
+    const equityValue = formatCurrencyCompact(latestFinancials?.equityEndOfYear ?? null);
     const liquidityValue = formatCurrencyValue(latestFinancials?.cash ?? null);
-    const solidityValue = typeof latestFinancials?.solidity === 'number' ? latestFinancials.solidity.toString() : t('common.naShort');
-    const dsoValue = typeof latestFinancials?.dso === 'number' ? t('common.units.days', { count: latestFinancials.dso }) : t('common.naShort');
+    const solidityValue = typeof latestFinancials?.solidity === 'number'
+        ? formatPercent((latestFinancials.solidity ?? 0) / 100, { maximumFractionDigits: 0 })
+        : t('common.naShort');
+    const dsoValue = typeof latestFinancials?.dso === 'number'
+        ? t('common.units.days', { count: Math.round(latestFinancials.dso) })
+        : t('common.naShort');
 
     return (
         <div className="space-y-8">
@@ -186,7 +198,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                     <KpiCard
                         title={t('dashboard.corporate.cards.netResult.title', { year: netResultYear })}
                         value={netResultValue}
-                        unit={millionUnit}
                         color={netResultChange < 0 ? 'orange' : 'green'}
                         change={netResultChange}
                         changeType="positive"
@@ -197,7 +208,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                     <KpiCard
                         title={t('dashboard.corporate.cards.equity.title')}
                         value={equityValue}
-                        unit={millionUnit}
                         color="green"
                         sparklineData={equitySparkline}
                         icon={<DollarSign className="w-4 h-4" />}
@@ -208,7 +218,6 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
                     <KpiCard
                         title={t('dashboard.corporate.cards.liquidity.title')}
                         value={liquidityValue}
-                        unit={currencyUnit}
                         color="red"
                         icon={<Banknote className="w-4 h-4" />}
                         onClick={() => onNavigate('cashflow', { fromDashboard: true })}

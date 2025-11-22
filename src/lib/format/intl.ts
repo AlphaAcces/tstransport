@@ -38,12 +38,22 @@ export const formatNumber = (value: number | null | undefined, options: FormatNu
 
 export const formatCurrency = (value: number | null | undefined, options: FormatCurrencyOptions = {}): string => {
   if (!isFiniteNumber(value)) return '–';
-  const { locale = DEFAULT_LOCALE, currency = DEFAULT_CURRENCY, minimumFractionDigits = 0, maximumFractionDigits = 0, ...rest } = options;
+  const {
+    locale = DEFAULT_LOCALE,
+    currency = DEFAULT_CURRENCY,
+    minimumFractionDigits,
+    maximumFractionDigits,
+    ...rest
+  } = options;
+
+  const resolvedMinimum = minimumFractionDigits ?? 0;
+  const resolvedMaximum = maximumFractionDigits ?? resolvedMinimum;
+
   return new Intl.NumberFormat(locale, {
     style: 'currency',
     currency,
-    minimumFractionDigits,
-    maximumFractionDigits,
+    minimumFractionDigits: resolvedMinimum,
+    maximumFractionDigits: resolvedMaximum,
     ...rest,
   }).format(value);
 };
@@ -89,13 +99,25 @@ export const formatDate = (value: string | Date | null | undefined, options: For
   if (!value) return '–';
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return '–';
+
   const { locale = DEFAULT_LOCALE, ...rest } = options;
+  const hasDateStyle = typeof rest.dateStyle !== 'undefined';
+  const baseOptions: Intl.DateTimeFormatOptions = hasDateStyle
+    ? {}
+    : { day: '2-digit', month: 'short', year: 'numeric' };
+
   return new Intl.DateTimeFormat(locale, {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
+    ...baseOptions,
     ...rest,
   }).format(date);
+};
+
+export const formatDateTime = (value: string | Date | null | undefined, options: FormatDateOptions = {}): string => {
+  return formatDate(value, {
+    hour: '2-digit',
+    minute: '2-digit',
+    ...options,
+  });
 };
 
 export const formatDSO = (value: number | null | undefined, options: FormatDSOOptions = {}): string => {

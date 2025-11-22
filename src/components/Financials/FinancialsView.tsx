@@ -2,6 +2,7 @@ import React from 'react';
 import { AreaChart, Area, BarChart, Bar, CartesianGrid, Legend, Line, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { useCaseData } from '../../context/DataContext';
 import { useTranslation } from 'react-i18next';
+import { useFormatters } from '../../domains/settings/hooks';
 
 const ChartCard: React.FC<{ title: string; children: React.ReactElement; }> = ({ title, children }) => (
     <div className="bg-component-dark p-6 rounded-lg border border-border-dark">
@@ -16,31 +17,26 @@ const ChartCard: React.FC<{ title: string; children: React.ReactElement; }> = ({
 
 export const FinancialsView: React.FC = () => {
   const { financialData } = useCaseData();
-  const { t, i18n } = useTranslation();
-  const locale = i18n.language === 'da' ? 'da-DK' : 'en-GB';
+  const { t } = useTranslation();
+  const { formatCurrency, formatNumber, formatCompactNumber, formatPercent } = useFormatters();
 
-  const millionAbbrev = t('common.units.millionAbbrev');
   const thousandAbbrev = t('financials.units.thousandAbbrev');
-  const currencyLabel = t('common.currency.dkk');
   const naLabel = t('common.naShort');
 
   const formatCompactValue = (value: number) => {
-    if (Math.abs(value) >= 1000000) {
-      return `${(value / 1000000).toFixed(1)} ${millionAbbrev}`;
-    }
+    if (!Number.isFinite(value)) return naLabel;
     if (Math.abs(value) >= 1000) {
-      return `${(value / 1000).toFixed(0)} ${thousandAbbrev}`;
+      return formatCompactNumber(value, { maximumFractionDigits: 1 });
     }
-    return new Intl.NumberFormat(locale).format(Math.round(value));
+    return formatNumber(Math.round(value), { maximumFractionDigits: 0 });
   };
 
-  const formatCurrency = (value: number) => {
-    const rounded = Math.round(value);
-    return `${new Intl.NumberFormat(locale).format(rounded)} ${currencyLabel}`;
-  };
-
-  const formatNumber = (value: number) => new Intl.NumberFormat(locale).format(value);
-  const formatPercent = (value: number) => `${value.toFixed(1)}%`;
+  const formatCurrencyValue = (value: number) => formatCurrency(value, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  });
+  const formatNumberValue = (value: number) => formatNumber(value, { maximumFractionDigits: 0 });
+  const formatPercentValue = (value: number) => formatPercent(value / 100, { maximumFractionDigits: 1 });
 
   return (
     <div className="space-y-8">
@@ -65,14 +61,14 @@ export const FinancialsView: React.FC = () => {
               {financialData.map((d) => (
                 <tr key={d.year} className="hover:bg-gray-800/40">
                   <td className="px-3 py-4 whitespace-nowrap text-sm font-medium text-gray-200">{d.year}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-300">{formatNumber(d.revenueOrGrossProfit)}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-orange-400">{d.ebit ? formatNumber(d.ebit) : naLabel}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-green-400">{formatNumber(d.profitAfterTax)}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-indigo-400">{formatNumber(d.equityEndOfYear)}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-300">{formatNumberValue(d.revenueOrGrossProfit)}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-orange-400">{d.ebit ? formatNumberValue(d.ebit) : naLabel}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-green-400">{formatNumberValue(d.profitAfterTax)}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-indigo-400">{formatNumberValue(d.equityEndOfYear)}</td>
                   <td className="px-3 py-4 whitespace-nowrap text-sm text-center text-gray-300">{d.staffCount}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-orange-400">{d.ebitMargin ? formatPercent(d.ebitMargin) : naLabel}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-green-400">{d.netMargin ? formatPercent(d.netMargin) : naLabel}</td>
-                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-300">{d.profitPerEmployee ? formatNumber(d.profitPerEmployee) : naLabel}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-orange-400">{d.ebitMargin ? formatPercentValue(d.ebitMargin) : naLabel}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-green-400">{d.netMargin ? formatPercentValue(d.netMargin) : naLabel}</td>
+                  <td className="px-3 py-4 whitespace-nowrap text-sm text-right text-gray-300">{d.profitPerEmployee ? formatNumberValue(d.profitPerEmployee) : naLabel}</td>
                 </tr>
               ))}
             </tbody>
@@ -88,7 +84,7 @@ export const FinancialsView: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
               <XAxis dataKey="year" stroke="#a0aec0" />
               <YAxis tickFormatter={formatCompactValue} stroke="#a0aec0" />
-              <Tooltip contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }} formatter={(value: number) => formatCurrency(value)} />
+              <Tooltip contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }} formatter={(value: number) => formatCurrencyValue(value)} />
               <Legend />
               <Area type="monotone" dataKey="revenueOrGrossProfit" name={t('financials.charts.result.series.grossProfit')} stroke="#60a5fa" fill="#60a5fa" fillOpacity={0.1} strokeWidth={2} />
               <Area type="monotone" dataKey="ebit" name={t('financials.charts.result.series.ebit')} stroke="#dd6b20" fill="#dd6b20" fillOpacity={0.1} strokeWidth={2} />
@@ -101,10 +97,10 @@ export const FinancialsView: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
               <XAxis dataKey="year" stroke="#a0aec0" />
               <YAxis yAxisId="left" tickFormatter={formatCompactValue} stroke="#a0aec0" />
-              <YAxis yAxisId="right" orientation="right" tickFormatter={formatPercent} stroke="#a0aec0" />
+              <YAxis yAxisId="right" orientation="right" tickFormatter={(value: number) => formatPercentValue(value)} stroke="#a0aec0" />
               <Tooltip
                 contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }}
-                formatter={(value: number, _name: string, entry) => (entry && (entry as { dataKey?: string }).dataKey === 'solidity' ? formatPercent(value) : formatCurrency(value))}
+                formatter={(value: number, _name: string, entry) => (entry && (entry as { dataKey?: string }).dataKey === 'solidity' ? formatPercentValue(value) : formatCurrencyValue(value))}
               />
               <Legend />
               <Area yAxisId="left" type="monotone" dataKey="equityEndOfYear" name={t('financials.charts.equity.series.equity')} stroke="#818cf8" fill="#818cf8" fillOpacity={0.1} strokeWidth={2} />
@@ -118,7 +114,7 @@ export const FinancialsView: React.FC = () => {
                 <CartesianGrid strokeDasharray="3 3" stroke="#2d3748" />
                 <XAxis dataKey="year" stroke="#a0aec0" />
                 <YAxis tickFormatter={(v) => `${Math.round(v / 1000)} ${thousandAbbrev}`} stroke="#a0aec0" />
-                <Tooltip contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }} formatter={(value: number) => formatCurrency(value)} />
+                <Tooltip contentStyle={{ backgroundColor: '#1a202c', border: '1px solid #2d3748' }} formatter={(value: number) => formatCurrencyValue(value)} />
                 <Legend />
                 <Bar dataKey="profitPerEmployee" name={t('financials.charts.productivity.series.profitPerEmployee')} fill="#dd6b20" />
               </BarChart>

@@ -1,6 +1,7 @@
 import React from 'react';
 import { LineChart, Line, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { useFormatters } from '../../domains/settings/hooks';
 
 interface KpiCardProps {
     title: string;
@@ -30,7 +31,8 @@ const sparklineColor = {
 }
 
 export const KpiCard: React.FC<KpiCardProps> = ({ title, value, unit, change, changeType, sparklineData, onClick, children, color, icon }) => {
-    
+    const { formatPercent } = useFormatters();
+
     const ChangeIndicator = () => {
         if (change === undefined || changeType === undefined) return null;
         
@@ -39,11 +41,16 @@ export const KpiCard: React.FC<KpiCardProps> = ({ title, value, unit, change, ch
 
         const trendColor = (isPositive && change > 0) || (isNegative && change < 0) ? 'text-green-400' : 'text-red-400';
         const Icon = change > 0 ? TrendingUp : TrendingDown;
+        const formattedChange = formatPercent(change / 100, {
+            maximumFractionDigits: 1,
+            minimumFractionDigits: 1,
+            signDisplay: 'exceptZero',
+        });
 
         return (
              <div className={`flex items-center text-xs font-mono ${trendColor}`}>
                 <Icon className="w-4 h-4 mr-1"/>
-                <span>{change.toFixed(1)}%</span>
+                <span>{formattedChange}</span>
             </div>
         );
     }

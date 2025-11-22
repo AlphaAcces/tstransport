@@ -1,6 +1,6 @@
 /**
  * LocaleSwitcher Component
- * 
+ *
  * Dropdown for selecting active locale (da-DK, en-US, en-GB, sv-SE, nb-NO, de-DE).
  */
 
@@ -20,7 +20,7 @@ export const LocaleSwitcher: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLocale = e.target.value as AppLocale;
     dispatch(setLocale(newLocale));
-    
+
     // Sync i18n language (map AppLocale to i18n language code)
     const i18nLang = newLocale.startsWith('da') ? 'da' : 'en';
     i18n.changeLanguage(i18nLang);

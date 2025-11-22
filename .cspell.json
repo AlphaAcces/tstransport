@@ -65,7 +65,22 @@
     "Likviditet",
     "Solvens",
     "Ejerandele",
-    "Ejerstruktur"
+    "Ejerstruktur",
+    "Bruttofortjeneste",
+    "bruttofortjeneste",
+    "Resultaterne",
+    "Følger",
+    "følger",
+    "Påkrævet",
+    "KRITISK",
+    "MODERAT",
+    "HØJ",
+    "Middel",
+    "nærmere",
+    "Vognmandstilladelse",
+    "Vognmandstilladelser",
+    "Færdselsstyrelsen",
+    "datagab"
   ],
   "ignorePaths": [
     "**/node_modules/**",

@@ -62,15 +62,15 @@ export const userPreferencesSlice = createSlice({
   },
 });
 
-export const { 
-  setCompactMode, 
-  setCurrency, 
-  setLocale, 
-  setCountry, 
-  setTimezone, 
+export const {
+  setCompactMode,
+  setCurrency,
+  setLocale,
+  setCountry,
+  setTimezone,
   setDateFormat,
-  saveView, 
-  removeView, 
-  clearSavedViews 
+  saveView,
+  removeView,
+  clearSavedViews
 } = userPreferencesSlice.actions;
 export default userPreferencesSlice.reducer;

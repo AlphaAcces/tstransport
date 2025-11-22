@@ -17,6 +17,7 @@ import { useCaseData, useActiveSubject } from '../../context/DataContext';
 import { Tag } from '../Shared/Tag';
 import { View, ExecutiveFinancialAlert } from '../../types';
 import { ExecutiveCard } from './ExecutiveCard';
+import { useFormatters } from '../../domains/settings/hooks';
 
 const ExecutiveTrendChart = lazy(() => import('./ExecutiveTrendChart').then(module => ({ default: module.ExecutiveTrendChart })));
 
@@ -37,30 +38,46 @@ const riskLevelColor: Record<'KRITISK' | 'HØJ' | 'MODERAT' | 'LAV' | 'N/A', 're
 };
 
 export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNavigate }) => {
-    const { t, i18n } = useTranslation();
-    const locale = useMemo(() => (i18n.language === 'da' ? 'da-DK' : 'en-GB'), [i18n.language]);
-    const currencyFormatter = useMemo(() => new Intl.NumberFormat(locale, {
-        style: 'currency',
-        currency: 'DKK',
-        maximumFractionDigits: 0,
-    }), [locale]);
+    const { t } = useTranslation();
+    const { formatCurrency, formatNumber, formatDate, formatPercent } = useFormatters();
     const millionFormatter = useCallback((value: number | null) => {
         if (typeof value !== 'number') {
             return t('executive.placeholder.unavailable');
         }
-        const millions = Math.round((value / 1_000_000) * 10) / 10;
-        return t('executive.units.million', { value: millions.toFixed(1) });
-    }, [t]);
-        const formatTrendValue = useCallback((value: number | null) => (typeof value === 'number'
-        ? t('executive.units.million', { value: value.toFixed(1) })
-        : t('executive.placeholder.unavailable')),
-    [t]);
-    const formatAlertValue = useCallback((alertValue: number, unit: 'DKK' | 'days') => (
-        unit === 'DKK'
-            ? currencyFormatter.format(alertValue)
-            : t('executive.units.days', { count: alertValue })
-    ), [currencyFormatter, t]);
-    const formatDate = useCallback((iso: string) => new Date(iso).toLocaleDateString(locale), [locale]);
+        const millions = value / 1_000_000;
+        return t('executive.units.million', {
+            value: formatNumber(millions, { maximumFractionDigits: 1, minimumFractionDigits: 1 }),
+        });
+    }, [formatNumber, t]);
+
+    const formatTrendValue = useCallback(
+        (value: number | null) => (typeof value === 'number'
+            ? t('executive.units.million', {
+                value: formatNumber(value, { maximumFractionDigits: 1, minimumFractionDigits: 1 }),
+            })
+            : t('executive.placeholder.unavailable')),
+        [formatNumber, t],
+    );
+
+    const formatAlertValue = useCallback(
+        (alertValue: number, unit: 'DKK' | 'days') => (
+            unit === 'DKK'
+                ? formatCurrency(alertValue, {
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                })
+                : t('executive.units.days', { count: alertValue })
+        ),
+        [formatCurrency, t],
+    );
+
+    const formatDateValue = useCallback((iso: string) => formatDate(iso), [formatDate]);
+
+    const formatCurrencyValue = useCallback((value: number) => formatCurrency(value, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0,
+    }), [formatCurrency]);
+
     const translateFinancialAlert = useCallback((alert: ExecutiveFinancialAlert) => ({
         label: t(`executive.alert.${alert.id}.label`, { defaultValue: alert.label }),
         description: t(`executive.alert.${alert.id}.description`, { defaultValue: alert.description }),
@@ -72,12 +89,15 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
     const grossChartRef = useRef<HTMLDivElement | null>(null);
     const profitChartRef = useRef<HTMLDivElement | null>(null);
     const riskCardRef = useRef<HTMLDivElement | null>(null);
-        const formatRedFlagValue = useCallback((value: number | null, unit: 'DKK' | 'days') => {
-            if (value === null) {
-                return t('executive.placeholder.unavailable');
-            }
-            return unit === 'DKK' ? currencyFormatter.format(value) : t('executive.units.days', { count: value });
-        }, [currencyFormatter, t]);
+
+    const formatRedFlagValue = useCallback((value: number | null, unit: 'DKK' | 'days') => {
+        if (value === null) {
+            return t('executive.placeholder.unavailable');
+        }
+        return unit === 'DKK'
+            ? formatCurrencyValue(value)
+            : t('executive.units.days', { count: value });
+    }, [formatCurrencyValue, t]);
 
     const handleExport = useCallback(async () => {
         try {
@@ -128,17 +148,17 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
     const grossProfitTrend = useMemo(
         () => financial.trendGrossProfit.map(point => ({
             year: point.year,
-            value: Math.round((point.value / 1_000_000) * 10) / 10,
+            value: Number((point.value / 1_000_000).toFixed(1)),
         })),
-        [financial.trendGrossProfit]
+        [financial.trendGrossProfit],
     );
 
     const netResultTrend = useMemo(
         () => financial.trendProfitAfterTax.map(point => ({
             year: point.year,
-            value: Math.round((point.value / 1_000_000) * 10) / 10,
+            value: Number((point.value / 1_000_000).toFixed(1)),
         })),
-        [financial.trendProfitAfterTax]
+        [financial.trendProfitAfterTax],
     );
 
     const riskCategoryLabels = useMemo(() => ({
@@ -186,6 +206,15 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
 
     const formatMillionsOrDash = (value: number | null) => millionFormatter(value);
 
+    const formatChangeLabel = useCallback((value: number) => {
+        const formattedPercent = formatPercent(value / 100, {
+            maximumFractionDigits: 1,
+            minimumFractionDigits: 1,
+            signDisplay: 'exceptZero',
+        });
+        return `${formattedPercent} ${t('executive.vsLastYear')}`;
+    }, [formatPercent, t]);
+
     return (
         <div className="space-y-8">
             <SectionHeading
@@ -230,7 +259,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
                                 {yoyGrossChange !== null && (
                                     <span className={`inline-flex items-center text-xs font-medium mt-2 ${yoyGrossChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                         {yoyGrossChange >= 0 ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
-                                        {`${yoyGrossChange >= 0 ? '+' : ''}${yoyGrossChange.toFixed(1)}% ${t('executive.vsLastYear')}`}
+                                        {formatChangeLabel(yoyGrossChange)}
                                     </span>
                                 )}
                             </div>
@@ -240,7 +269,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
                                 {yoyProfitChange !== null && (
                                     <span className={`inline-flex items-center text-xs font-medium mt-2 ${yoyProfitChange >= 0 ? 'text-green-400' : 'text-red-400'}`}>
                                         {yoyProfitChange >= 0 ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
-                                        {`${yoyProfitChange >= 0 ? '+' : ''}${yoyProfitChange.toFixed(1)}% ${t('executive.vsLastYear')}`}
+                                        {formatChangeLabel(yoyProfitChange)}
                                     </span>
                                 )}
                             </div>
@@ -308,7 +337,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
                             <AlertTriangle className="w-4 h-4 text-red-400" />
                             <div>
                                 <p className="font-semibold text-gray-100">{t('executive.risk.taxCase')}</p>
-                                <p className="text-xs text-gray-400">{risk.taxCaseExposure ? `${t('executive.risk.exposure')} ${currencyFormatter.format(risk.taxCaseExposure)} – ${t('executive.risk.monitor')}` : t('executive.risk.noActiveCase')}</p>
+                                <p className="text-xs text-gray-400">{risk.taxCaseExposure ? `${t('executive.risk.exposure')} ${formatCurrencyValue(risk.taxCaseExposure)} – ${t('executive.risk.monitor')}` : t('executive.risk.noActiveCase')}</p>
                             </div>
                         </div>
                         <div className="flex items-center gap-3">
@@ -393,7 +422,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
                                     <li key={`${event.title}-${event.date}`} className="bg-gray-900/40 border border-border-dark/40 rounded-lg p-3">
                                         <div className="flex items-center justify-between">
                                             <span className="text-gray-200 font-medium">{event.title}</span>
-                                            <span className="text-[11px] font-mono text-red-300">{formatDate(event.date)}</span>
+                                            <span className="text-[11px] font-mono text-red-300">{formatDateValue(event.date)}</span>
                                         </div>
                                         <p className="text-xs text-gray-500 mt-1">{event.description}</p>
                                     </li>
@@ -427,7 +456,7 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
                                 {actions.upcomingEvents.map(event => (
                                     <li key={`upcoming-${event.title}-${event.date}`} className="flex items-center justify-between">
                                         <span className="text-gray-300">{event.title}</span>
-                                        <span className="font-mono text-gray-500">{formatDate(event.date)}</span>
+                                        <span className="font-mono text-gray-500">{formatDateValue(event.date)}</span>
                                     </li>
                                 ))}
                             </ul>

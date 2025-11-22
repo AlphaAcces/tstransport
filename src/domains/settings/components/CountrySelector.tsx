@@ -1,6 +1,6 @@
 /**
  * CountrySelector Component
- * 
+ *
  * Dropdown for selecting market/country context (DK, SE, NO, DE, GB, US).
  * Automatically updates default currency and locale.
  */
@@ -21,7 +21,7 @@ export const CountrySelector: React.FC = () => {
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCountry = e.target.value as Country;
     const config = COUNTRY_CONFIGS[newCountry];
-    
+
     dispatch(setCountry(newCountry));
     dispatch(setCurrency(config.defaultCurrency));
     dispatch(setLocale(config.defaultLocale));

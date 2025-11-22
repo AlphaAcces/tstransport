@@ -11,7 +11,7 @@ import { UserSettings } from '../types';
 
 export const useUserSettings = (): UserSettings => {
   const settings = useSelector((state: RootState) => state.userPreferences);
-  
+
   return {
     currency: settings.currency,
     locale: settings.locale,

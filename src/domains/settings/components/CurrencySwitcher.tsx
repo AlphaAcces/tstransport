@@ -1,6 +1,6 @@
 /**
  * CurrencySwitcher Component
- * 
+ *
  * Dropdown for selecting active currency (DKK, EUR, USD, GBP, SEK, NOK).
  */
 
