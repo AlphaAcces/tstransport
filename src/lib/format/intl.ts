@@ -43,13 +43,39 @@ export const formatCurrency = (value: number | null | undefined, options: Format
 
 export const formatPercent = (value: number | null | undefined, options: FormatNumberOptions = {}): string => {
   if (!isFiniteNumber(value)) return '–';
-  const { locale = DEFAULT_LOCALE, minimumFractionDigits = 1, maximumFractionDigits = 1, ...rest } = options;
-  return new Intl.NumberFormat(locale, {
+  const { locale = DEFAULT_LOCALE, ...intlOptions } = options;
+  const requestedMin = intlOptions.minimumFractionDigits;
+  const requestedMax = intlOptions.maximumFractionDigits;
+
+  const hasMin = typeof requestedMin === 'number';
+  const hasMax = typeof requestedMax === 'number';
+
+  let safeMin: number;
+  let safeMax: number;
+
+  if (hasMin && hasMax) {
+    safeMin = Math.min(requestedMin!, requestedMax!);
+    safeMax = Math.max(requestedMin!, requestedMax!);
+  } else if (hasMax) {
+    safeMin = 0;
+    safeMax = requestedMax!;
+  } else if (hasMin) {
+    safeMin = requestedMin!;
+    safeMax = requestedMin!;
+  } else {
+    safeMin = 1;
+    safeMax = 1;
+  }
+
+  const formatted = new Intl.NumberFormat(locale, {
+    ...intlOptions,
     style: 'percent',
-    minimumFractionDigits,
-    maximumFractionDigits,
-    ...rest,
+    minimumFractionDigits: safeMin,
+    maximumFractionDigits: safeMax,
   }).format(value);
+
+  // Trim locale-inserted whitespace before the percent sign for consistency across locales.
+  return formatted.replace(/\s+(?=%)/g, '');
 };
 
 export const formatDate = (value: string | Date | null | undefined, options: FormatDateOptions = {}): string => {

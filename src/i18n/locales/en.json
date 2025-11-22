@@ -984,8 +984,35 @@
     },
     "notSpecified": "Not specified",
     "notApplicable": "N/A",
-    "criticalEvents": "Critical events",
-    "boardActionables": "Board actionables",
-    "nextKeyEvents": "Next key events"
+    "criticalEvents": "Critical Events",
+    "boardActionables": "Board Actionables",
+    "nextKeyEvents": "Next Key Events"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "close": "Close",
+    "delete": "Delete",
+    "viewDetails": "View details",
+    "empty": "No notifications",
+    "unreadCount": "{{count}} unread",
+    "unreadCount_one": "{{count}} unread",
+    "unreadCount_other": "{{count}} unread",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all",
+    "settings": "Settings",
+    "categories": {
+      "all": "All",
+      "financial": "Financial",
+      "risk": "Risk",
+      "legal": "Legal",
+      "intelligence": "Intelligence",
+      "commercial": "Commercial",
+      "system": "System"
+    },
+    "priorities": {
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    }
   }
 }

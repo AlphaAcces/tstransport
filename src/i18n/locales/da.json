@@ -987,5 +987,32 @@
     "criticalEvents": "Kritiske hændelser",
     "boardActionables": "Bestyrelses-handlingspunkter",
     "nextKeyEvents": "Næste vigtige hændelser"
+  },
+  "notifications": {
+    "title": "Notifikationer",
+    "close": "Luk",
+    "delete": "Slet",
+    "viewDetails": "Se detaljer",
+    "empty": "Ingen notifikationer",
+    "unreadCount": "{{count}} ulæst",
+    "unreadCount_one": "{{count}} ulæst",
+    "unreadCount_other": "{{count}} ulæste",
+    "markAllRead": "Marker alle som læst",
+    "clearAll": "Ryd alle",
+    "settings": "Indstillinger",
+    "categories": {
+      "all": "Alle",
+      "financial": "Finansiel",
+      "risk": "Risiko",
+      "legal": "Juridisk",
+      "intelligence": "Efterretning",
+      "commercial": "Kommerciel",
+      "system": "System"
+    },
+    "priorities": {
+      "high": "Høj",
+      "medium": "Middel",
+      "low": "Lav"
+    }
   }
 }

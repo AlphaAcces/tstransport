@@ -254,7 +254,7 @@ const AIAnalysisPanel: React.FC<AIAnalysisPanelProps> = ({ analysis, isLoading, 
     );
 }
 
-export const ScenariosView: React.FC = () => {
+const ScenariosView: React.FC = () => {
     const { scenariosData, actionsData } = useCaseData();
     const { t } = useTranslation();
     const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(null);
@@ -468,3 +468,5 @@ export const ScenariosView: React.FC = () => {
         </div>
     );
 };
+
+export default ScenariosView;

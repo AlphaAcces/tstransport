@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { TslLogo } from '../Shared/TslLogo';
 import { LanguageToggle } from '../Shared/LanguageToggle';
 import { PreferencesPanel } from '../Shared/PreferencesPanel';
+import { NotificationBadge } from '../../domains/notifications/components/NotificationBadge';
+import { NotificationDrawer } from '../../domains/notifications/components/NotificationDrawer';
+import { useNotifications } from '../../domains/notifications/hooks';
 import { Subject, View } from '../../types';
 
 interface TopBarProps {
@@ -16,6 +19,17 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSubjectChange, currentViewId, currentBreadcrumbs, navigateTo }) => {
   const { t } = useTranslation();
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAll,
+  } = useNotifications();
+
   const getButtonClass = (subject: Subject) => {
     const baseClass = "flex flex-col items-center px-4 py-1 rounded-md transition-colors duration-200";
     if (activeSubject === subject) {
@@ -58,11 +72,25 @@ export const TopBar: React.FC<TopBarProps> = ({ onToggleNav, activeSubject, onSu
             <div className="ml-2">
               <LanguageToggle />
             </div>
+            <div className="ml-2">
+              <NotificationBadge count={unreadCount} onClick={() => setIsDrawerOpen(true)} />
+            </div>
             <div className="ml-4">
               <PreferencesPanel currentViewId={currentViewId ?? 'dashboard'} currentBreadcrumbs={currentBreadcrumbs} navigateTo={navigateTo} />
             </div>
           </div>
       </div>
+
+      <NotificationDrawer
+        isOpen={isDrawerOpen}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onClose={() => setIsDrawerOpen(false)}
+        onMarkAsRead={markAsRead}
+        onMarkAllAsRead={markAllAsRead}
+        onDelete={deleteNotification}
+        onClearAll={clearAll}
+      />
     </header>
   );
 };

@@ -23,7 +23,7 @@ const ActionsView = lazy(() => import('./components/Actions/ActionsView').then(m
 const CashflowView = lazy(() => import('./components/Cashflow/CashflowView').then(module => ({ default: module.CashflowView })));
 const SectorAnalysisView = lazy(() => import('./components/Sector/SectorAnalysisView').then(module => ({ default: module.SectorAnalysisView })));
 const CounterpartiesView = lazy(() => import('./components/Counterparties/CounterpartiesView').then(module => ({ default: module.CounterpartiesView })));
-const ScenariosView = lazy(() => import('./components/Scenarios/ScenariosView').then(module => ({ default: module.ScenariosView })));
+const ScenariosView = lazy(() => import('./components/Scenarios/ScenariosView'));
 const ExecutiveSummaryView = lazy(() => import('./components/Executive/ExecutiveSummaryView').then(module => ({ default: module.ExecutiveSummaryView })));
 const SavedViewsPage = lazy(() => import('./components/Settings/SavedViewsPage').then(m => ({ default: m.SavedViewsPage })));
 
