@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useCaseData } from '../../context/DataContext';
+import { useEnrichedCaseData } from '../../context/DataContext';
 import { TimelineEvent } from '../../types';
 import { TimelineEventCard } from './TimelineEventCard';
 import { useTranslation } from 'react-i18next';
@@ -16,7 +16,7 @@ const FILTER_CONFIG = [
 type FilterKey = typeof FILTER_CONFIG[number]['key'];
 
 export const TimelineView: React.FC = () => {
-    const { timelineData } = useCaseData();
+    const { timelineData } = useEnrichedCaseData();
     const { t } = useTranslation();
 
     const filters = useMemo(() => FILTER_CONFIG.map(config => ({
@@ -35,16 +35,26 @@ export const TimelineView: React.FC = () => {
 
     const groupedEvents = useMemo(() => {
         return filteredEvents.reduce((acc, event) => {
-            const year = new Date(event.date).getFullYear();
-            if (!acc[year]) {
-                acc[year] = [];
+            const date = new Date(event.date);
+            const year = date.getFullYear();
+            const month = date.toLocaleString('default', { month: 'long' });
+            const key = `${year}-${month}`;
+
+            if (!acc[key]) {
+                acc[key] = [];
             }
-            acc[year].push(event);
+            acc[key].push(event);
             return acc;
         }, {} as Record<string, TimelineEvent[]>);
     }, [filteredEvents]);
 
-    const sortedYears = useMemo(() => Object.keys(groupedEvents).sort((a, b) => Number(b) - Number(a)), [groupedEvents]);
+    const sortedGroups = useMemo(() => Object.keys(groupedEvents).sort((a, b) => {
+        const [yearA, monthA] = a.split('-');
+        const [yearB, monthB] = b.split('-');
+        const dateA = new Date(parseInt(yearA), new Date(`${monthA} 1`).getMonth());
+        const dateB = new Date(parseInt(yearB), new Date(`${monthB} 1`).getMonth());
+        return dateB.getTime() - dateA.getTime();
+    }), [groupedEvents]);
 
     return (
         <div className="space-y-8">
@@ -68,22 +78,26 @@ export const TimelineView: React.FC = () => {
             </div>
 
             <div className="relative border-l-2 border-border-dark ml-4">
-                {sortedYears.map(year => (
-                    <div key={year} className="relative mb-8">
-                        <div className="sticky top-16 z-10 -ml-[calc(1rem+1px)] mb-4">
-                            <h3 className="pl-12 py-1 bg-base-dark/80 backdrop-blur-sm text-lg font-bold text-gray-300">
-                                {year}
-                                <span className="text-xs font-mono text-gray-500 ml-2">{t('yearSummary', { count: groupedEvents[year].length })}</span>
-                            </h3>
+                {sortedGroups.map(groupKey => {
+                    const [year, month] = groupKey.split('-');
+                    const events = groupedEvents[groupKey];
+                    return (
+                        <div key={groupKey} className="relative mb-8">
+                            <div className="sticky top-16 z-10 -ml-[calc(1rem+1px)] mb-4">
+                                <h3 className="pl-12 py-1 bg-base-dark/80 backdrop-blur-sm text-lg font-bold text-gray-300">
+                                    {month} {year}
+                                    <span className="text-xs font-mono text-gray-500 ml-2">{t('eventSummary', { count: events.length })}</span>
+                                </h3>
+                            </div>
+                            <div className="pl-8 space-y-8">
+                                {events.map((event, index) => (
+                                    <TimelineEventCard key={`${event.date}-${index}`} event={event} />
+                                ))}
+                            </div>
                         </div>
-                        <div className="pl-8 space-y-8">
-                            {groupedEvents[year].map((event, index) => (
-                                <TimelineEventCard key={`${event.date}-${index}`} event={event} />
-                            ))}
-                        </div>
-                    </div>
-                ))}
-                 {sortedYears.length === 0 && (
+                    );
+                })}
+                 {sortedGroups.length === 0 && (
                     <div className="pl-8 pt-4">
                         <p className="text-gray-500">{t('noEvents')}</p>
                     </div>

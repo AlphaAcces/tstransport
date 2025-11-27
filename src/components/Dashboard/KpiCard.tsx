@@ -31,10 +31,10 @@ const sparklineColor = {
 }
 
 export const KpiCard: React.FC<KpiCardProps> = ({ title, value, unit, change, changeType, sparklineData, onClick, children, color, icon }) => {
-    
+
     const ChangeIndicator = () => {
         if (change === undefined || changeType === undefined) return null;
-        
+
         const isPositive = changeType === 'positive';
         const isNegative = changeType === 'negative';
 
@@ -50,7 +50,7 @@ export const KpiCard: React.FC<KpiCardProps> = ({ title, value, unit, change, ch
     }
 
     return (
-        <div 
+        <div
             className={`bg-component-dark rounded-lg border border-border-dark flex flex-col justify-between transition-all duration-200 min-w-[280px] ${onClick ? 'cursor-pointer hover:border-accent-green/50 hover:shadow-lg hover:shadow-accent-green/5' : ''}`}
             onClick={onClick}
             {...(onClick ? { role: 'button', tabIndex: 0, onKeyPress: (e) => e.key === 'Enter' && onClick() } : {})}

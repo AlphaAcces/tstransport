@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from '../../../store';
-import { DataProvider } from '../../../context/DataContext';
+import DataProvider from '../../../context/DataContext';
 import { ExecutiveSummaryView } from '../ExecutiveSummaryView';
 
 import * as PdfModule from '../../../pdf/executiveReport';

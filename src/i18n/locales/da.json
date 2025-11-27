@@ -1029,5 +1029,96 @@
     "currency": {
       "label": "Valuta"
     }
+  },
+  "kpi": {
+    "category": {
+      "financial": "Finansiel",
+      "risk": "Risiko",
+      "operational": "Operationel"
+    },
+    "status": {
+      "healthy": "Sund",
+      "warning": "Advarsel",
+      "critical": "Kritisk",
+      "unknown": "Ukendt"
+    },
+    "financial": {
+      "grossProfit": {
+        "name": "Bruttofortjeneste",
+        "description": "Samlet bruttofortjeneste for seneste regnskabsår"
+      },
+      "profitAfterTax": {
+        "name": "Resultat efter skat",
+        "description": "Nettoresultat efter skat for seneste regnskabsår"
+      },
+      "equity": {
+        "name": "Egenkapital",
+        "description": "Egenkapital ved regnskabsårets slutning"
+      },
+      "solidity": {
+        "name": "Soliditet",
+        "description": "Egenkapitalandel i procent"
+      },
+      "ebit": {
+        "name": "EBIT",
+        "description": "Resultat før renter og skat"
+      },
+      "ebitMargin": {
+        "name": "EBIT-margin",
+        "description": "EBIT i procent af omsætning"
+      },
+      "netMargin": {
+        "name": "Netto-margin",
+        "description": "Nettoresultat i procent af omsætning"
+      },
+      "dso": {
+        "name": "DSO",
+        "description": "Gennemsnitlige debitor-dage"
+      },
+      "cash": {
+        "name": "Likviditet",
+        "description": "Kontant beholdning"
+      },
+      "profitPerEmployee": {
+        "name": "Resultat pr. medarbejder",
+        "description": "Nettoresultat divideret med antal ansatte"
+      }
+    },
+    "risk": {
+      "totalScore": {
+        "name": "Samlet risikoscore",
+        "description": "Aggregeret risikoscore på tværs af alle kategorier"
+      },
+      "legalCompliance": {
+        "name": "Jura & compliance",
+        "description": "Risiko relateret til juridiske forhold og overholdelse"
+      },
+      "financial": {
+        "name": "Finansiel risiko",
+        "description": "Risiko relateret til likviditet og økonomi"
+      },
+      "governance": {
+        "name": "Governance",
+        "description": "Risiko relateret til ledelse og kontrol"
+      },
+      "sectorOperations": {
+        "name": "Sektor & drift",
+        "description": "Risiko relateret til branche og operationelle forhold"
+      },
+      "reputation": {
+        "name": "Omdømme",
+        "description": "Risiko relateret til omdømme og SOCMINT"
+      }
+    },
+    "operational": {
+      "employees": {
+        "name": "Antal medarbejdere",
+        "description": "Samlet antal fuldtidsansatte"
+      },
+      "intercompanyLoans": {
+        "name": "Mellemværender",
+        "description": "Tilgodehavender hos nærtstående parter"
+      }
+    }
   }
 }

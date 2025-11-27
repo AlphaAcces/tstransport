@@ -1,15 +1,18 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, Suspense, lazy, useCallback } from 'react';
 import { SideNav } from './components/Layout/SideNav';
 import { TopBar } from './components/Layout/TopBar';
 import { ViewContainer } from './components/Layout/ViewContainer';
 import { useAppNavigation } from './hooks/useAppNavigation';
-import { DataProvider } from './context/DataContext';
+import DataProvider from './context/DataContext';
 import { LoginPage } from './components/Auth/LoginPage';
 import { Loader } from 'lucide-react';
 import { View } from './types';
 import './i18n';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './store';
+import { TenantProvider } from './domains/tenant';
+import type { TenantConfig, TenantUser } from './domains/tenant';
+import { tenantApi } from './domains/tenant/tenantApi';
 
 // Lazy load heavy components
 const DashboardView = lazy(() => import('./components/Dashboard/DashboardView').then(module => ({ default: module.DashboardView })));
@@ -29,6 +32,28 @@ const ExecutiveSummaryView = lazy(() => import('./components/Executive/Executive
 export const App: React.FC = () => {
   const [authUser, setAuthUser] = useState<{ id: string; role: 'admin' | 'user' } | null>(null);
   const [topBarHeight, setTopBarHeight] = useState(96);
+  const [tenantConfig, setTenantConfig] = useState<TenantConfig | null>(null);
+  const [tenantUser, setTenantUser] = useState<TenantUser | null>(null);
+  const [isTenantLoading, setIsTenantLoading] = useState(true);
+
+  // Initialize tenant on app load
+  useEffect(() => {
+    const initTenant = async () => {
+      try {
+        const response = await tenantApi.initializeTenant();
+        if (response.success && response.data) {
+          setTenantConfig(response.data.tenant);
+          setTenantUser(response.data.user);
+        }
+      } catch (error) {
+        console.error('Failed to initialize tenant:', error);
+      } finally {
+        setIsTenantLoading(false);
+      }
+    };
+
+    initTenant();
+  }, []);
 
   useEffect(() => {
     try {
@@ -39,6 +64,19 @@ export const App: React.FC = () => {
     } catch (error) {
       console.error("Could not parse auth user from session storage", error);
       sessionStorage.removeItem('authUser');
+    }
+  }, []);
+
+  // Handle tenant change from TenantSwitcher
+  const handleTenantChange = useCallback(async (tenantId: string) => {
+    try {
+      const response = await tenantApi.switchTenant(tenantId);
+      if (response.success && response.data) {
+        setTenantConfig(response.data.tenant);
+        setTenantUser(response.data.user);
+      }
+    } catch (error) {
+      console.error('Failed to switch tenant:', error);
     }
   }, []);
 
@@ -113,8 +151,21 @@ export const App: React.FC = () => {
     }
   };
 
+  // Show loading state while tenant initializes
+  if (isTenantLoading) {
+    return (
+      <div className="min-h-screen bg-base-dark flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="w-10 h-10 animate-spin text-accent-green" />
+          <p className="text-gray-400 text-sm">Initialiserer platform...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <ReduxProvider store={store}>
+    <TenantProvider initialTenant={tenantConfig || undefined} initialUser={tenantUser || undefined}>
     <div className="app-root app-zoom min-h-screen">
       <TopBar
         onToggleNav={() => setIsNavOpen(!isNavOpen)}
@@ -125,6 +176,7 @@ export const App: React.FC = () => {
         onNavigate={navigateTo}
         onHeightChange={setTopBarHeight}
         user={authUser}
+        onTenantChange={handleTenantChange}
       />
       <SideNav
         currentView={navState.activeView}
@@ -150,6 +202,7 @@ export const App: React.FC = () => {
       </main>
       {isNavOpen && <div className="fixed inset-0 bg-black/60 z-25 lg:hidden" onClick={() => setIsNavOpen(false)}></div>}
     </div>
+    </TenantProvider>
     </ReduxProvider>
   );
 };

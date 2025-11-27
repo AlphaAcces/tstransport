@@ -1029,5 +1029,96 @@
     "country": {
       "label": "Market"
     }
+  },
+  "kpi": {
+    "category": {
+      "financial": "Financial",
+      "risk": "Risk",
+      "operational": "Operational"
+    },
+    "status": {
+      "healthy": "Healthy",
+      "warning": "Warning",
+      "critical": "Critical",
+      "unknown": "Unknown"
+    },
+    "financial": {
+      "grossProfit": {
+        "name": "Gross Profit",
+        "description": "Total gross profit for the most recent fiscal year"
+      },
+      "profitAfterTax": {
+        "name": "Profit After Tax",
+        "description": "Net result after tax for the most recent fiscal year"
+      },
+      "equity": {
+        "name": "Equity",
+        "description": "Equity at end of fiscal year"
+      },
+      "solidity": {
+        "name": "Solvency",
+        "description": "Equity ratio in percent"
+      },
+      "ebit": {
+        "name": "EBIT",
+        "description": "Earnings before interest and taxes"
+      },
+      "ebitMargin": {
+        "name": "EBIT Margin",
+        "description": "EBIT as percentage of revenue"
+      },
+      "netMargin": {
+        "name": "Net Margin",
+        "description": "Net result as percentage of revenue"
+      },
+      "dso": {
+        "name": "DSO",
+        "description": "Average days sales outstanding"
+      },
+      "cash": {
+        "name": "Liquidity",
+        "description": "Cash on hand"
+      },
+      "profitPerEmployee": {
+        "name": "Profit per Employee",
+        "description": "Net result divided by number of employees"
+      }
+    },
+    "risk": {
+      "totalScore": {
+        "name": "Total Risk Score",
+        "description": "Aggregated risk score across all categories"
+      },
+      "legalCompliance": {
+        "name": "Legal & Compliance",
+        "description": "Risk related to legal matters and compliance"
+      },
+      "financial": {
+        "name": "Financial Risk",
+        "description": "Risk related to liquidity and finances"
+      },
+      "governance": {
+        "name": "Governance",
+        "description": "Risk related to management and controls"
+      },
+      "sectorOperations": {
+        "name": "Sector & Operations",
+        "description": "Risk related to industry and operational matters"
+      },
+      "reputation": {
+        "name": "Reputation",
+        "description": "Risk related to reputation and SOCMINT"
+      }
+    },
+    "operational": {
+      "employees": {
+        "name": "Number of Employees",
+        "description": "Total number of full-time employees"
+      },
+      "intercompanyLoans": {
+        "name": "Intercompany Loans",
+        "description": "Receivables from related parties"
+      }
+    }
   }
 }

@@ -20,6 +20,7 @@ import { CountrySelector } from '../../domains/settings/components/CountrySelect
 import { useNotifications } from '../../domains/notifications/hooks';
 import { PreferencesPanel } from '../Shared/PreferencesPanel';
 import { Subject, View } from '../../types';
+import { TenantSwitcher } from '../../domains/tenant/TenantSwitcher';
 
 interface TopBarProps {
   onToggleNav: () => void;
@@ -30,6 +31,7 @@ interface TopBarProps {
   onNavigate?: (view: View, options?: { fromDashboard?: boolean; breadcrumbs?: string[] }) => void;
   onHeightChange?: (height: number) => void;
   user?: { id: string; role: 'admin' | 'user' } | null;
+  onTenantChange?: (tenantId: string) => void;
 }
 
 export const TopBar: React.FC<TopBarProps> = ({
@@ -41,6 +43,7 @@ export const TopBar: React.FC<TopBarProps> = ({
   onNavigate,
   onHeightChange,
   user,
+  onTenantChange,
 }) => {
   const { t } = useTranslation();
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -133,6 +136,7 @@ export const TopBar: React.FC<TopBarProps> = ({
 
           <div className="hidden lg:flex items-center gap-2.5 flex-1 justify-between">
             <div className="flex items-center gap-1.5">
+              <TenantSwitcher variant="compact" onTenantChange={onTenantChange} />
               <div className="rounded-xl border border-border-dark/70 bg-component-dark/50 px-2.5 py-1.5">
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] font-semibold uppercase tracking-wider text-gray-500">SPROG</span>

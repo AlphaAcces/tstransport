@@ -19,6 +19,7 @@ const impactConfig = {
     'Høj': { color: 'red' },
     'Middel': { color: 'yellow' },
     'Lav': { color: 'blue' },
+    'Ekstrem': { color: 'red' },
 } as const;
 
 const categoryConfig: Record<Hypothesis['category'], { color: 'blue' | 'green' | 'yellow' | 'red' | 'gray' }> = {
@@ -39,6 +40,7 @@ const impactLabelKeys: Record<Hypothesis['impact'], string> = {
     'Høj': 'hypotheses.impact.high',
     'Middel': 'hypotheses.impact.medium',
     'Lav': 'hypotheses.impact.low',
+    'Ekstrem': 'hypotheses.impact.extreme',
 };
 
 const categoryLabelKeys: Record<Hypothesis['category'], string> = {

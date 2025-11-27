@@ -1,12 +1,21 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Loader2 } from 'lucide-react';
-import { Subject, CaseData } from '../types';
+import { Subject, CaseData, RiskScore, RiskCategory } from '../types';
 import { getDataForSubject } from '../data';
+import { enrichTimelineWithViews, groupRisksByCategory } from '../data/transformers';
 import { useTranslation } from 'react-i18next';
+import { useTenantId, createAuditEntry } from '../domains/tenant';
 
 interface DataContextValue {
   caseData: CaseData;
+  enrichedCaseData: {
+    timelineData: CaseData['timelineData'];
+    actionsData: CaseData['actionsData'];
+    riskBreakdown: Record<RiskCategory, RiskScore | undefined>;
+    priorityActions: CaseData['actionsData'];
+  };
   subject: Subject;
+  tenantId: string | null;
 }
 
 export const DataContext = createContext<DataContextValue | null>(null);
@@ -16,11 +25,14 @@ interface DataProviderProps {
   activeSubject: Subject;
 }
 
-export const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) => {
+const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) => {
   const [caseData, setCaseData] = useState<CaseData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const { t } = useTranslation('data');
+
+  // Get current tenant ID for data isolation
+  const tenantId = useTenantId();
 
   useEffect(() => {
     let isActive = true;
@@ -33,6 +45,19 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubj
         if (!isActive) {
           return;
         }
+
+        // Log data access for audit trail (if tenant context exists)
+        if (tenantId) {
+          createAuditEntry(
+            tenantId,
+            'system', // Replace with actual user ID from TenantContext
+            'read',
+            'case',
+            activeSubject,
+            { subjectName: activeSubject }
+          );
+        }
+
         setCaseData(data);
         setIsLoading(false);
       })
@@ -48,11 +73,32 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubj
     return () => {
       isActive = false;
     };
-  }, [activeSubject]);
+  }, [activeSubject, tenantId]);
 
   const value = useMemo<DataContextValue | null>(
-    () => (caseData ? { caseData, subject: activeSubject } : null),
-    [caseData, activeSubject],
+    () => {
+      if (!caseData) return null;
+
+      // Enrich data using transformers
+      const enrichedTimelineData = enrichTimelineWithViews(caseData.timelineData);
+      const priorityActions = caseData.actionsData.filter(action =>
+        action.priority === 'Påkrævet' || action.priority === 'Høj'
+      );
+      const riskBreakdown = groupRisksByCategory(caseData.riskHeatmapData);
+
+      return {
+        caseData,
+        enrichedCaseData: {
+          timelineData: enrichedTimelineData,
+          actionsData: caseData.actionsData,
+          riskBreakdown,
+          priorityActions,
+        },
+        subject: activeSubject,
+        tenantId,
+      };
+    },
+    [caseData, activeSubject, tenantId],
   );
 
   if (isLoading) {
@@ -75,7 +121,7 @@ export const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubj
   return <DataContext.Provider value={value}>{children}</DataContext.Provider>;
 };
 
-const useDataContext = (): DataContextValue => {
+export const useDataContext = (): DataContextValue => {
   const context = useContext(DataContext);
   if (!context) {
     throw new Error('DataContext hooks must be used within a DataProvider');
@@ -88,7 +134,14 @@ export const useCaseData = (): CaseData => {
   return caseData;
 };
 
+export const useEnrichedCaseData = () => {
+  const { enrichedCaseData } = useDataContext();
+  return enrichedCaseData;
+};
+
 export const useActiveSubject = (): Subject => {
   const { subject } = useDataContext();
   return subject;
 };
+
+export default DataProvider;

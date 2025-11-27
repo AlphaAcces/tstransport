@@ -2,7 +2,7 @@ import React from 'react';
 import { View, ActionItem } from '../../types';
 import { ArrowRight, ListChecks } from 'lucide-react';
 import { Tag } from '../Shared/Tag';
-import { useCaseData } from '../../context/DataContext';
+import { useEnrichedCaseData } from '../../context/DataContext';
 
 interface PriorityActionsCardProps {
     onNavigate: (view: View) => void;
@@ -21,13 +21,12 @@ const priorityColorMap: Record<ActionItem['priority'], 'red' | 'yellow' | 'blue'
 }
 
 export const PriorityActionsCard: React.FC<PriorityActionsCardProps> = ({ onNavigate }) => {
-    const { actionsData } = useCaseData();
+    const { priorityActions } = useEnrichedCaseData();
 
-    const topActions = [...actionsData]
-        .filter(a => a.priority === 'Påkrævet' || a.priority === 'Høj')
+    const topActions = [...priorityActions]
         .sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority])
         .slice(0, 3);
-    
+
     return (
         <div className="bg-component-dark p-6 rounded-lg border border-border-dark h-full flex flex-col">
             <h3 className="text-md font-bold text-gray-200 mb-4 border-b border-border-dark pb-2 flex items-center">
