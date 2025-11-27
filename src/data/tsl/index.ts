@@ -14,6 +14,7 @@ import { scenariosData } from './scenarios';
 import { buildExecutiveSummaryData } from '../executive';
 
 export const tslData: CaseData = {
+    tenantId: 'default-tenant',
     personData,
     companiesData,
     financialData,

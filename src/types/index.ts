@@ -147,6 +147,7 @@ import type { NetworkNode, NetworkEdge } from './network';
  * Contains all domain data in a unified structure.
  */
 export interface CaseData {
+  tenantId: string;
   personData: PersonData;
   companiesData: Company[];
   financialData: FinancialYear[];

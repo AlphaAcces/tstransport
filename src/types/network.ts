@@ -32,6 +32,7 @@ export type NetworkNodeType =
  */
 export interface NetworkNode {
   id: string;
+  tenantId: string;
   label: string;
   sublabel: string;
   type: NodeType;
@@ -78,6 +79,7 @@ export type NetworkEdgeType =
 export interface NetworkEdge {
   from: string;
   to: string;
+  tenantId: string;
   type: 'ownership' | 'historical' | 'transaction';
   weight?: number; // For edge thickness and importance
   isHighlighted?: boolean; // For relation highlighting

@@ -46,6 +46,14 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) 
           return;
         }
 
+        // Filter data by tenant ID for multi-tenant isolation
+        if (tenantId && data.tenantId !== tenantId) {
+          console.warn(`Case data tenantId (${data.tenantId}) does not match active tenantId (${tenantId})`);
+          setErrorKey('tenantMismatch');
+          setIsLoading(false);
+          return;
+        }
+
         // Log data access for audit trail (if tenant context exists)
         if (tenantId) {
           createAuditEntry(

@@ -17,6 +17,7 @@ import { buildExecutiveSummaryData } from '../executive';
 // This ensures the app doesn't crash when switching subjects.
 // It can be populated with real data later.
 export const umitData: CaseData = {
+    tenantId: 'default-tenant',
     personData,
     companiesData,
     financialData,
