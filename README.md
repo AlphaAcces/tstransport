@@ -8,7 +8,7 @@ This repository contains the TSL Intelligence Console — a multi-tenant React +
 - **AI integration:** client-side adapters in `src/lib/ai` and a network analysis service in `src/domains/network/services/aiNetworkAnalysisService.ts` which caches results and exposes a pub/sub interface.
 - **Tenant & RBAC:** central `TenantProvider` supplies tenant information and permissions. UI respects `ai:use` (consume overlays) and `ai:configure` (manage tenant key).
 - **Server (local/dev):** a lightweight Express service in `server/` provides encrypted storage for tenant AI keys (`/api/tenant/:id/aiKey`). AES‑256‑GCM encryption is used; master key comes from `process.env.AI_KEY_MASTER`.
-- **Export module (planned):** modular export pipeline for PDF/Excel/CSV/JSON under `src/domains/export/` (Del 8).
+- **Export module:** færdig pipeline for PDF/Excel/CSV/JSON under `src/domains/export/`. PDF bruger `jspdf` + `html2canvas`, Excel bygger flere faner med `exceljs`.
 
 ## Quickstart (development)
 
@@ -52,7 +52,8 @@ node ./server/index.js
 
 ```pwsh
 npm run build
-npm test
+npm test --silent -- run   # Vitest (e2e tests er ekskluderet)
+npm run test:e2e           # Playwright UI/e2e når du behøver det
 ```
 
 ## Tenant AI key API
@@ -73,11 +74,7 @@ The provided `server/` implementation uses a simple JSON file for storage and re
 
 ## Testing
 
-- Unit tests: Vitest
-
-```pwsh
-npm test
-```
+- Unit tests: Vitest (`npm test --silent -- run`)
 
 - Server integration tests: Supertest + Vitest (see `server/__tests__/aiKeyApi.test.ts`).
 
@@ -88,6 +85,13 @@ npm i -D @playwright/test playwright
 npx playwright install --with-deps
 npm run test:e2e
 ```
+
+## Export pipelines
+
+- ExportModal (Shared) lader operatører vælge format via dropdown/knapper, viser AI-toggle (respekterer `usePermission('ai:use')`), preview-log og loading-hinters for store datasæt.
+- `pdfRenderer.ts` samler hero-threat card, KPI-kort, risikobadges og AI-overlay i et 1024px grid, renderer via `html2canvas` (scale 3×) og sender resultatet til `jspdf` med dateret footer/pagination.
+- `excelRenderer.ts` anvender `exceljs` til at bygge `Overview`, `Nodes`, `Edges`, `AI_Insights` og `KPIs` faner med formatterede kolonner og cover sheet metadata.
+- `exportOrchestrator.ts` sanitiserer payloads automatisk hvis brugeren mangler `ai:use`, og en Vitest-suite demonstrerer begge RBAC-grene.
 
 Full browser UI e2e tests (AI toggle visibility, overlay rendering) are planned next; they require the frontend dev server to be running during the tests and will be added to CI when stable.
 

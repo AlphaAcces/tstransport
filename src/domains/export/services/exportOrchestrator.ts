@@ -6,20 +6,16 @@ import jsonExporter from '../renderers/jsonExporter';
 
 export class ExportOrchestrator {
   async export(payload: ExportPayload, format: ExportFormat): Promise<Uint8Array | string> {
-    // Ensure payload includes tenant and RBAC-relevant info
-    const { tenant, aiOverlay } = payload;
-
-    // Optionally transform payload here (filter by tenant permissions, redact, etc.)
-    // For now we forward payload to renderers which can implement format-specific logic.
+    const sanitized = sanitizePayload(payload);
     switch (format) {
       case 'pdf':
-        return pdfRenderer.renderPdf(payload);
+        return pdfRenderer.renderPdf(sanitized);
       case 'excel':
-        return excelRenderer.renderExcel(payload);
+        return excelRenderer.renderExcel(sanitized);
       case 'csv':
-        return csvRenderer.renderCsv(payload);
+        return csvRenderer.renderCsv(sanitized);
       case 'json':
-        return jsonExporter.renderJson(payload);
+        return jsonExporter.renderJson(sanitized);
       default:
         throw new Error('unsupported export format');
     }
@@ -27,6 +23,36 @@ export class ExportOrchestrator {
 }
 
 export default new ExportOrchestrator();
+
+export function sanitizePayload(payload: ExportPayload): ExportPayload {
+  const canUseAi = payload.permissions?.includes('ai:use');
+  if (canUseAi) {
+    return payload;
+  }
+
+  const stripAiFromNode = (node: any) => ({ ...node, ai: undefined });
+  const stripAiFromEdge = (edge: any) => ({ ...edge, ai: undefined });
+  const scrubMetadata = (metadata?: Record<string, unknown>) => {
+    if (!metadata) return metadata;
+    const clone: Record<string, unknown> = { ...metadata };
+    Object.keys(clone).forEach(key => {
+      if (key.toLowerCase().includes('ai')) {
+        delete clone[key];
+      }
+    });
+    return clone;
+  };
+
+  return {
+    ...payload,
+    aiOverlay: null,
+    nodes: payload.nodes?.map(stripAiFromNode),
+    edges: payload.edges?.map(stripAiFromEdge),
+    aiInsights: undefined,
+    metadata: scrubMetadata(payload.metadata as Record<string, unknown> | undefined),
+  };
+}
+
 /**
  * Export Orchestrator Service
  *
