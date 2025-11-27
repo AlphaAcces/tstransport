@@ -1,6 +1,7 @@
 import { PersonData } from "../../types";
 
 export const personData: PersonData = {
+  id: 'uc',
   name: 'Ümit Cetin',
   aliases: ['Umit Cetin'],
   birthYear: '1978 (estimeret)',

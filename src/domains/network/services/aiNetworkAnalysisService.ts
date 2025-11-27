@@ -6,7 +6,7 @@
  * complete. Integrates with `lib/ai` (Gemini) when an API key is available.
  */
 
-import type { NetworkNode, NetworkEdge } from '../../../../types/network';
+import type { NetworkNode, NetworkEdge } from '../../../types/network';
 
 const CACHE_KEY = 'ai:network:cache:v1';
 
@@ -65,7 +65,7 @@ export function setCachedAnalysis(entry: AiEntry) {
 
 export function subscribeToNetworkAnalysis(listener: (entry: AiEntry) => void) {
   listeners.add(listener);
-  return () => listeners.delete(listener);
+  return () => { listeners.delete(listener); };
 }
 
 interface AnalyzeOptions {
@@ -118,7 +118,7 @@ export async function analyzeNetworkItem({ node, edge, apiKey }: AnalyzeOptions)
   }
 }
 
-export async function analyzeWholeGraph(nodes: NetworkNode[], edges: NetworkEdge[], apiKey?: string) {
+export async function analyzeWholeGraph(nodes: NetworkNode[], _edges: NetworkEdge[], apiKey?: string) {
   // For performance, analyze only nodes with size, high risk, or sample set; keep it simple for now
   const toAnalyze = nodes.slice(0, 50);
   await Promise.all(toAnalyze.map(n => analyzeNetworkItem({ node: n, apiKey })));

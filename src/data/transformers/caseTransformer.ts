@@ -75,6 +75,7 @@ export interface TransformResult {
 // ============================================================================
 
 const defaultPersonData: PersonData = {
+  id: 'unknown',
   name: 'Unknown',
   aliases: [],
   birthYear: '',
