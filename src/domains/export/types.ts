@@ -1,3 +1,44 @@
+export type TenantInfo = {
+  id: string;
+  name?: string;
+  aiKeyPresent?: boolean;
+};
+
+export type AiOverlay = {
+  enabled: boolean;
+  sensitivity?: number;
+  categories?: string[];
+};
+
+export type NetworkNode = {
+  id: string;
+  label?: string;
+  ai?: { score?: number; category?: string } | null;
+};
+
+export type NetworkEdge = {
+  id: string;
+  source: string;
+  target: string;
+  ai?: { score?: number; category?: string } | null;
+};
+
+export type ExportPayload = {
+  tenant: TenantInfo;
+  aiOverlay: AiOverlay | null;
+  nodes?: NetworkNode[];
+  edges?: NetworkEdge[];
+  metadata?: Record<string, unknown>;
+  kpis?: Array<{ label: string; value: string | number; trend?: 'up' | 'down' | 'flat' }>;
+  risks?: Array<{ title: string; severity: 'low' | 'medium' | 'high'; summary?: string }>;
+  finance?: { revenue?: number; ebitda?: number; burnRate?: number; currency?: string };
+  aiInsights?: Array<{ label: string; description: string; category?: string; score?: number }>;
+  permissions?: string[];
+};
+
+export type ExportFormat = 'pdf' | 'excel' | 'csv' | 'json';
+
+export type SanitizedPayload = ExportPayload & { aiOverlay: AiOverlay | null };
 /**
  * Export Domain Types
  *

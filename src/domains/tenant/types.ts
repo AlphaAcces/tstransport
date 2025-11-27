@@ -38,6 +38,8 @@ export interface TenantConfig {
   branding: TenantBranding;
   features: TenantFeatures;
   limits: TenantLimits;
+  // Optional tenant-scoped AI API key (stored encrypted at rest)
+  aiKey?: string | null;
 }
 
 /**
@@ -241,6 +243,7 @@ export interface TenantContextActions {
   clearTenant: () => void;
   updateBranding: (branding: Partial<TenantBranding>) => void;
   updateFeatures: (features: Partial<TenantFeatures>) => void;
+  updateAiKey: (aiKey?: string | null) => void;
   hasPermission: (permission: Permission) => boolean;
   hasFeature: (feature: keyof TenantFeatures) => boolean;
   hasModule: (module: TenantModule) => boolean;

@@ -1,66 +1,108 @@
 # TSL Intelligence Console
 
-![Executive console banner](https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6)
+This repository contains the TSL Intelligence Console — a multi-tenant React + Vite application for investigations, network analysis and reporting. It includes support for AI overlays on networks, tenant‑scoped AI keys (server‑side encrypted), a pluggable events engine, KPI modules, export pipelines and rebranding-ready UI work.
 
-## Run and deploy your AI Studio app
+## High-level architecture
 
-This contains everything you need to run your app locally.
+- **Frontend:** React + Vite app in `src/` with modular components (Dashboard, NetworkGraph, Executive, Settings, etc.).
+- **AI integration:** client-side adapters in `src/lib/ai` and a network analysis service in `src/domains/network/services/aiNetworkAnalysisService.ts` which caches results and exposes a pub/sub interface.
+- **Tenant & RBAC:** central `TenantProvider` supplies tenant information and permissions. UI respects `ai:use` (consume overlays) and `ai:configure` (manage tenant key).
+- **Server (local/dev):** a lightweight Express service in `server/` provides encrypted storage for tenant AI keys (`/api/tenant/:id/aiKey`). AES‑256‑GCM encryption is used; master key comes from `process.env.AI_KEY_MASTER`.
+- **Export module:** færdig pipeline for PDF/Excel/CSV/JSON under `src/domains/export/`. PDF bruger `jspdf` + `html2canvas`, Excel bygger flere faner med `exceljs`.
 
-View your app in AI Studio: [https://ai.studio/apps/drive/16vIahFq1nG7S_oXIMVsen0gKYBOU0e-0](https://ai.studio/apps/drive/16vIahFq1nG7S_oXIMVsen0gKYBOU0e-0)
+## Quickstart (development)
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
+Prerequisites: Node.js 16+ and Git.
 
 1. Install dependencies:
-   `npm install`
-2. Set the `VITE_GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
-
-## Build & Bundle Strategy
-
-- Vite 7 builds now rely on explicit manual chunks (`pdf-jspdf`, `pdf-html2canvas`, `charts-core`, `charts-cartesian`, `charts-wrappers`, `charts-polar`, `charts-shapes`, `charts-components`, `charts-utils`, `ai-gemini`, `ai-client`, `icons`, `case-data`, `pdf-executive`, `shared-kpi`).
-- The chunk naming mirrors the major feature areas; keep `vite.config.ts` and this section in sync when introducing or removing chunks.
-- Heavy chart libraries (`recharts`) and AI tooling (`@google/generative-ai`) are isolated so that dashboard navigation keeps a lean initial bundle while async views pull their weights on demand.
-- Shared KPI components have their own chunk to avoid re-hydrating UI chrome when navigating between analytics-heavy views.
-
-## PDF Executive Export
-
-- The export now renders a light, board-ready grid of cards (Financials, Risks, Action Radar) with consistent padding and typography.
-- Charts are rasterised with `html2canvas` at a minimum scale of 3× to keep vector-style sharpness in jsPDF v3.0.4.
-- Risk scores appear as high-contrast badges, while deadlines, board items, and critical events are grouped with icon bullets; footer metadata adds date and pagination automatically.
-- When testing locally: trigger the export from the Executive summary view and verify that cards, charts, and badges align with the current subject data.
-
-## Tooling Notes
-
-- TypeScript is pinned to `~5.5.x` to remain compatible with the current ESLint plugin ecosystem; update both when bumping ESLint.
-- `npm run lint`, `npm run build`, and `npm audit` must stay green before committing. The PDF export depends on dynamic imports, so always exercise the executive view after dependency changes.
-
-## Test Roadmap
-
-- **Export payload builder:** unit-test that `createExecutiveExportPayload` derives financial metrics, risk highlights, and action timelines consistently for both TSL and Ümit cases.
-- **Lazy-loaded views:** add render smoke tests to confirm the Suspense fallbacks mount and resolve for dashboard helpers and chart-centric screens.
-- **PDF rendering hooks:** cover the `generateExecutiveReportPdf` flow with mocks for `jspdf`/`html2canvas` to assert card ordering, badge colours, and footer metadata.
-
-## Visual preview & Playwright
-
-To generate deterministic screenshots locally (TopBar, nested breadcrumbs, saved-views):
-
-1. Install Playwright and browsers:
 
 ```pwsh
-npm install --save-dev playwright
+npm install
+```
+
+2. Environment variables
+
+Create a `.env.local` (or set env vars) with at least the following keys:
+
+```
+VITE_GEMINI_API_KEY=your_gemini_key_here
+AI_KEY_MASTER=<base64-encoded-32-byte-master-key>
+```
+
+Notes:
+- `AI_KEY_MASTER` must be a 32‑byte key encoded in base64. Use a proper secret manager (KMS, HashiCorp Vault, Azure Key Vault) in production — do not check secrets into source control.
+- The frontend will fetch/store tenant AI keys only via the server API; it does not persist keys in `localStorage`.
+
+3. Run locally
+
+- Start the frontend (Vite):
+
+```pwsh
+npm run dev
+```
+
+- Start the local AI-key service (optional, used by `AiKeySettings`):
+
+```pwsh
+node ./server/index.js
+# or with tsx for TS: npx tsx server/index.ts
+```
+
+4. Build and test
+
+```pwsh
+npm run build
+npm test --silent -- run   # Vitest (e2e tests er ekskluderet)
+npm run test:e2e           # Playwright UI/e2e når du behøver det
+```
+
+## Tenant AI key API
+
+Routes (example server implementation in `server/`):
+
+- `GET /api/tenant/:id/aiKey` — returns `{ exists: boolean }`. Requires `ai:configure` permission.
+- `PUT /api/tenant/:id/aiKey` — body `{ aiKey: string | null }`. Stores (or deletes) encrypted key. Requires `ai:configure`.
+
+The provided `server/` implementation uses a simple JSON file for storage and reads `x-user-permissions` header to simulate RBAC in development/testing. Replace this with your real auth integration in production.
+
+## New modules (summary)
+
+- `src/domains/network/services/aiNetworkAnalysisService.ts`: analysis + cache + pub/sub.
+- `src/components/Person/NetworkGraph.tsx`: AI overlay UI (toggle, sensitivity, category filters) and visuals.
+- `src/domains/tenant/TenantContext.tsx`: tenant state, `aiKey?: string | null`, `updateAiKey` and `useOptionalTenant`.
+- `src/components/Settings/AiKeySettings.tsx`: frontend integration to call server API (never stores keys client‑side).
+
+## Testing
+
+- Unit tests: Vitest (`npm test --silent -- run`)
+
+- Server integration tests: Supertest + Vitest (see `server/__tests__/aiKeyApi.test.ts`).
+
+- Playwright (e2e): scaffolded Playwright tests (API-level RBAC checks) are included. To run Playwright tests and install browsers:
+
+```pwsh
+npm i -D @playwright/test playwright
 npx playwright install --with-deps
+npm run test:e2e
 ```
 
-2. Run the composite script which starts the dev server, waits for `http://localhost:5173` and runs the screenshot flow:
+## Export pipelines
 
-```pwsh
-npm run preview-shots
-```
+- ExportModal (Shared) lader operatører vælge format via dropdown/knapper, viser AI-toggle (respekterer `usePermission('ai:use')`), preview-log og loading-hinters for store datasæt.
+- `pdfRenderer.ts` samler hero-threat card, KPI-kort, risikobadges og AI-overlay i et 1024px grid, renderer via `html2canvas` (scale 3×) og sender resultatet til `jspdf` med dateret footer/pagination.
+- `excelRenderer.ts` anvender `exceljs` til at bygge `Overview`, `Nodes`, `Edges`, `AI_Insights` og `KPIs` faner med formatterede kolonner og cover sheet metadata.
+- `exportOrchestrator.ts` sanitiserer payloads automatisk hvis brugeren mangler `ai:use`, og en Vitest-suite demonstrerer begge RBAC-grene.
 
-Screenshots will be written to the `screenshots/` directory: `screenshot-topbar.png`, `screenshot-nested-breadcrumbs.png`, `screenshot-saved-views.png`.
+Full browser UI e2e tests (AI toggle visibility, overlay rendering) are planned next; they require the frontend dev server to be running during the tests and will be added to CI when stable.
 
-The app exposes a dev-only helper `window.__navigateTo` for deterministic navigation during screenshotting. Do not rely on this API in production code.
+## PR & CI guidance
+
+- Ensure `npm run build` and `npm test` pass on your branch.
+- Security PR (`chore(security): add server-side encrypted tenant AI key API`) includes server code, server tests and the frontend change to `AiKeySettings`.
+
+## Next steps I can take for you
+
+- Open or update the PR for the server API so it's ready for review.
+- Add full Playwright browser UI tests for AI toggle/overlay flows.
+- Start the export refactor (Del 8) on a new feature branch and scaffold `src/domains/export/`.
+

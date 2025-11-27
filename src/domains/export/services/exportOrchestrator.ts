@@ -1,3 +1,58 @@
+import { ExportPayload, ExportFormat } from '../types';
+import pdfRenderer from '../renderers/pdfRenderer';
+import excelRenderer from '../renderers/excelRenderer';
+import csvRenderer from '../renderers/csvRenderer';
+import jsonExporter from '../renderers/jsonExporter';
+
+export class ExportOrchestrator {
+  async export(payload: ExportPayload, format: ExportFormat): Promise<Uint8Array | string> {
+    const sanitized = sanitizePayload(payload);
+    switch (format) {
+      case 'pdf':
+        return pdfRenderer.renderPdf(sanitized);
+      case 'excel':
+        return excelRenderer.renderExcel(sanitized);
+      case 'csv':
+        return csvRenderer.renderCsv(sanitized);
+      case 'json':
+        return jsonExporter.renderJson(sanitized);
+      default:
+        throw new Error('unsupported export format');
+    }
+  }
+}
+
+export default new ExportOrchestrator();
+
+export function sanitizePayload(payload: ExportPayload): ExportPayload {
+  const canUseAi = payload.permissions?.includes('ai:use');
+  if (canUseAi) {
+    return payload;
+  }
+
+  const stripAiFromNode = (node: any) => ({ ...node, ai: undefined });
+  const stripAiFromEdge = (edge: any) => ({ ...edge, ai: undefined });
+  const scrubMetadata = (metadata?: Record<string, unknown>) => {
+    if (!metadata) return metadata;
+    const clone: Record<string, unknown> = { ...metadata };
+    Object.keys(clone).forEach(key => {
+      if (key.toLowerCase().includes('ai')) {
+        delete clone[key];
+      }
+    });
+    return clone;
+  };
+
+  return {
+    ...payload,
+    aiOverlay: null,
+    nodes: payload.nodes?.map(stripAiFromNode),
+    edges: payload.edges?.map(stripAiFromEdge),
+    aiInsights: undefined,
+    metadata: scrubMetadata(payload.metadata as Record<string, unknown> | undefined),
+  };
+}
+
 /**
  * Export Orchestrator Service
  *

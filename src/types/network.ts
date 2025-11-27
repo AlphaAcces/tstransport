@@ -45,6 +45,14 @@ export interface NetworkNode {
   isHighlighted?: boolean; // For relation highlighting
   size?: number; // For node sizing based on importance
   connections?: number; // Number of connections for prioritization
+  // AI analysis overlay (optional)
+  ai?: {
+    score: number; // 0-100
+    sentiment?: 'positive' | 'neutral' | 'negative';
+    category?: 'economy' | 'risk' | 'legal' | 'social' | 'other';
+    source?: string; // e.g., 'gemini' or 'cache'
+    generatedAt?: string; // ISO timestamp
+  } | null;
 }
 
 // ============================================================================
@@ -74,6 +82,14 @@ export interface NetworkEdge {
   weight?: number; // For edge thickness and importance
   isHighlighted?: boolean; // For relation highlighting
   label?: string; // Optional edge label
+  // Optional AI annotation for relationships
+  ai?: {
+    score?: number;
+    sentiment?: 'positive' | 'neutral' | 'negative';
+    category?: 'economy' | 'risk' | 'legal' | 'social' | 'other';
+    source?: string;
+    generatedAt?: string;
+  } | null;
 }
 
 // ============================================================================

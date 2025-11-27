@@ -1,5 +1,5 @@
 import { useDomainViewModel } from '../../shared/hooks/useDomainData';
-import type { ExecutiveSummaryViewProps } from '../types';
 
+// The view model returns the executive summary payload from the case data.
 export const useExecutiveSummaryViewModel = () =>
-  useDomainViewModel<ExecutiveSummaryViewProps>(({ caseData }) => caseData.executiveSummary);
+  useDomainViewModel(({ caseData }) => caseData.executiveSummary);
