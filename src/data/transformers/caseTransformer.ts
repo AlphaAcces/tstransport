@@ -39,6 +39,7 @@ import { validateCaseData, type ValidationResult } from '../schemas/caseSchema';
  * Raw data input that may have partial or unvalidated fields.
  */
 export interface RawCaseData {
+  tenantId?: string;
   personData?: Partial<PersonData>;
   companiesData?: Partial<Company>[];
   financialData?: Partial<FinancialYear>[];
@@ -144,6 +145,7 @@ export function transformCaseData(raw: RawCaseData): TransformResult {
 
   // Transform with defaults
   const data: CaseData = {
+    tenantId: raw.tenantId || 'default-tenant',
     personData: {
       ...defaultPersonData,
       ...raw.personData,

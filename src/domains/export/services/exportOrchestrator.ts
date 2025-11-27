@@ -1,4 +1,18 @@
-import { ExportPayload, ExportFormat } from '../types';
+/**
+ * Export Orchestrator Service
+ *
+ * Coordinates the export process across different formats
+ * and renderers. Provides a unified API for triggering exports.
+ */
+
+import type {
+  ExportFormat,
+  ExportOptions,
+  ExportPayload,
+  ExportResult,
+  ExportRenderer,
+  ChartImage,
+} from '../types';
 import pdfRenderer from '../renderers/pdfRenderer';
 import excelRenderer from '../renderers/excelRenderer';
 import csvRenderer from '../renderers/csvRenderer';
@@ -54,22 +68,6 @@ export function sanitizePayload(payload: ExportPayload): ExportPayload {
 }
 
 /**
- * Export Orchestrator Service
- *
- * Coordinates the export process across different formats
- * and renderers. Provides a unified API for triggering exports.
- */
-
-import type {
-  ExportFormat,
-  ExportOptions,
-  ExportPayload,
-  ExportResult,
-  ExportRenderer,
-  ChartImage,
-} from '../types';
-
-/**
  * Registry of available renderers
  */
 const renderers = new Map<ExportFormat, ExportRenderer>();
@@ -122,9 +120,9 @@ export function generateFilename(
 export function preparePayload(
   subject: { id: string; name: string; type: 'corporate' | 'personal' },
   data: {
-    financial: ExportPayload['financial'];
-    risk: ExportPayload['risk'];
-    actions: ExportPayload['actions'];
+    financial?: ExportPayload['financial'];
+    risk?: ExportPayload['risk'];
+    actions?: ExportPayload['actions'];
   },
   options: { locale?: string; currency?: string; charts?: ChartImage[] } = {}
 ): ExportPayload {

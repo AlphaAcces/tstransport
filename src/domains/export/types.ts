@@ -1,3 +1,10 @@
+/**
+ * Export Domain Types
+ *
+ * Type definitions for the export module that handles
+ * PDF, Excel, and other export formats.
+ */
+
 export type TenantInfo = {
   id: string;
   name?: string;
@@ -9,42 +16,6 @@ export type AiOverlay = {
   sensitivity?: number;
   categories?: string[];
 };
-
-export type NetworkNode = {
-  id: string;
-  label?: string;
-  ai?: { score?: number; category?: string } | null;
-};
-
-export type NetworkEdge = {
-  id: string;
-  source: string;
-  target: string;
-  ai?: { score?: number; category?: string } | null;
-};
-
-export type ExportPayload = {
-  tenant: TenantInfo;
-  aiOverlay: AiOverlay | null;
-  nodes?: NetworkNode[];
-  edges?: NetworkEdge[];
-  metadata?: Record<string, unknown>;
-  kpis?: Array<{ label: string; value: string | number; trend?: 'up' | 'down' | 'flat' }>;
-  risks?: Array<{ title: string; severity: 'low' | 'medium' | 'high'; summary?: string }>;
-  finance?: { revenue?: number; ebitda?: number; burnRate?: number; currency?: string };
-  aiInsights?: Array<{ label: string; description: string; category?: string; score?: number }>;
-  permissions?: string[];
-};
-
-export type ExportFormat = 'pdf' | 'excel' | 'csv' | 'json';
-
-export type SanitizedPayload = ExportPayload & { aiOverlay: AiOverlay | null };
-/**
- * Export Domain Types
- *
- * Type definitions for the export module that handles
- * PDF, Excel, and other export formats.
- */
 
 /**
  * Supported export formats
@@ -167,20 +138,35 @@ export interface ActionsExportData {
 }
 
 /**
- * Complete export payload
+ * Complete export payload - unified type supporting both AI/tenant exports and executive reports
  */
 export interface ExportPayload {
-  subject: {
+  // Common fields
+  subject?: {
     id: string;
     name: string;
     type: 'corporate' | 'personal';
   };
-  generatedAt: string;
-  locale: string;
-  currency: string;
-  financial: FinancialExportData;
-  risk: RiskExportData;
-  actions: ActionsExportData;
+  generatedAt?: string;
+  locale?: string;
+  currency?: string;
+  
+  // AI/Tenant export fields
+  tenant?: TenantInfo;
+  aiOverlay?: AiOverlay | null;
+  nodes?: Array<{ id: string; label?: string; ai?: { score?: number; category?: string } | null }>;
+  edges?: Array<{ id: string; source: string; target: string; ai?: { score?: number; category?: string } | null }>;
+  metadata?: Record<string, unknown>;
+  kpis?: Array<{ label: string; value: string | number; trend?: 'up' | 'down' | 'flat' }>;
+  risks?: Array<{ title: string; severity: 'low' | 'medium' | 'high'; summary?: string }>;
+  finance?: { revenue?: number; ebitda?: number; burnRate?: number; currency?: string };
+  aiInsights?: Array<{ label: string; description: string; category?: string; score?: number }>;
+  permissions?: string[];
+  
+  // Executive report fields
+  financial?: FinancialExportData;
+  risk?: RiskExportData;
+  actions?: ActionsExportData;
   charts?: ChartImage[];
 }
 
