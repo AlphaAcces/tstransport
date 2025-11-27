@@ -109,16 +109,19 @@ const Node: React.FC<{
     onMouseLeave: () => void,
     onClick?: () => void,
     scale?: number,
-    aiEnabled?: boolean
-}> = ({ node, onMouseEnter, onMouseLeave, onClick, scale = 1, aiEnabled = false }) => {
+    aiEnabled?: boolean,
+    aiSensitivity?: number,
+    enabledCategories?: Set<string>
+}> = ({ node, onMouseEnter, onMouseLeave, onClick, scale = 1, aiEnabled = false, aiSensitivity = 1, enabledCategories = new Set() }) => {
     const riskColor = riskColors[node.riskLevel] || riskColors.None;
     const typeColor = typeColors[node.type] || typeColors.company;
     const statusColor = statusColors[node.status || 'active'];
     const isHighlighted = node.isHighlighted;
 
     // If AI overlay present, map category -> color and score -> extra scale/opacity
-    const aiCategory = aiEnabled ? node.ai?.category : undefined;
-    const aiScore = aiEnabled && typeof node.ai?.score === 'number' ? node.ai.score : undefined;
+    const rawCategory = aiEnabled ? node.ai?.category : undefined;
+    const aiCategory = rawCategory && enabledCategories.has(rawCategory.toLowerCase()) ? rawCategory : undefined;
+    const aiScore = aiEnabled && typeof node.ai?.score === 'number' && aiCategory ? node.ai.score : undefined;
     const aiCategoryColors: Record<string, string> = {
         economy: '#f6ad55',
         risk: '#e53e3e',
@@ -131,7 +134,7 @@ const Node: React.FC<{
 
     const aiColor = aiCategory ? (aiCategoryColors[aiCategory.toLowerCase()] || aiCategoryColors.other) : undefined;
 
-    const scoreScale = aiScore ? (1 + Math.min(0.9, aiScore / 100 * 0.9)) : 1;
+    const scoreScale = aiScore ? (1 + Math.min(0.9, (aiScore / 100 * 0.9) * aiSensitivity)) : 1;
     const width = nodeDimensions.width * (node.size || 1) * scale * scoreScale;
     const height = nodeDimensions.height * (node.size || 1) * scale * scoreScale;
 
@@ -235,12 +238,14 @@ const Edge: React.FC<{
     fromNode: NetworkNode,
     toNode: NetworkNode,
     onClick?: () => void,
-    aiEnabled?: boolean
-}> = ({ edge, fromNode, toNode, onClick, aiEnabled = false }) => {
+    aiEnabled?: boolean,
+    enabledCategories?: Set<string>
+}> = ({ edge, fromNode, toNode, onClick, aiEnabled = false, enabledCategories = new Set() }) => {
     const isHighlighted = edge.isHighlighted;
     const strokeWidth = Math.max(1, (edge.weight || 1) * 1.5);
     // If AI classification present on edge, color by category
-    const aiCat = aiEnabled ? edge.ai?.category : undefined;
+    const rawAiCat = aiEnabled ? edge.ai?.category : undefined;
+    const aiCat = rawAiCat && enabledCategories.has(rawAiCat.toLowerCase()) ? rawAiCat : undefined;
     const aiEdgeColors: Record<string, string> = {
         economy: '#f6ad55',
         risk: '#e53e3e',
@@ -392,6 +397,17 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
         x: 0, y: 0, width: 700, height: 400
     });
 
+    // AI UI controls
+    const [aiSensitivity, setAiSensitivity] = useState<number>(1);
+    const [enabledCategories, setEnabledCategories] = useState<Set<string>>(new Set(['economy','risk','legal','social','governance','socmint','other']));
+    const toggleCategory = useCallback((cat: string) => {
+        setEnabledCategories(prev => {
+            const next = new Set(Array.from(prev));
+            if (next.has(cat)) next.delete(cat); else next.add(cat);
+            return next;
+        });
+    }, []);
+
     // Tenant / RBAC (use optional tenant hook to avoid throwing in tests)
     const tenantCtx = useOptionalTenant();
     const canUseAi = tenantCtx ? tenantCtx.hasPermission('ai:use') : false;
@@ -422,12 +438,12 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
 
         (async () => {
             try {
-                await aiService.analyzeWholeGraph(allNodes, allEdges);
+                await aiService.analyzeWholeGraph(allNodes, allEdges, tenant?.aiKey ?? undefined);
             } catch (e) {
                 console.warn('Analyze whole graph failed', e);
             }
         })();
-    }, [aiEnabled, canUseAi, allNodes, allEdges]);
+    }, [aiEnabled, canUseAi, allNodes, allEdges, tenant?.aiKey]);
 
     // Use lazy loading for large networks (batchSize can be adjusted based on maxNodesToShow)
     const {
@@ -523,14 +539,28 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
         <div className="relative w-full h-full bg-base-darker rounded-lg overflow-hidden">
             {loadingState.isLoading && <LoadingIndicator />}
 
-            {/* AI overlay toggle (top-right) */}
-            <div className="absolute top-4 right-4 z-20 flex items-center space-x-2">
-                <div className="text-xs text-gray-300">AI overlay</div>
-                <label className={`inline-flex relative items-center cursor-pointer ${!canUseAi ? 'opacity-50 cursor-not-allowed' : ''}`}>
-                    <input type="checkbox" className="sr-only peer" checked={aiEnabled && canUseAi} onChange={() => { if (!canUseAi) return; setAiEnabled(v=>!v); }} aria-label="Toggle AI overlays" />
-                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-primary relative" />
-                </label>
-            </div>
+                    {/* AI controls (top-right) */}
+                    <div className="absolute top-4 right-4 z-20 bg-base-dark p-2 rounded-md border border-border-dark">
+                        <div className="flex items-center space-x-2">
+                            <div className="text-xs text-gray-300">AI overlay</div>
+                            <label className={`inline-flex relative items-center cursor-pointer ${!canUseAi ? 'opacity-50 cursor-not-allowed' : ''}`}>
+                                <input type="checkbox" className="sr-only peer" checked={aiEnabled && canUseAi} onChange={() => { if (!canUseAi) return; setAiEnabled(v=>!v); }} aria-label="Toggle AI overlays" />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:bg-primary relative" />
+                            </label>
+                        </div>
+
+                        <div className="mt-2">
+                            <label className="text-xs text-gray-400">Score sensitivity</label>
+                            <input type="range" min="0" max="2" step="0.1" value={(window as any).__aiSensitivity ?? 1} onChange={(e)=>{ const v = Number(e.target.value); (window as any).__aiSensitivity = v; setAiSensitivity(v); }} className="w-full" aria-label="AI sensitivity" />
+                        </div>
+
+                        <div className="mt-2 text-xs text-gray-300">Categories</div>
+                        <div className="grid grid-cols-2 gap-1 mt-1">
+                            {['economy','risk','legal','social','governance','socmint','other'].map(cat => (
+                                <label key={cat} className="flex items-center space-x-2 text-xs"><input type="checkbox" checked={enabledCategories.has(cat)} onChange={() => toggleCategory(cat)} /> <span>{cat}</span></label>
+                            ))}
+                        </div>
+                    </div>
 
             <svg
                 width="100%"
@@ -565,6 +595,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
                             toNode={toNode}
                             onClick={() => handleEdgeClick(edge)}
                             aiEnabled={aiEnabled && canUseAi}
+                            enabledCategories={enabledCategories}
                         />
                     );
                 })}
@@ -579,6 +610,8 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
                         onClick={() => handleNodeClick(node)}
                         scale={selectedNodeId === node.id ? 1.1 : 1}
                         aiEnabled={aiEnabled && canUseAi}
+                        aiSensitivity={aiSensitivity}
+                        enabledCategories={enabledCategories}
                     />
                 )) : nodesWithAi.map(node => (
                     <Node
@@ -589,6 +622,8 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
                         onClick={() => handleNodeClick(node)}
                         scale={selectedNodeId === node.id ? 1.1 : 1}
                         aiEnabled={aiEnabled && canUseAi}
+                        aiSensitivity={aiSensitivity}
+                        enabledCategories={enabledCategories}
                     />
                 ))}
 

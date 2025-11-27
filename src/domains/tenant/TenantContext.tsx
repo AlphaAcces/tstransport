@@ -195,6 +195,15 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({
     }
   }, [tenant]);
 
+  const updateAiKey = useCallback((aiKey?: string | null) => {
+    if (tenant) {
+      setTenantState({
+        ...tenant,
+        aiKey: aiKey ?? null,
+      });
+    }
+  }, [tenant]);
+
   const hasPermission = useCallback((permission: Permission): boolean => {
     if (!user) return false;
 
@@ -227,6 +236,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({
     clearTenant,
     updateBranding,
     updateFeatures,
+    updateAiKey,
     hasPermission,
     hasFeature,
     hasModule,
@@ -234,6 +244,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({
     tenant, user, isLoading, error,
     setTenant, setUser, clearTenant,
     updateBranding, updateFeatures,
+    updateAiKey,
     hasPermission, hasFeature, hasModule,
   ]);
 

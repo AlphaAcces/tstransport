@@ -47,6 +47,7 @@ export {
   DEFAULT_FEATURES,
   DEFAULT_ROLE_PERMISSIONS,
 } from './TenantContext';
+// Permission type already re-exported above from './types'
 
 // Isolation utilities
 export {

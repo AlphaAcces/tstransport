@@ -118,10 +118,10 @@ export async function analyzeNetworkItem({ node, edge, apiKey }: AnalyzeOptions)
   }
 }
 
-export async function analyzeWholeGraph(nodes: NetworkNode[], _edges: NetworkEdge[], apiKey?: string) {
+export async function analyzeWholeGraph(nodes: NetworkNode[], _edges: NetworkEdge[], apiKey?: string | null) {
   // For performance, analyze only nodes with size, high risk, or sample set; keep it simple for now
   const toAnalyze = nodes.slice(0, 50);
-  await Promise.all(toAnalyze.map(n => analyzeNetworkItem({ node: n, apiKey })));
+  await Promise.all(toAnalyze.map(n => analyzeNetworkItem({ node: n, apiKey: apiKey ?? undefined })));
 }
 
 export default {
