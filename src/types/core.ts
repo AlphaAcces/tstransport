@@ -30,7 +30,8 @@ export type View =
   | 'scenarios'
   | 'business'
   | 'personal'
-  | 'vault';
+  | 'vault'
+  | 'accessRequests';
 
 /**
  * Available investigation subjects

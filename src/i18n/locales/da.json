@@ -27,10 +27,96 @@
     "counterparties": "Modparter",
     "scenarios": "Scenarier",
     "vault": "Intel Vault",
+    "accessRequests": "Adgangsanmodninger",
     "savedViews": "Gemte visninger"
-  }
-  ,
+  },
+  "theme": {
+    "light": "Lyst",
+    "dark": "Mørkt",
+    "system": "System",
+    "switchToLight": "Skift til lyst tema",
+    "switchToDark": "Skift til mørkt tema",
+    "title": "Tema",
+    "description": "Vælg dit foretrukne farveskema"
+  },
+  "aiKey": {
+    "title": "AI API-nøgle",
+    "description": "Administrer din lejer-specifikke AI API-nøgle",
+    "inputLabel": "API-nøgle",
+    "inputLabelRotate": "Ny API-nøgle (rotation)",
+    "placeholder": "Indsæt din AI API-nøgle her",
+    "loading": "Tjekker gemt nøgle…",
+    "show": "Vis nøgle",
+    "hide": "Skjul nøgle",
+    "save": "Gem nøgle",
+    "rotate": "Rotér nøgle",
+    "saving": "Gemmer…",
+    "delete": "Slet nøgle",
+    "deleting": "Sletter…",
+    "lastRotated": "Sidst roteret",
+    "noPermission": "Du skal have ai:configure-tilladelse for at administrere AI-nøglen.",
+    "status": {
+      "configured": "Nøgle konfigureret",
+      "notConfigured": "Ingen nøgle konfigureret"
+    },
+    "deleteConfirm": {
+      "title": "Slet AI-nøgle",
+      "message": "Er du sikker på, at du vil slette AI API-nøglen? Denne handling kan ikke fortrydes, og AI-funktioner vil være deaktiveret, indtil en ny nøgle er konfigureret.",
+      "confirm": "Slet nøgle"
+    },
+    "error": {
+      "saveFailed": "Kunne ikke gemme API-nøglen. Prøv igen.",
+      "deleteFailed": "Kunne ikke slette API-nøglen. Prøv igen."
+    }
+  },
+  "accessRequests": {
+    "title": "Adgangsanmodninger",
+    "description": "Gennemgå og administrer adgangsanmodninger fra brugere",
+    "refresh": "Opdater",
+    "loading": "Indlæser anmodninger…",
+    "noRequests": "Ingen adgangsanmodninger",
+    "noRequestsHint": "Adgangsanmodninger vil blive vist her, når brugere anmoder om tilladelser",
+    "searchPlaceholder": "Søg efter navn, ressource eller begrundelse…",
+    "filters": "Filtre",
+    "deleteConfirm": "Er du sikker på, at du vil slette denne anmodning?",
+    "status": {
+      "pending": "Afventer",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "expired": "Udløbet"
+    },
+    "filterStatus": {
+      "all": "Alle statusser"
+    },
+    "filterType": {
+      "all": "Alle typer"
+    },
+    "stats": {
+      "total": "Samlede anmodninger",
+      "pending": "Afventer",
+      "approved": "Godkendt",
+      "rejected": "Afvist",
+      "avgReviewTime": "Gns. behandlingstid"
+    },
+    "justification": "Begrundelse",
+    "requester": "Anmoder",
+    "email": "E-mail",
+    "created": "Oprettet",
+    "expires": "Udløber",
+    "reviewInfo": "Gennemgangsinformation",
+    "reviewedBy": "Gennemgået af",
+    "approve": "Godkend",
+    "reject": "Afvis",
+    "delete": "Slet",
+    "rejectDialog": {
+      "title": "Afvis anmodning",
+      "notesLabel": "Afvisningsnoter (valgfrit)",
+      "notesPlaceholder": "Angiv en begrundelse for afvisning…"
+    }
+  },
   "common": {
+    "never": "Aldrig",
+    "cancel": "Annuller",
     "naShort": "N/A",
     "riskLevel": {
       "critical": "Kritisk",
@@ -80,6 +166,7 @@
     "passwordPlaceholder": "Indtast adgangskode",
     "submit": "Log ind",
     "submitting": "Logger ind…",
+    "securityNotice": "Sikret med hardware-nøgle autentifikation. Alle adgangsforsøg logges og overvåges.",
     "error": {
       "invalidCredentials": "Forkert brugernavn eller adgangskode"
     }
@@ -99,6 +186,20 @@
         "financial": "Likviditet",
         "sector": "Sektor & drift",
         "reputation": "Reputationsrisiko"
+      }
+    },
+    "threat": {
+      "title": "Trusselsniveau",
+      "fromPrevious": "fra forrige",
+      "activeAlerts": "Alarmer",
+      "riskFactors": "Faktorer",
+      "confidence": "Konfidens",
+      "levels": {
+        "low": "Lav",
+        "moderate": "Moderat",
+        "elevated": "Forhøjet",
+        "high": "Høj",
+        "critical": "Kritisk"
       }
     },
     "personal": {

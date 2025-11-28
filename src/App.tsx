@@ -11,6 +11,7 @@ import './i18n';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from './store';
 import { TenantProvider } from './domains/tenant';
+import { ThemeProvider } from './domains/tenant/ThemeContext';
 import type { TenantConfig, TenantUser } from './domains/tenant';
 import { tenantApi } from './domains/tenant/tenantApi';
 
@@ -29,6 +30,7 @@ const CounterpartiesView = lazy(() => import('./components/Counterparties/Counte
 const ScenariosView = lazy(() => import('./components/Scenarios/ScenariosView'));
 const ExecutiveSummaryView = lazy(() => import('./components/Executive/ExecutiveSummaryView').then(module => ({ default: module.ExecutiveSummaryView })));
 const IntelVaultView = lazy(() => import('./components/Vault/IntelVaultView'));
+const AccessRequestsView = lazy(() => import('./components/Settings/AccessRequestsView'));
 
 export const App: React.FC = () => {
   const [authUser, setAuthUser] = useState<{ id: string; role: 'admin' | 'user' } | null>(null);
@@ -149,6 +151,8 @@ export const App: React.FC = () => {
         return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><ActionsView /></ViewContainer>;
       case 'vault':
         return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><IntelVaultView /></ViewContainer>;
+      case 'accessRequests':
+        return <ViewContainer {...commonViewProps} breadcrumbs={navState.breadcrumbs}><AccessRequestsView /></ViewContainer>;
       default:
         return <DashboardView activeSubject={activeSubject} onNavigate={navigateTo} />;
     }
@@ -169,7 +173,11 @@ export const App: React.FC = () => {
   return (
     <ReduxProvider store={store}>
     <TenantProvider initialTenant={tenantConfig || undefined} initialUser={tenantUser || undefined}>
-    <div className="app-root app-zoom min-h-screen">
+    <ThemeProvider
+      darkScheme={tenantConfig?.branding?.colors}
+      lightScheme={tenantConfig?.branding?.colorsLight}
+    >
+    <div className="app-root app-zoom min-h-screen bg-[var(--color-background)]">
       <TopBar
         onToggleNav={() => setIsNavOpen(!isNavOpen)}
         activeSubject={activeSubject}
@@ -205,6 +213,7 @@ export const App: React.FC = () => {
       </main>
       {isNavOpen && <div className="fixed inset-0 bg-black/60 z-25 lg:hidden" onClick={() => setIsNavOpen(false)}></div>}
     </div>
+    </ThemeProvider>
     </TenantProvider>
     </ReduxProvider>
   );

@@ -19,6 +19,7 @@ import { LocaleSwitcher } from '../../domains/settings/components/LocaleSwitcher
 import { CountrySelector } from '../../domains/settings/components/CountrySelector';
 import { useNotifications } from '../../domains/notifications/hooks';
 import { PreferencesPanel } from '../Shared/PreferencesPanel';
+import { ThemeToggle } from '../Shared/ThemeToggle';
 import { Subject, View } from '../../types';
 import { TenantSwitcher } from '../../domains/tenant/TenantSwitcher';
 
@@ -157,6 +158,7 @@ export const TopBar: React.FC<TopBarProps> = ({
             </div>
 
             <div className="flex items-center gap-2">
+              <ThemeToggle variant="button" />
               <div className="rounded-xl border border-border-dark/70 bg-component-dark/60 px-1.5 py-0.5 text-gray-300">
                 <NotificationBadge count={unreadCount} onClick={() => setIsDrawerOpen(true)} />
               </div>

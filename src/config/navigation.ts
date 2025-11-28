@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, User, Building2, BarChart3, TestTube2, Banknote, Factory, GanttChart, ShieldAlert, ListChecks, Users, Route, FileText, Network, FolderLock } from 'lucide-react';
+import { LayoutDashboard, User, Building2, BarChart3, TestTube2, Banknote, Factory, GanttChart, ShieldAlert, ListChecks, Users, Route, FileText, Network, FolderLock, KeyRound } from 'lucide-react';
 import { NavItemConfig } from '../types';
 
 /**
@@ -59,5 +59,8 @@ export const NAV_ITEMS: NavItemConfig[] = [
 
   // Intel Vault (Both)
   { id: 'vault',      label: 'Intel Vault', i18nKey: 'nav.vault', icon: React.createElement(FolderLock, { className: "h-5 w-5" }),      showFor: ['tsl', 'umit'] },
+
+  // Admin/Settings (Both)
+  { id: 'accessRequests', label: 'Access Requests', i18nKey: 'nav.accessRequests', icon: React.createElement(KeyRound, { className: "h-5 w-5" }), showFor: ['tsl', 'umit'] },
 
 ];

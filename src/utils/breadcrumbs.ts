@@ -18,6 +18,7 @@ const KEY_MAP: Record<View, string> = {
   business: 'nav.business',
   personal: 'nav.personal',
   vault: 'nav.vault',
+  accessRequests: 'nav.accessRequests',
 };
 
 export const buildBreadcrumbs = (view: View, trail?: string[]): string[] => {

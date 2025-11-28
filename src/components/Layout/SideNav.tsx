@@ -78,7 +78,7 @@ export const SideNav: React.FC<SideNavProps> = ({
   return (
     <aside
       aria-label={t('nav.primaryMenu', { defaultValue: 'Primary navigation' })}
-      className={`fixed top-0 left-0 z-20 h-full w-64 sm:w-72 max-w-[90vw] border-r border-border-dark bg-component-dark backdrop-blur-sm shadow-2xl lg:shadow-none transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden`}
+      className={`fixed top-0 left-0 z-20 h-full w-64 sm:w-72 max-w-[90vw] border-r border-[var(--color-border)] bg-[var(--color-surface)] backdrop-blur-sm shadow-2xl lg:shadow-none transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-hidden`}
       style={{ paddingTop: topOffset }}
     >
       <div className="flex h-full flex-col">
@@ -90,7 +90,7 @@ export const SideNav: React.FC<SideNavProps> = ({
             return (
               <div key={section.key}>
                 {section.label && (
-                  <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-gray-500">
+                  <p className="px-2 pb-1 text-[11px] font-semibold uppercase tracking-widest text-[var(--color-text-muted)]">
                     {section.label}
                   </p>
                 )}
@@ -101,15 +101,9 @@ export const SideNav: React.FC<SideNavProps> = ({
                       <li key={item.id}>
                         <button
                           onClick={() => handleNavigate(item.id)}
-                          className={`group flex w-full items-center rounded-xl border px-3 py-2.5 text-sm font-medium transition-all ${
-                            isActive
-                              ? 'border-accent-green/40 bg-accent-green/10 text-white shadow-[inset_3px_0_0_0] shadow-accent-green'
-                              : 'border-transparent text-gray-300 hover:border-border-dark/80 hover:bg-component-dark'
-                          }`}
+                          className={`sidenav-item group ${isActive ? 'sidenav-item--active' : ''}`}
                         >
-                          <span className={`mr-3 flex h-8 w-8 items-center justify-center rounded-lg ${
-                            isActive ? 'bg-accent-green/15 text-accent-green' : 'bg-component-dark/80 text-gray-400 group-hover:text-gray-200'
-                          }`}>
+                          <span className={`sidenav-item__icon ${isActive ? 'sidenav-item__icon--active' : ''}`}>
                             {renderIcon(item.icon)}
                           </span>
                           <span className="truncate">{item.i18nKey ? t(item.i18nKey) : item.label}</span>
@@ -123,14 +117,14 @@ export const SideNav: React.FC<SideNavProps> = ({
           })}
         </nav>
 
-        <div className="border-t border-border-dark/60 bg-component-dark/90 p-4 space-y-4">
+        <div className="border-t border-[var(--color-border)]/60 bg-[var(--color-surface)]/90 p-4 space-y-4">
           <div>
-            <p className="px-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gray-500 truncate">
+            <p className="px-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--color-text-muted)] truncate">
               {t('nav.settingsSection', { defaultValue: 'INDSTILLINGER' })}
             </p>
             <div className="mt-2 space-y-3">
-              <div className="rounded-2xl border border-border-dark/70 bg-base-dark/40 px-3 py-2">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-gray-500/80 truncate">
+              <div className="rounded-xl border border-[var(--color-border)]/70 bg-[var(--color-background)]/40 px-3 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-[var(--color-text-muted)]/80 truncate">
                   {t('settings.currency.label', { defaultValue: 'Display currency' })}
                 </p>
                 <div className="mt-1">
@@ -140,20 +134,20 @@ export const SideNav: React.FC<SideNavProps> = ({
             </div>
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl border border-border-dark/70 bg-base-dark/60 p-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-green/15 text-accent-green font-semibold">
+          <div className="flex items-center gap-3 rounded-xl border border-[var(--color-border)]/70 bg-[var(--color-background)]/60 p-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-gold)]/15 text-[var(--color-gold)] font-semibold">
               {initials}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-semibold text-gray-100 truncate">{user?.id ?? t('auth.guest', { defaultValue: 'Gæst' })}</p>
-              <p className="text-[11px] uppercase tracking-widest text-gray-500">{roleLabel}</p>
+              <p className="text-sm font-semibold text-[var(--color-text)] truncate">{user?.id ?? t('auth.guest', { defaultValue: 'Gæst' })}</p>
+              <p className="text-[11px] uppercase tracking-widest text-[var(--color-text-muted)]">{roleLabel}</p>
             </div>
           </div>
 
           {onLogout && (
             <button
               onClick={onLogout}
-              className="flex w-full items-center justify-center gap-2 rounded-2xl border border-border-dark/70 bg-red-500/10 px-3 py-2 text-sm font-semibold text-red-300 hover:bg-red-500/20"
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-[var(--color-danger)]/30 bg-[var(--color-danger)]/10 px-3 py-2 text-sm font-semibold text-[var(--color-danger)] hover:bg-[var(--color-danger)]/20 transition-colors"
             >
               <LogOut className="h-4 w-4" />
               {t('auth.logout', { defaultValue: 'Log ud' })}

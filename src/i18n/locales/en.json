@@ -26,11 +26,97 @@
     "actions": "Actionables",
     "counterparties": "Counterparties",
     "scenarios": "Scenarios",
-    "vault": "Intel Vault"
-    ,"savedViews": "Saved Views"
-  }
-  ,
+    "vault": "Intel Vault",
+    "accessRequests": "Access Requests",
+    "savedViews": "Saved Views"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "switchToLight": "Switch to light mode",
+    "switchToDark": "Switch to dark mode",
+    "title": "Theme",
+    "description": "Choose your preferred color scheme"
+  },
+  "aiKey": {
+    "title": "AI API Key",
+    "description": "Manage your tenant-scoped AI API key",
+    "inputLabel": "API Key",
+    "inputLabelRotate": "New API Key (rotation)",
+    "placeholder": "Paste your AI API key here",
+    "loading": "Checking stored key…",
+    "show": "Show key",
+    "hide": "Hide key",
+    "save": "Save Key",
+    "rotate": "Rotate Key",
+    "saving": "Saving…",
+    "delete": "Delete Key",
+    "deleting": "Deleting…",
+    "lastRotated": "Last rotated",
+    "noPermission": "You need the ai:configure permission to manage the AI key.",
+    "status": {
+      "configured": "Key configured",
+      "notConfigured": "No key configured"
+    },
+    "deleteConfirm": {
+      "title": "Delete AI Key",
+      "message": "Are you sure you want to delete the AI API key? This action cannot be undone and will disable AI features until a new key is configured.",
+      "confirm": "Delete Key"
+    },
+    "error": {
+      "saveFailed": "Failed to save the API key. Please try again.",
+      "deleteFailed": "Failed to delete the API key. Please try again."
+    }
+  },
+  "accessRequests": {
+    "title": "Access Requests",
+    "description": "Review and manage access requests from users",
+    "refresh": "Refresh",
+    "loading": "Loading requests…",
+    "noRequests": "No access requests",
+    "noRequestsHint": "Access requests will appear here when users request permissions",
+    "searchPlaceholder": "Search by name, resource, or justification…",
+    "filters": "Filters",
+    "deleteConfirm": "Are you sure you want to delete this request?",
+    "status": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "expired": "Expired"
+    },
+    "filterStatus": {
+      "all": "All statuses"
+    },
+    "filterType": {
+      "all": "All types"
+    },
+    "stats": {
+      "total": "Total requests",
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "avgReviewTime": "Avg. review time"
+    },
+    "justification": "Justification",
+    "requester": "Requester",
+    "email": "Email",
+    "created": "Created",
+    "expires": "Expires",
+    "reviewInfo": "Review Information",
+    "reviewedBy": "Reviewed by",
+    "approve": "Approve",
+    "reject": "Reject",
+    "delete": "Delete",
+    "rejectDialog": {
+      "title": "Reject Request",
+      "notesLabel": "Rejection notes (optional)",
+      "notesPlaceholder": "Provide a reason for rejection…"
+    }
+  },
   "common": {
+    "never": "Never",
+    "cancel": "Cancel",
     "naShort": "N/A",
     "riskLevel": {
       "critical": "Critical",
@@ -80,6 +166,7 @@
     "passwordPlaceholder": "Enter password",
     "submit": "Sign in",
     "submitting": "Signing in…",
+    "securityNotice": "Secured with hardware key authentication. All access attempts are logged and monitored.",
     "error": {
       "invalidCredentials": "Invalid username or password"
     }
@@ -99,6 +186,20 @@
         "financial": "Liquidity",
         "sector": "Sector & operations",
         "reputation": "Reputation risk"
+      }
+    },
+    "threat": {
+      "title": "Threat Level",
+      "fromPrevious": "from previous",
+      "activeAlerts": "Alerts",
+      "riskFactors": "Factors",
+      "confidence": "Confidence",
+      "levels": {
+        "low": "Low",
+        "moderate": "Moderate",
+        "elevated": "Elevated",
+        "high": "High",
+        "critical": "Critical"
       }
     },
     "personal": {

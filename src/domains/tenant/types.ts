@@ -61,6 +61,11 @@ export interface TenantSettings {
 // ============================================================================
 
 /**
+ * Theme mode
+ */
+export type ThemeMode = 'light' | 'dark' | 'system';
+
+/**
  * Color scheme for tenant branding
  */
 export interface TenantColorScheme {
@@ -82,7 +87,7 @@ export interface TenantColorScheme {
 }
 
 /**
- * Tenant branding configuration
+ * Tenant branding configuration with light/dark themes
  */
 export interface TenantBranding {
   companyName: string;
@@ -90,6 +95,7 @@ export interface TenantBranding {
   logoUrlDark?: string;
   faviconUrl?: string;
   colors: TenantColorScheme;
+  colorsLight?: TenantColorScheme;
   customCss?: string;
   emailFooter?: string;
   supportEmail?: string;
@@ -194,7 +200,11 @@ export type Permission =
   // Admin permissions
   | 'admin:audit'
   | 'admin:billing'
-  | 'admin:api';
+  | 'admin:api'
+  // Access request permissions
+  | 'access:review'
+  | 'access:manage'
+  | 'admin:*';
 
 /**
  * Role permission mapping
