@@ -186,9 +186,13 @@
     "usernamePlaceholder": "Enter username",
     "passwordLabel": "Password",
     "passwordPlaceholder": "Enter password",
-    "submit": "Sign in",
+    "pinLabel": "PIN code",
+    "tokenLabel": "Token (optional)",
+    "submit": "LOG IN",
     "submitting": "Signing in…",
     "securityNotice": "Secured with hardware key authentication. All access attempts are logged and monitored.",
+    "securityNoticeShort": "Access requires authorized hardware key.",
+    "securityNoticeLog": "All attempts are logged.",
     "error": {
       "invalidCredentials": "Invalid username or password"
     }

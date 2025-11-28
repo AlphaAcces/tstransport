@@ -186,9 +186,13 @@
     "usernamePlaceholder": "Indtast brugernavn",
     "passwordLabel": "Adgangskode",
     "passwordPlaceholder": "Indtast adgangskode",
-    "submit": "Log ind",
+    "pinLabel": "PIN-kode",
+    "tokenLabel": "Token (valgfri)",
+    "submit": "LOG IND",
     "submitting": "Logger ind…",
     "securityNotice": "Sikret med hardware-nøgle autentifikation. Alle adgangsforsøg logges og overvåges.",
+    "securityNoticeShort": "Adgang kræver autoriseret hardware-nøgle.",
+    "securityNoticeLog": "Alle forsøg logges.",
     "error": {
       "invalidCredentials": "Forkert brugernavn eller adgangskode"
     }
