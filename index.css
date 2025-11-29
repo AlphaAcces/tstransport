@@ -210,6 +210,22 @@ body::-webkit-scrollbar,
   background-color: var(--color-background-dark);
 }
 
+/* Case header component - consistent spacing */
+.case-header {
+  background-color: var(--color-surface);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+@media (min-width: 1024px) {
+  .case-header {
+    margin-bottom: var(--spacing-xl);
+  }
+}
+
 .eyebrow-label {
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -820,6 +836,208 @@ body::-webkit-scrollbar,
 }
 
 /* ============================================
+ * PREFERENCES PANEL RESPONSIVE BUTTONS
+ * Icon-only on medium screens (1024-1366px)
+ * ============================================ */
+
+.prefs-btn {
+  position: relative;
+}
+
+.prefs-btn__label {
+  display: inline;
+  white-space: nowrap;
+}
+
+.prefs-btn__count {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  flex-shrink: 0;
+}
+
+/* Medium screens: icon-only with count badge */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  .prefs-btn__label {
+    display: none;
+  }
+
+  .prefs-btn {
+    padding: var(--spacing-sm) !important;
+  }
+
+  .prefs-btn__count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+    border-radius: var(--radius-full);
+    background-color: var(--color-gold);
+    color: var(--color-background);
+    font-size: 10px;
+    font-weight: 700;
+  }
+}
+
+/* ============================================
+ * COMMAND DECK TRIGGER BUTTON
+ * Responsive sizing: large desktop, compact medium, FAB mobile
+ * ============================================ */
+
+.command-deck-trigger {
+  padding: 0.875rem 1.25rem;
+}
+
+.command-deck-trigger__icon {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.command-deck-trigger__label--full {
+  display: inline;
+}
+
+.command-deck-trigger__label--short {
+  display: none;
+}
+
+/* Large desktop (>1440px): full size */
+@media (min-width: 1440px) {
+  .command-deck-trigger {
+    padding: 0.875rem 1.5rem;
+  }
+}
+
+/* Medium screens (1024-1366px): compact */
+@media (min-width: 1024px) and (max-width: 1439px) {
+  .command-deck-trigger {
+    padding: 0.625rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .command-deck-trigger__icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}
+
+/* Tablet and below (<1024px): FAB style */
+@media (max-width: 1023px) {
+  .command-deck-trigger {
+    padding: 0.5rem 0.75rem;
+    font-size: 0.75rem;
+    gap: 0.35rem;
+  }
+
+  .command-deck-trigger__icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .command-deck-trigger__label--full {
+    display: none;
+  }
+
+  .command-deck-trigger__label--short {
+    display: inline;
+  }
+}
+
+/* Mobile (<640px): pill FAB */
+@media (max-width: 639px) {
+  .command-deck-trigger {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+    gap: 0.25rem;
+  }
+
+  .command-deck-trigger__icon {
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+}
+
+/* ============================================
+ * COMMAND DECK PANEL UX
+ * Scroll indicators and collapsible AI section
+ * ============================================ */
+
+.command-deck-body {
+  position: relative;
+}
+
+/* Scroll shadow indicators */
+.command-deck-body::before,
+.command-deck-body::after {
+  content: '';
+  position: sticky;
+  left: 0;
+  right: 0;
+  height: 24px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.command-deck-body::before {
+  top: 0;
+  background: linear-gradient(to bottom, var(--color-surface) 0%, transparent 100%);
+}
+
+.command-deck-body::after {
+  bottom: 0;
+  background: linear-gradient(to top, var(--color-surface) 0%, transparent 100%);
+}
+
+/* Show shadows when scrollable (handled via JS class if needed, but CSS can hint) */
+.command-deck-body:not(:first-child)::before {
+  opacity: 0.8;
+}
+
+/* AI section accordion */
+.command-deck-ai-toggle {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+.command-deck-ai-chevron {
+  display: block;
+}
+
+.command-deck-ai-content {
+  overflow: hidden;
+  max-height: 600px;
+  transition: max-height var(--transition-base), opacity var(--transition-base);
+}
+
+.command-deck-ai-content--collapsed {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* Desktop: always expanded, hide chevron */
+@media (min-width: 1024px) {
+  .command-deck-ai-chevron {
+    display: none;
+  }
+
+  .command-deck-ai-toggle {
+    pointer-events: none;
+  }
+
+  .command-deck-ai-content--collapsed {
+    max-height: 600px;
+    opacity: 1;
+  }
+}
+
+/* ============================================
  * INTEL24 TOPBAR STYLES
  * Harmonized header with 56px height
  * ============================================ */
@@ -843,6 +1061,7 @@ body::-webkit-scrollbar,
   margin: 0 auto;
   padding: var(--spacing-md) var(--spacing-lg);
   min-height: 72px;
+  flex-wrap: wrap;
 }
 
 .topbar__left {
@@ -850,6 +1069,7 @@ body::-webkit-scrollbar,
   align-items: center;
   gap: var(--spacing-md);
   min-width: 0;
+  flex-wrap: wrap;
 }
 
 .topbar__center {
@@ -864,6 +1084,7 @@ body::-webkit-scrollbar,
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
+  flex-wrap: wrap;
 }
 
 .topbar__center p,
@@ -943,6 +1164,36 @@ body::-webkit-scrollbar,
   width: 1px;
   height: 24px;
   background-color: var(--color-border);
+}
+
+/* Medium screens (1024-1366px): tighter topbar */
+@media (min-width: 1024px) and (max-width: 1366px) {
+  .topbar__container {
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+
+  .topbar__left {
+    gap: var(--spacing-sm);
+  }
+
+  .topbar__right {
+    gap: 4px;
+  }
+
+  .topbar__pill {
+    padding: 0.25rem 0.4rem;
+    gap: 0.35rem;
+  }
+
+  .topbar__pill button {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .topbar__divider {
+    height: 20px;
+  }
 }
 
 .topbar__menu-btn {
@@ -1179,6 +1430,30 @@ body::-webkit-scrollbar,
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-lg);
   border-top: 1px solid var(--color-border-subtle);
+}
+
+/* Mobile header: stacked layout on small screens */
+@media (max-width: 639px) {
+  .topbar__mobile {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-md);
+  }
+
+  /* Row 1 content handled by topbar__container */
+  /* Row 2: case pill full width */
+  .topbar__mobile > *:first-child {
+    width: 100%;
+  }
+
+  /* Row 3: engine pill + deck button side by side */
+  .topbar__mobile > *:nth-child(2) {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+  }
 }
 
 /* ============================================

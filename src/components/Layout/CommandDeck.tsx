@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Command, Activity, ArrowRight, Shield, Sparkles, Settings2, X, Power } from 'lucide-react';
+import { Command, Activity, ArrowRight, Shield, Sparkles, Settings2, X, Power, ChevronDown } from 'lucide-react';
 import { Subject, View } from '../../types';
 import { NAV_ITEMS } from '../../config/navigation';
 import { LocaleSwitcher } from '../../domains/settings/components/LocaleSwitcher';
@@ -43,6 +43,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(min-width: 1024px)').matches;
   });
+  const [isAiExpanded, setIsAiExpanded] = useState(true);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const { country, currency } = useUserSettings();
@@ -136,11 +137,11 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
         style={triggerStyle}
         aria-expanded={isOpen}
         aria-controls="command-deck-panel"
-        className="fixed right-4 lg:right-6 z-30 flex items-center gap-2 rounded-full bg-[var(--color-gold)] text-[var(--color-background)] shadow-[var(--shadow-gold)] px-4 py-3 font-semibold tracking-wide transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold-hover)] lg:top-1/2 lg:-translate-y-1/2"
+        className="command-deck-trigger fixed right-4 lg:right-6 z-30 flex items-center gap-2 rounded-full bg-[var(--color-gold)] text-[var(--color-background)] shadow-[var(--shadow-gold)] font-semibold tracking-wide transition-transform hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold-hover)] lg:top-1/2 lg:-translate-y-1/2"
       >
-        <Command className="w-5 h-5" />
-        <span className="hidden sm:inline">{t('commandDeck.cta', { defaultValue: 'Command Deck' })}</span>
-        <span className="sm:hidden">{t('commandDeck.shortCta', { defaultValue: 'Deck' })}</span>
+        <Command className="w-5 h-5 command-deck-trigger__icon" />
+        <span className="command-deck-trigger__label--full">{t('commandDeck.cta', { defaultValue: 'Command Deck' })}</span>
+        <span className="command-deck-trigger__label--short">{t('commandDeck.shortCta', { defaultValue: 'Deck' })}</span>
       </button>
 
       {isOpen && (
@@ -176,7 +177,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
               </button>
             </header>
 
-            <div className="flex-1 overflow-y-auto px-6 py-6 space-y-6">
+            <div className="command-deck-body flex-1 overflow-y-auto px-6 py-6 space-y-6">
               <section>
                 <div className="flex items-center justify-between">
                   <div>
@@ -245,15 +246,23 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
                 </div>
               </section>
 
-              <section>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">{t('commandDeck.ai.label', { defaultValue: 'AI Command' })}</p>
-                    <h3 className="text-sm font-semibold text-[var(--color-text)]">{t('commandDeck.ai.subtitle', { defaultValue: 'Send directives and review log' })}</h3>
+              <section className="command-deck-ai-section">
+                <button
+                  type="button"
+                  onClick={() => setIsAiExpanded(!isAiExpanded)}
+                  className="command-deck-ai-toggle w-full flex items-center justify-between lg:cursor-default"
+                  aria-expanded={isAiExpanded}
+                >
+                  <div className="flex items-center gap-3">
+                    <Activity className="w-4 h-4 text-[var(--color-gold)]" />
+                    <div className="text-left">
+                      <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">{t('commandDeck.ai.label', { defaultValue: 'AI Command' })}</p>
+                      <h3 className="text-sm font-semibold text-[var(--color-text)]">{t('commandDeck.ai.subtitle', { defaultValue: 'Send directives and review log' })}</h3>
+                    </div>
                   </div>
-                  <Activity className="w-4 h-4 text-[var(--color-gold)]" />
-                </div>
-                <div className="mt-4">
+                  <ChevronDown className={`command-deck-ai-chevron w-4 h-4 text-[var(--color-text-muted)] transition-transform ${isAiExpanded ? 'rotate-180' : ''}`} />
+                </button>
+                <div className={`command-deck-ai-content mt-4 ${!isAiExpanded ? 'command-deck-ai-content--collapsed' : ''}`}>
                   <AiCommandPanel className="shadow-none border border-[var(--color-border)]" maxHistoryVisible={4} />
                 </div>
               </section>

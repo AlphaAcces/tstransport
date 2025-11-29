@@ -77,7 +77,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
         return (
             <div className="space-y-8">
                 {/* Case Header */}
-                <div className="bg-[var(--color-surface)] p-3 rounded-lg border border-[var(--color-border)] text-center">
+                <div className="case-header">
                     <p className="text-sm font-semibold text-[var(--color-text)] tracking-wider">
                         {t('dashboard.personal.caseHeader')}
                     </p>
@@ -196,7 +196,7 @@ export const DashboardView: React.FC<DashboardViewProps> = ({ onNavigate, active
     return (
         <div className="space-y-8">
             {/* Case Header */}
-            <div className="bg-[var(--color-surface)] p-3 rounded-lg border border-[var(--color-border)] text-center">
+            <div className="case-header">
                 <p className="text-sm font-semibold text-[var(--color-text)] tracking-wider">
                     {t('dashboard.corporate.caseHeader')}
                 </p>

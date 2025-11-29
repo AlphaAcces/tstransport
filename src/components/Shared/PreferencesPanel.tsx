@@ -1,6 +1,7 @@
 import React from 'react';
 import { Bookmark, PlusCircle } from 'lucide-react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useTranslation } from 'react-i18next';
 import type { RootState, AppDispatch } from '../../store';
 import type { View } from '../../types';
 import { setCompactMode, saveView, removeView, clearSavedViews } from '../../store/userPreferencesSlice';
@@ -15,6 +16,7 @@ interface PreferencesPanelProps {
 }
 
 export const PreferencesPanel: React.FC<PreferencesPanelProps> = ({ currentViewId, currentBreadcrumbs = ['Dashboard'], navigateTo, variant = 'default' }) => {
+  const { t } = useTranslation();
   const prefs = useSelector((s: RootState) => s.userPreferences);
   const dispatch = useDispatch<AppDispatch>();
   const { formatDateTime } = useFormatters();
@@ -64,21 +66,25 @@ export const PreferencesPanel: React.FC<PreferencesPanelProps> = ({ currentViewI
       <div className="flex items-center gap-2">
         <button
           onClick={handleSave}
-          className={`${primaryButtonClasses} bg-accent-green/10 border-accent-green/30`}
+          className={`${primaryButtonClasses} bg-accent-green/10 border-accent-green/30 prefs-btn`}
           type="button"
+          title={t('preferences.saveView', { defaultValue: 'Gem visning' })}
+          aria-label={t('preferences.saveView', { defaultValue: 'Gem visning' })}
         >
           <PlusCircle className="h-4 w-4 shrink-0" />
-          <span className="truncate">Gem visning</span>
+          <span className="prefs-btn__label">{t('preferences.saveView', { defaultValue: 'Gem visning' })}</span>
         </button>
         <button
           onClick={() => setOpen(!open)}
           aria-expanded={open}
-          className={`${primaryButtonClasses} bg-component-dark/60`}
+          className={`${primaryButtonClasses} bg-component-dark/60 prefs-btn`}
           type="button"
+          title={t('preferences.savedViews', { defaultValue: 'Gemte visninger' })}
+          aria-label={t('preferences.savedViews', { defaultValue: 'Gemte visninger' })}
         >
           <Bookmark className="h-4 w-4 shrink-0" />
-          <span className="truncate">Gemte visninger</span>
-          <span className="text-[11px] text-gray-400 shrink-0">({prefs.savedViews.length})</span>
+          <span className="prefs-btn__label">{t('preferences.savedViews', { defaultValue: 'Gemte visninger' })}</span>
+          <span className="prefs-btn__count">({prefs.savedViews.length})</span>
         </button>
       </div>
 
