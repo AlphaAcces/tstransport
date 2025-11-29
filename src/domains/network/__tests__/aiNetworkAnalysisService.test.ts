@@ -4,7 +4,7 @@ import { getCachedAnalysis, setCachedAnalysis, subscribeToNetworkAnalysis } from
 describe('AI Network Analysis Service', () => {
   afterEach(() => {
     vi.restoreAllMocks();
-    try { localStorage.removeItem('ai:network:cache:v1'); } catch {}
+    try { localStorage.removeItem('ai:network:cache:v1'); } catch { /* ignore */ }
   });
 
   it('should store and retrieve cached entries', () => {

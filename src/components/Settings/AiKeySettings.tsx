@@ -12,10 +12,10 @@ interface KeyStatus {
 const AiKeySettings: React.FC = () => {
   const { t } = useTranslation();
   const tenantCtx = useOptionalTenant();
-  if (!tenantCtx) return null;
 
-  const { tenant, hasPermission } = tenantCtx;
-  const canConfigure = hasPermission('ai:configure');
+  const tenant = tenantCtx?.tenant;
+  const hasPermission = tenantCtx?.hasPermission;
+  const canConfigure = hasPermission?.('ai:configure') ?? false;
 
   const [key, setKey] = useState<string>('');
   const [keyStatus, setKeyStatus] = useState<KeyStatus>({ exists: false, lastRotated: null, rotatedBy: null });
@@ -26,11 +26,11 @@ const AiKeySettings: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  const getHeaders = (): Record<string, string> => {
+  const getHeaders = React.useCallback((): Record<string, string> => {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (canConfigure) headers['x-user-permissions'] = 'ai:configure';
     return headers;
-  };
+  }, [canConfigure]);
 
   useEffect(() => {
     let mounted = true;
@@ -58,7 +58,10 @@ const AiKeySettings: React.FC = () => {
     }
     fetchStatus();
     return () => { mounted = false; };
-  }, [tenant, canConfigure]);
+  }, [tenant, canConfigure, getHeaders]);
+
+  // Early return after all hooks
+  if (!tenantCtx) return null;
 
   const onSave = async () => {
     if (!canConfigure || !tenant || !key.trim()) return;

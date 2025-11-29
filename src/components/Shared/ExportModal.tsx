@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-nocheck
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';

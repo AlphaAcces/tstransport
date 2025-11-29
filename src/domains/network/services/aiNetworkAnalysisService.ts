@@ -34,7 +34,7 @@ function readCache(): AiCache {
     return JSON.parse(raw) as AiCache;
   } catch (e) {
     console.warn('Failed to read AI network cache', e);
-    try { window.localStorage.removeItem(CACHE_KEY); } catch {};
+    try { window.localStorage.removeItem(CACHE_KEY); } catch { /* ignore */ }
     return {};
   }
 }

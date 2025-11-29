@@ -437,7 +437,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
 
     useEffect(() => {
         if (!isLocalStorageAvailable()) return;
-        try { window.localStorage.setItem(AI_PREF_KEY, String(aiEnabled)); } catch { }
+        try { window.localStorage.setItem(AI_PREF_KEY, String(aiEnabled)); } catch { /* storage unavailable */ }
     }, [aiEnabled, AI_PREF_KEY]);
 
     // When enabling AI overlays, trigger analysis (only if allowed)
@@ -459,7 +459,7 @@ export const NetworkGraph: React.FC<NetworkGraphProps> = ({
         nodes: processedNodes,
         edges: processedEdges,
         loadingState,
-        loadMoreNodes: _loadMore
+        loadMoreNodes: _loadMore // eslint-disable-line @typescript-eslint/no-unused-vars
     } = useLazyNetworkLoading(allNodes, allEdges, Math.min(20, _maxNodes));
 
     const clusters = useMemo((): NetworkCluster[] => {
