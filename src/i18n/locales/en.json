@@ -400,6 +400,29 @@
     "activeLabel": "Active case",
     "unknownUpdated": "Unknown update time"
   },
+  "cases": {
+    "timeline": {
+      "title": "Case timeline",
+      "subtitle": "Latest activity",
+      "source": {
+        "live": "Live feed",
+        "derived": "Offline snapshot"
+      },
+      "loading": "Loading timeline…",
+      "noEvents": "No events recorded for this case yet.",
+      "openLink": "Open source",
+      "section": {
+        "today": "Today",
+        "yesterday": "Yesterday"
+      },
+      "severity": {
+        "low": "Low severity",
+        "medium": "Moderate severity",
+        "high": "High severity",
+        "critical": "Critical severity"
+      }
+    }
+  },
   "person": {
     "profile": {
       "heading": "{{name}} - Profile & network",
@@ -1211,7 +1234,25 @@
     "notApplicable": "N/A",
     "criticalEvents": "Critical Events",
     "boardActionables": "Board Actionables",
-    "nextKeyEvents": "Next Key Events"
+    "nextKeyEvents": "Next Key Events",
+    "kpi": {
+      "sectionEyebrow": "Intel dashboard",
+      "sectionTitle": "Case KPIs",
+      "generatedAt": "Updated {{date}}",
+      "noData": "No KPI data available for this case yet.",
+      "source": {
+        "api": "Live data",
+        "derived": "Offline snapshot"
+      },
+      "trend": {
+        "up": "Rising",
+        "down": "Falling",
+        "flat": "Stable"
+      },
+      "units": {
+        "daysShort": "days"
+      }
+    }
   },
   "notifications": {
     "title": "Notifications",

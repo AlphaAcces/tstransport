@@ -4,6 +4,8 @@ import storage, { logAudit, getAuditLog } from './storage';
 import { encrypt, decrypt } from './crypto';
 import monitoringRoutes from './monitoring';
 import { listCases, getCaseById } from '../src/domains/cases/caseStore';
+import { deriveEventsFromCaseData } from '../src/domains/events/caseEvents';
+import { deriveKpisFromCaseData } from '../src/domains/kpi/caseKpis';
 
 const SSO_EXPECTED_ISS = 'ts24-intel';
 const SSO_EXPECTED_AUD = 'ts24-intel';
@@ -57,6 +59,26 @@ app.get('/api/cases/:id', (req, res) => {
 
   res.json(caseData);
   // TODO: Add auth/authorization when exposing the case API beyond mocks.
+});
+
+app.get('/api/cases/:id/events', (req, res) => {
+  const caseData = getCaseById(req.params.id);
+  if (!caseData) {
+    return res.status(404).json({ error: 'CASE_NOT_FOUND' });
+  }
+
+  const events = deriveEventsFromCaseData(caseData, { caseId: req.params.id });
+  res.json({ events });
+});
+
+app.get('/api/cases/:id/kpis', (req, res) => {
+  const caseData = getCaseById(req.params.id);
+  if (!caseData) {
+    return res.status(404).json({ error: 'CASE_NOT_FOUND' });
+  }
+
+  const summary = deriveKpisFromCaseData(caseData, { caseId: req.params.id });
+  res.json({ summary });
 });
 
 // ============================================================================

@@ -26,11 +26,15 @@ vi.mock('react-i18next', () => ({
 const getDataForSubjectMock = vi.mocked(getDataForSubject);
 
 const TestConsumer = () => {
-  const { caseData, dataSource } = useDataContext();
+  const { caseData, dataSource, eventsSource, events, kpisSource, kpis } = useDataContext();
   return (
     <div>
       <span data-testid="case-name">{caseData.personData.name}</span>
       <span data-testid="data-source">{dataSource}</span>
+      <span data-testid="events-source">{eventsSource}</span>
+      <span data-testid="events-count">{events ? events.length : 0}</span>
+      <span data-testid="kpi-source">{kpisSource}</span>
+      <span data-testid="kpi-count">{kpis ? kpis.metrics.length : 0}</span>
     </div>
   );
 };
@@ -50,6 +54,8 @@ describe('DataContext', () => {
 
   it('hydrates context with API data when fetch succeeds', async () => {
     caseApiMock.fetchCaseMock.mockResolvedValue(tslData);
+    caseApiMock.fetchCaseEventsMock.mockResolvedValue(caseApiMock.defaultCaseEvents);
+    caseApiMock.fetchCaseKpisMock.mockResolvedValue(caseApiMock.defaultCaseKpis);
     getDataForSubjectMock.mockResolvedValue(tslData);
 
     renderWithProvider('tsl', 'tsl');
@@ -57,10 +63,16 @@ describe('DataContext', () => {
     await waitFor(() => {
       expect(screen.getByTestId('case-name').textContent).toBe(tslData.personData.name);
       expect(screen.getByTestId('data-source').textContent).toBe('api');
+      expect(screen.getByTestId('events-source').textContent).toBe('api');
+      expect(screen.getByTestId('events-count').textContent).toBe(String(caseApiMock.defaultCaseEvents.length));
+      expect(screen.getByTestId('kpi-source').textContent).toBe('api');
+      expect(screen.getByTestId('kpi-count').textContent).toBe(String(caseApiMock.defaultCaseKpis.metrics.length));
     });
 
     expect(caseApiMock.fetchCaseMock).toHaveBeenCalledWith('tsl');
     expect(getDataForSubjectMock).not.toHaveBeenCalled();
+    expect(caseApiMock.fetchCaseEventsMock).toHaveBeenCalledWith('tsl');
+    expect(caseApiMock.fetchCaseKpisMock).toHaveBeenCalledWith('tsl');
   });
 
   it('falls back to mock data when API fails', async () => {
@@ -72,9 +84,51 @@ describe('DataContext', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('data-source').textContent).toBe('mock');
+      expect(screen.getByTestId('events-source').textContent).toBe('derived');
+      expect(Number(screen.getByTestId('events-count').textContent)).toBeGreaterThan(0);
+      expect(screen.getByTestId('kpi-source').textContent).toBe('derived');
+      expect(Number(screen.getByTestId('kpi-count').textContent)).toBeGreaterThan(0);
     });
 
     expect(getDataForSubjectMock).toHaveBeenCalledWith('tsl');
+    expect(caseApiMock.fetchCaseEventsMock).not.toHaveBeenCalled();
+    expect(caseApiMock.fetchCaseKpisMock).not.toHaveBeenCalled();
+    warnSpy.mockRestore();
+  });
+
+  it('falls back to derived events when events API errors', async () => {
+    caseApiMock.fetchCaseMock.mockResolvedValue(tslData);
+    caseApiMock.fetchCaseEventsMock.mockRejectedValueOnce(new Error('events down'));
+    caseApiMock.fetchCaseKpisMock.mockResolvedValue(caseApiMock.defaultCaseKpis);
+    getDataForSubjectMock.mockResolvedValue(tslData);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    renderWithProvider('tsl', 'tsl');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('events-source').textContent).toBe('derived');
+      expect(Number(screen.getByTestId('events-count').textContent)).toBeGreaterThan(0);
+    });
+
+    expect(caseApiMock.fetchCaseEventsMock).toHaveBeenCalledWith('tsl');
+    warnSpy.mockRestore();
+  });
+
+  it('falls back to derived KPIs when KPI API errors', async () => {
+    caseApiMock.fetchCaseMock.mockResolvedValue(tslData);
+    caseApiMock.fetchCaseEventsMock.mockResolvedValue(caseApiMock.defaultCaseEvents);
+    caseApiMock.fetchCaseKpisMock.mockRejectedValueOnce(new Error('kpi down'));
+    getDataForSubjectMock.mockResolvedValue(tslData);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    renderWithProvider('tsl', 'tsl');
+
+    await waitFor(() => {
+      expect(screen.getByTestId('kpi-source').textContent).toBe('derived');
+      expect(Number(screen.getByTestId('kpi-count').textContent)).toBeGreaterThan(0);
+    });
+
+    expect(caseApiMock.fetchCaseKpisMock).toHaveBeenCalledWith('tsl');
     warnSpy.mockRestore();
   });
 });

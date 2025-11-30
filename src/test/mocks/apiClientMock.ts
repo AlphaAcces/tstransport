@@ -1,6 +1,8 @@
 import { vi } from 'vitest';
 import { tslData } from '../../data/tsl';
 import type { CaseData, CaseMeta } from '../../types';
+import type { CaseEvent } from '../../domains/events/caseEvents';
+import type { CaseKpiSummary } from '../../domains/kpi/caseKpis';
 
 const defaultCaseData: CaseData = tslData;
 const defaultCaseMeta: CaseMeta[] = [
@@ -16,8 +18,39 @@ const defaultCaseMeta: CaseMeta[] = [
   },
 ];
 
+const defaultCaseEvents: CaseEvent[] = [
+  {
+    id: 'evt-1',
+    caseId: 'tsl',
+    timestamp: '2025-01-05T10:00:00.000Z',
+    type: 'timeline',
+    severity: 'high',
+    title: 'Mocked event',
+    description: 'Mocked description',
+  },
+];
+
+const defaultCaseKpis: CaseKpiSummary = {
+  caseId: 'tsl',
+  generatedAt: '2025-01-05T10:00:00.000Z',
+  source: 'api',
+  metrics: [
+    {
+      id: 'overall-risk',
+      label: 'Samlet risikoscore',
+      value: 78,
+      unit: '%',
+      severity: 'high',
+      trend: 'up',
+      hint: 'Mock KPI summary',
+    },
+  ],
+};
+
 const fetchCaseMock = vi.fn().mockResolvedValue(defaultCaseData);
 const fetchCasesMock = vi.fn().mockResolvedValue(defaultCaseMeta);
+const fetchCaseEventsMock = vi.fn().mockResolvedValue(defaultCaseEvents);
+const fetchCaseKpisMock = vi.fn().mockResolvedValue(defaultCaseKpis);
 
 class MockApiError extends Error {
   status: number;
@@ -34,13 +67,21 @@ class MockApiError extends Error {
 export const caseApiMock = {
   defaultCaseData,
   defaultCaseMeta,
+  defaultCaseEvents,
+  defaultCaseKpis,
   fetchCaseMock,
   fetchCasesMock,
+  fetchCaseEventsMock,
+  fetchCaseKpisMock,
   reset() {
     fetchCaseMock.mockReset();
     fetchCaseMock.mockResolvedValue(defaultCaseData);
     fetchCasesMock.mockReset();
     fetchCasesMock.mockResolvedValue(defaultCaseMeta);
+    fetchCaseEventsMock.mockReset();
+    fetchCaseEventsMock.mockResolvedValue(defaultCaseEvents);
+    fetchCaseKpisMock.mockReset();
+    fetchCaseKpisMock.mockResolvedValue(defaultCaseKpis);
   },
 };
 
@@ -48,4 +89,6 @@ vi.mock('../../domains/api/client', () => ({
   ApiError: MockApiError,
   fetchCase: caseApiMock.fetchCaseMock,
   fetchCases: caseApiMock.fetchCasesMock,
+  fetchCaseEvents: caseApiMock.fetchCaseEventsMock,
+  fetchCaseKpis: caseApiMock.fetchCaseKpisMock,
 }));

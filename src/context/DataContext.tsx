@@ -5,7 +5,14 @@ import { getDataForSubject } from '../data';
 import { enrichTimelineWithViews, groupRisksByCategory } from '../data/transformers';
 import { useTranslation } from 'react-i18next';
 import { useTenantId, createAuditEntry } from '../domains/tenant';
-import { fetchCase } from '../domains/api/client';
+import { fetchCase, fetchCaseEvents, fetchCaseKpis } from '../domains/api/client';
+import type { CaseEvent } from '../domains/events/caseEvents';
+import { deriveEventsFromCaseData } from '../domains/events/caseEvents';
+import type { CaseKpiSummary } from '../domains/kpi/caseKpis';
+import { deriveKpisFromCaseData } from '../domains/kpi/caseKpis';
+
+type CaseEventsSource = 'api' | 'derived';
+type CaseKpiSource = 'api' | 'derived';
 
 interface DataContextValue {
   caseData: CaseData;
@@ -19,6 +26,14 @@ interface DataContextValue {
   subject: Subject;
   tenantId: string | null;
   dataSource: CaseDataSource;
+  events: CaseEvent[] | null;
+  eventsLoading: boolean;
+  eventsError: Error | null;
+  eventsSource: CaseEventsSource;
+  kpis: CaseKpiSummary | null;
+  kpisLoading: boolean;
+  kpisError: Error | null;
+  kpisSource: CaseKpiSource;
 }
 
 export const DataContext = createContext<DataContextValue | null>(null);
@@ -35,6 +50,14 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeCaseId, act
   const [dataSource, setDataSource] = useState<CaseDataSource | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
+  const [events, setEvents] = useState<CaseEvent[] | null>(null);
+  const [eventsLoading, setEventsLoading] = useState(false);
+  const [eventsError, setEventsError] = useState<Error | null>(null);
+  const [eventsSource, setEventsSource] = useState<CaseEventsSource>('api');
+  const [kpis, setKpis] = useState<CaseKpiSummary | null>(null);
+  const [kpisLoading, setKpisLoading] = useState(false);
+  const [kpisError, setKpisError] = useState<Error | null>(null);
+  const [kpisSource, setKpisSource] = useState<CaseKpiSource>('api');
   const { t } = useTranslation('data');
 
   // Get current tenant ID for data isolation
@@ -47,6 +70,14 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeCaseId, act
     setCaseData(null);
     setDataSource(null);
     setResolvedCaseId(activeCaseId);
+    setEvents(null);
+    setEventsError(null);
+    setEventsSource('api');
+    setEventsLoading(true);
+    setKpis(null);
+    setKpisError(null);
+    setKpisSource('api');
+    setKpisLoading(true);
 
     const applyCaseData = (data: CaseData, source: CaseDataSource) => {
       if (!isActive) {
@@ -80,10 +111,109 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeCaseId, act
       setIsLoading(false);
     };
 
+    const loadEvents = async (caseId: string, data: CaseData, allowApiFetch: boolean) => {
+      if (!isActive) {
+        return;
+      }
+
+      if (allowApiFetch) {
+        try {
+          const apiEvents = await fetchCaseEvents(caseId);
+          if (!isActive) {
+            return;
+          }
+          setEvents(apiEvents);
+          setEventsSource('api');
+          setEventsLoading(false);
+          return;
+        } catch (apiError) {
+          if (!isActive) {
+            return;
+          }
+          console.warn('[DataContext] Case events API failed, deriving locally.', apiError);
+          setEventsError(apiError instanceof Error ? apiError : new Error('Failed to fetch case events'));
+        }
+      }
+
+      try {
+        const derivedEvents = deriveEventsFromCaseData(data, { caseId });
+        if (!isActive) {
+          return;
+        }
+        setEvents(derivedEvents);
+        setEventsSource('derived');
+      } catch (deriveError) {
+        if (!isActive) {
+          return;
+        }
+        console.error('[DataContext] Failed to derive events from case data', deriveError);
+        setEvents([]);
+        setEventsError(prev => prev ?? (deriveError instanceof Error ? deriveError : new Error('Failed to derive events')));
+      } finally {
+        if (isActive) {
+          setEventsLoading(false);
+        }
+      }
+    };
+
+    const loadKpis = async (caseId: string, data: CaseData, allowApiFetch: boolean) => {
+      if (!isActive) {
+        return;
+      }
+
+      if (allowApiFetch) {
+        try {
+          const summary = await fetchCaseKpis(caseId);
+          if (!isActive) {
+            return;
+          }
+          setKpis(summary);
+          setKpisSource('api');
+          setKpisLoading(false);
+          return;
+        } catch (apiError) {
+          if (!isActive) {
+            return;
+          }
+          console.warn('[DataContext] Case KPI API failed, deriving locally.', apiError);
+          setKpisError(apiError instanceof Error ? apiError : new Error('Failed to fetch case KPIs'));
+        }
+      }
+
+      try {
+        const derived = deriveKpisFromCaseData(data, { caseId });
+        if (!isActive) {
+          return;
+        }
+        setKpis(derived);
+        setKpisSource('derived');
+      } catch (deriveError) {
+        if (!isActive) {
+          return;
+        }
+        console.error('[DataContext] Failed to derive KPIs from case data', deriveError);
+        setKpis({
+          caseId,
+          metrics: [],
+          generatedAt: new Date().toISOString(),
+          source: 'derived',
+        });
+        setKpisError(prev => prev ?? (deriveError instanceof Error ? deriveError : new Error('Failed to derive KPIs')));
+      } finally {
+        if (isActive) {
+          setKpisLoading(false);
+        }
+      }
+    };
+
     const loadCaseData = async () => {
       try {
         const apiData = await fetchCase(activeCaseId);
         applyCaseData(apiData, 'api');
+        await Promise.all([
+          loadEvents(activeCaseId, apiData, true),
+          loadKpis(activeCaseId, apiData, true),
+        ]);
         return;
       } catch (apiError) {
         if (!isActive) {
@@ -95,6 +225,10 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeCaseId, act
       try {
         const fallbackData = await getDataForSubject(activeSubject);
         applyCaseData(fallbackData, 'mock');
+        await Promise.all([
+          loadEvents(activeCaseId, fallbackData, false),
+          loadKpis(activeCaseId, fallbackData, false),
+        ]);
       } catch (fallbackError) {
         if (!isActive) {
           return;
@@ -102,6 +236,17 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeCaseId, act
         console.error('Failed to load subject data', fallbackError);
         setErrorKey('loadError');
         setIsLoading(false);
+        setEvents([]);
+        setEventsLoading(false);
+        setEventsSource('derived');
+        setKpis({
+          caseId: activeCaseId,
+          metrics: [],
+          generatedAt: new Date().toISOString(),
+          source: 'derived',
+        });
+        setKpisLoading(false);
+        setKpisSource('derived');
       }
     };
 
@@ -135,9 +280,31 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeCaseId, act
         subject: activeSubject,
         tenantId,
         dataSource,
+        events,
+        eventsLoading,
+        eventsError,
+        eventsSource,
+        kpis,
+        kpisLoading,
+        kpisError,
+        kpisSource,
       };
     },
-    [caseData, activeSubject, tenantId, dataSource, resolvedCaseId],
+    [
+      caseData,
+      activeSubject,
+      tenantId,
+      dataSource,
+      resolvedCaseId,
+      events,
+      eventsLoading,
+      eventsError,
+      eventsSource,
+      kpis,
+      kpisLoading,
+      kpisError,
+      kpisSource,
+    ],
   );
 
   if (isLoading) {

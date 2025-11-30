@@ -22,6 +22,9 @@ export type {
   AppEvent,
 } from './types';
 
+export type { CaseEvent, CaseEventSeverity } from './caseEvents';
+export { deriveEventsFromCaseData } from './caseEvents';
+
 // Core
 export * from './core';
 

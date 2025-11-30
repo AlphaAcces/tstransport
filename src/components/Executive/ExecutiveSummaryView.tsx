@@ -23,6 +23,10 @@ import {
   TrendDirection,
   getMockExecutiveSummary,
 } from '../../domains/executive/mockExecutiveSummary';
+import { useDataContext } from '../../context/DataContext';
+import { CaseTimeline } from '../Cases/CaseTimeline';
+import { useTranslation } from 'react-i18next';
+import type { CaseKpiMetric, KpiSeverity } from '../../domains/kpi/caseKpis';
 
 interface ExecutiveSummaryViewProps {
   onNavigate?: (view: View) => void;
@@ -85,6 +89,18 @@ const trendDirectionTone: Record<TrendDirection, string> = {
   flat: 'text-gray-400',
 };
 
+const kpiSeverityTone: Record<KpiSeverity, string> = {
+  low: 'text-emerald-200 border-emerald-400/40 bg-emerald-500/5',
+  medium: 'text-amber-200 border-amber-400/40 bg-amber-500/5',
+  high: 'text-orange-200 border-orange-400/40 bg-orange-500/5',
+  critical: 'text-red-100 border-red-500/50 bg-red-500/10',
+};
+
+const kpiSourceBadge: Record<'api' | 'derived', string> = {
+  api: 'text-emerald-200 border-emerald-400/40 bg-emerald-500/10',
+  derived: 'text-amber-200 border-amber-400/40 bg-amber-500/10',
+};
+
 const kpiIconMap = {
   revenue: <TrendingUp className="w-4 h-4" />,
   cash: <Banknote className="w-4 h-4" />,
@@ -97,6 +113,62 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
   const controller = useExecutiveSummaryController(onNavigate);
   const summary = useMemo(() => dataOverride ?? getMockExecutiveSummary(), [dataOverride]);
   const threatLastUpdated = useMemo(() => new Date(summary.threat.lastUpdated), [summary.threat.lastUpdated]);
+  const { events, eventsLoading, eventsSource, kpis, kpisLoading, kpisSource } = useDataContext();
+  const { t, i18n } = useTranslation('executive');
+
+  const caseKpiMetrics: CaseKpiMetric[] = kpis?.metrics ?? [];
+
+  const kpiGeneratedLabel = useMemo(() => {
+    if (!kpis?.generatedAt) {
+      return null;
+    }
+    try {
+      return new Intl.DateTimeFormat(i18n.language || undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      }).format(new Date(kpis.generatedAt));
+    } catch {
+      return kpis.generatedAt;
+    }
+  }, [kpis?.generatedAt, i18n.language]);
+
+  const formatMetricValue = (metric: CaseKpiMetric) => {
+    const formatter = new Intl.NumberFormat(i18n.language || undefined, {
+      maximumFractionDigits: metric.unit === '%' ? 0 : 1,
+    });
+    const formatted = formatter.format(metric.value);
+
+    if (metric.unit === '%') {
+      return `${formatted}%`;
+    }
+    if (metric.unit === 'DKK') {
+      return new Intl.NumberFormat(i18n.language || undefined, {
+        style: 'currency',
+        currency: 'DKK',
+        maximumFractionDigits: 0,
+      }).format(metric.value);
+    }
+    if (metric.unit === 'days') {
+      return `${formatted} ${t('kpi.units.daysShort', { defaultValue: 'dage' })}`;
+    }
+    return formatted;
+  };
+
+  const renderKpiTrend = (metric: CaseKpiMetric) => {
+    if (!metric.trend) {
+      return null;
+    }
+    const TrendIcon = trendDirectionIcon[metric.trend];
+    return (
+      <span className={`inline-flex items-center gap-1 text-xs font-mono ${trendDirectionTone[metric.trend]}`}>
+        <TrendIcon className="w-3 h-3" />
+        {t(`kpi.trend.${metric.trend}`, {
+          defaultValue:
+            metric.trend === 'up' ? 'Op' : metric.trend === 'down' ? 'Ned' : 'Stabil',
+        })}
+      </span>
+    );
+  };
 
   const renderEmptyState = (message: string) => (
     <div className="empty-state" role="status" aria-live="polite">
@@ -136,6 +208,83 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
           </div>
         </div>
       </div>
+
+      <section className="surface-card p-6 space-y-5" aria-label={t('kpi.sectionTitle', { defaultValue: 'Intel-dashboard KPI’er' })}>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">
+              {t('kpi.sectionEyebrow', { defaultValue: 'Operativ status' })}
+            </p>
+            <h2 className="text-lg font-semibold text-[var(--color-text)]">
+              {t('kpi.sectionTitle', { defaultValue: 'Intel-dashboard KPI’er' })}
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-[var(--color-text-muted)]">
+            {kpiGeneratedLabel && (
+              <span>
+                {t('kpi.generatedAt', {
+                  defaultValue: 'Opdateret {{date}}',
+                  date: kpiGeneratedLabel,
+                })}
+              </span>
+            )}
+            <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 font-semibold ${kpiSourceBadge[kpisSource]}`}>
+              {t(`kpi.source.${kpisSource}`, {
+                defaultValue: kpisSource === 'api' ? 'Live-data' : 'Offline snapshot',
+              })}
+            </span>
+          </div>
+        </div>
+
+        {kpisLoading && (
+          <div
+            className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
+            data-testid="executive-kpi-loading"
+          >
+            {[...Array(4)].map((_, index) => (
+              <div key={index} className="skeleton skeleton--card h-32" aria-hidden="true" />
+            ))}
+          </div>
+        )}
+
+        {!kpisLoading && caseKpiMetrics.length === 0 && (
+          <div
+            className="rounded-xl border border-dashed border-white/20 bg-white/5 p-6 text-center text-sm text-[var(--color-text-muted)]"
+            data-testid="executive-kpi-empty"
+          >
+            {t('kpi.noData', { defaultValue: 'Ingen KPI-data tilgængelige for denne sag endnu.' })}
+          </div>
+        )}
+
+        {!kpisLoading && caseKpiMetrics.length > 0 && (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {caseKpiMetrics.map(metric => {
+              const severity = metric.severity ?? 'medium';
+              return (
+                <article key={metric.id} className="rounded-xl border border-white/10 bg-white/5 p-4 shadow-sm">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.2em] text-[var(--color-text-muted)]">
+                        {metric.label}
+                      </p>
+                      <p className="mt-2 text-2xl font-semibold text-[var(--color-text)]">
+                        {formatMetricValue(metric)}
+                      </p>
+                    </div>
+                    <span className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${kpiSeverityTone[severity]}`}>
+                      {t(`common.riskLevel.${severity}`, { defaultValue: severity })}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between text-xs text-[var(--color-text-muted)]">
+                    <span>{metric.hint}</span>
+                    {renderKpiTrend(metric)}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
       <section className="grid grid-cols-1 gap-6 xl:grid-cols-3" aria-label="Executive overview">
         <div className="space-y-4">
@@ -334,6 +483,10 @@ export const ExecutiveSummaryView: React.FC<ExecutiveSummaryViewProps> = ({ onNa
             ))}
           </ul>
         </article>
+      </section>
+
+      <section aria-label="Case timeline">
+        <CaseTimeline events={events} loading={eventsLoading} source={eventsSource} />
       </section>
     </div>
   );

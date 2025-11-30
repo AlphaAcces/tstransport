@@ -398,6 +398,29 @@
       "tables": "Tabeller (placeholder)"
     }
   },
+  "cases": {
+    "timeline": {
+      "title": "Sags-tidslinje",
+      "subtitle": "Seneste hændelser",
+      "source": {
+        "live": "Live-feed",
+        "derived": "Offline snapshot"
+      },
+      "loading": "Indlæser tidslinje…",
+      "noEvents": "Ingen hændelser registreret for denne sag.",
+      "openLink": "Åbn kilde",
+      "section": {
+        "today": "I dag",
+        "yesterday": "I går"
+      },
+      "severity": {
+        "low": "Lav alvor",
+        "medium": "Moderat alvor",
+        "high": "Høj alvor",
+        "critical": "Kritisk alvor"
+      }
+    }
+  },
   "person": {
     "profile": {
       "heading": "{{name}} - Profil & netværk",
@@ -1209,7 +1232,25 @@
     "notApplicable": "Ikke relevant",
     "criticalEvents": "Kritiske hændelser",
     "boardActionables": "Bestyrelses-handlingspunkter",
-    "nextKeyEvents": "Næste vigtige hændelser"
+    "nextKeyEvents": "Næste vigtige hændelser",
+    "kpi": {
+      "sectionEyebrow": "Intel-dashboard",
+      "sectionTitle": "Case KPI’er",
+      "generatedAt": "Opdateret {{date}}",
+      "noData": "Ingen KPI-data tilgængelige for denne sag endnu.",
+      "source": {
+        "api": "Live-data",
+        "derived": "Offline snapshot"
+      },
+      "trend": {
+        "up": "Stigende",
+        "down": "Faldende",
+        "flat": "Stabil"
+      },
+      "units": {
+        "daysShort": "dage"
+      }
+    }
   },
   "notifications": {
     "title": "Notifikationer",

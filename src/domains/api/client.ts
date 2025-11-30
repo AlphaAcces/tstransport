@@ -1,4 +1,6 @@
 import type { CaseData, CaseMeta } from '../../types';
+import type { CaseEvent } from '../events/caseEvents';
+import type { CaseKpiSummary } from '../kpi/caseKpis';
 
 const API_BASE_URL = '/api';
 
@@ -78,4 +80,16 @@ export async function fetchCases(): Promise<CaseMeta[]> {
 export async function fetchCase(id: string): Promise<CaseData> {
   const encodedId = encodeURIComponent(id);
   return request<CaseData>(buildUrl(`/cases/${encodedId}`));
+}
+
+export async function fetchCaseEvents(id: string): Promise<CaseEvent[]> {
+  const encodedId = encodeURIComponent(id);
+  const response = await request<{ events: CaseEvent[] }>(buildUrl(`/cases/${encodedId}/events`));
+  return response.events ?? [];
+}
+
+export async function fetchCaseKpis(id: string): Promise<CaseKpiSummary> {
+  const encodedId = encodeURIComponent(id);
+  const response = await request<{ summary: CaseKpiSummary }>(buildUrl(`/cases/${encodedId}/kpis`));
+  return response.summary;
 }

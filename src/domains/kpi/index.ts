@@ -20,7 +20,15 @@ export type {
   KpiCalculationOptions,
 } from './types';
 
+export type {
+  CaseKpiMetric,
+  CaseKpiSummary,
+  KpiSeverity,
+  KpiTrend as CaseKpiTrend,
+} from './caseKpis';
+
 export { KPI_STATUS_COLORS, RISK_LEVEL_TO_STATUS } from './types';
+export { deriveKpisFromCaseData } from './caseKpis';
 
 // Services
 export {

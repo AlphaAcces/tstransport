@@ -1,5 +1,5 @@
 import React from 'react';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { store } from '../../../store';
@@ -7,6 +7,7 @@ import DataProvider from '../../../context/DataContext';
 import { TenantProvider } from '../../../domains/tenant/TenantContext';
 import { ExecutiveSummaryView } from '../ExecutiveSummaryView';
 import { ExecutiveSummaryViewData, getMockExecutiveSummary } from '../../../domains/executive/mockExecutiveSummary';
+import { caseApiMock } from '../../../test/mocks/apiClientMock';
 
 const renderExecutiveView = (data?: ExecutiveSummaryViewData) =>
   render(
@@ -20,6 +21,10 @@ const renderExecutiveView = (data?: ExecutiveSummaryViewData) =>
   );
 
 describe('ExecutiveSummaryView – mock dashboard layout', () => {
+  beforeEach(() => {
+    caseApiMock.reset();
+  });
+
   it('renders threat badge and at least one KPI card', async () => {
     renderExecutiveView();
 
@@ -44,5 +49,32 @@ describe('ExecutiveSummaryView – mock dashboard layout', () => {
 
     expect(await screen.findByText(/Ingen kritiske risici/i)).toBeInTheDocument();
     expect(await screen.findByText(/Ingen prioriterede handlinger/i)).toBeInTheDocument();
+  });
+
+  it('renders case KPI metrics from DataContext', async () => {
+    renderExecutiveView();
+
+    expect(await screen.findByText(/Samlet risikoscore/i)).toBeInTheDocument();
+  });
+
+  it('shows KPI loader while KPIs are fetching', async () => {
+    caseApiMock.fetchCaseKpisMock.mockImplementation(() => new Promise(() => {}));
+
+    renderExecutiveView();
+
+    expect(await screen.findByTestId('executive-kpi-loading')).toBeInTheDocument();
+  });
+
+  it('shows KPI empty state when API returns no metrics', async () => {
+    caseApiMock.fetchCaseKpisMock.mockResolvedValue({
+      caseId: 'tsl',
+      metrics: [],
+      generatedAt: new Date().toISOString(),
+      source: 'api',
+    });
+
+    renderExecutiveView();
+
+    expect(await screen.findByTestId('executive-kpi-empty')).toBeInTheDocument();
   });
 });
