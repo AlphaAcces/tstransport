@@ -60,16 +60,26 @@ describe('ScenariosView AI fallback', () => {
     localStorage.clear();
   });
 
-  it('shows fallback message when API key is missing', async () => {
+  it('shows toast message when API key is missing and button is clicked', async () => {
     getGeminiApiKeyMock.mockReturnValue(undefined);
     render(<ScenariosView />);
 
+    // The analyze button should exist but clicking it should show a toast
     await act(async () => {
       await userEvent.click(screen.getByRole('button', { name: /kør ai-analyse/i }));
     });
 
-    expect(await screen.findByText(/AI-modulet er ikke aktiveret/i)).toBeInTheDocument();
+    // Now a toast should appear with the missing API key message
+    expect(await screen.findByText(/AI-analyse utilgængelig/i)).toBeInTheDocument();
     expect(generateGeminiContentMock).not.toHaveBeenCalled();
+  });
+
+  it('shows hint message when API key is missing', async () => {
+    getGeminiApiKeyMock.mockReturnValue(undefined);
+    render(<ScenariosView />);
+
+    // A hint should be visible in the heading area
+    expect(screen.getByText(/AI-analyser er deaktiveret/i)).toBeInTheDocument();
   });
 
   it('runs analysis when API key exists', async () => {

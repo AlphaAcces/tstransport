@@ -2,6 +2,9 @@
  * IntelVaultView Component
  *
  * Document management interface with search, filtering, and pagination.
+ * - Responsive: Card view on mobile (<768px), table on desktop
+ * - Slide-in filter panel with overlay
+ * - Improved accessibility with tooltips and ARIA
  */
 
 import { useState, useMemo } from 'react';
@@ -36,20 +39,17 @@ import { useVault, formatFileSize, type VaultDocument, type SecurityLevel } from
 function SecurityBadge({ level }: { level: SecurityLevel }) {
   const { t } = useTranslation();
 
-  const config = {
-    'unclassified': { bg: 'bg-slate-100', text: 'text-slate-700', border: 'border-slate-300' },
-    'confidential': { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-300' },
-    'secret': { bg: 'bg-amber-100', text: 'text-amber-700', border: 'border-amber-300' },
-    'top-secret': { bg: 'bg-red-100', text: 'text-red-700', border: 'border-red-300' },
+  // Use centralized badge CSS classes
+  const classMap: Record<SecurityLevel, string> = {
+    'unclassified': 'badge-security-unclassified',
+    'confidential': 'badge-security-confidential',
+    'secret': 'badge-security-secret',
+    'top-secret': 'badge-security-top-secret',
   };
 
-  const style = config[level];
-
   return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${style.bg} ${style.text} ${style.border}`}
-    >
-      <Shield className="w-3 h-3" />
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium ${classMap[level]}`}>
+      <Shield className="w-3 h-3" aria-hidden="true" />
       {t(`vault.security.${level}`)}
     </span>
   );
@@ -108,51 +108,108 @@ function DocumentRow({ document, onView }: DocumentRowProps) {
   const { t } = useTranslation();
 
   return (
-    <tr className="hover:bg-slate-50 transition-colors">
+    <tr className="hover:bg-slate-50 dark:hover:bg-gray-800/40 transition-colors">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
           <FileTypeIcon type={document.fileType} />
-          <div>
-            <p className="font-medium text-slate-900 text-sm">{document.title}</p>
-            <p className="text-xs text-slate-500">{document.filename}</p>
+          <div className="min-w-0">
+            <p className="font-medium text-slate-900 dark:text-gray-200 text-sm truncate">{document.title}</p>
+            <p className="text-xs text-slate-500 dark:text-gray-500 truncate">{document.filename}</p>
           </div>
         </div>
       </td>
-      <td className="px-4 py-3">
-        <span className="text-sm text-slate-600 capitalize">
+      <td className="px-4 py-3 hidden md:table-cell">
+        <span className="text-sm text-slate-600 dark:text-gray-400 capitalize">
           {t(`vault.category.${document.category}`)}
         </span>
       </td>
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 hidden sm:table-cell">
         <SecurityBadge level={document.securityLevel} />
       </td>
-      <td className="px-4 py-3">
+      <td className="px-4 py-3 hidden lg:table-cell">
         <StatusBadge status={document.status} />
       </td>
-      <td className="px-4 py-3 text-sm text-slate-600">
+      <td className="px-4 py-3 text-sm text-slate-600 dark:text-gray-400 hidden lg:table-cell">
         {formatFileSize(document.size)}
       </td>
-      <td className="px-4 py-3 text-sm text-slate-600">
+      <td className="px-4 py-3 text-sm text-slate-600 dark:text-gray-400 hidden md:table-cell">
         {new Date(document.updatedAt).toLocaleDateString()}
       </td>
       <td className="px-4 py-3">
         <div className="flex items-center gap-2">
           <button
             onClick={() => onView(document)}
-            className="p-1.5 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
+            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             title={t('vault.actions.view')}
+            aria-label={t('vault.actions.viewAriaLabel', { title: document.title, defaultValue: `Vis ${document.title}` })}
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-4 h-4" aria-hidden="true" />
           </button>
           <button
-            className="p-1.5 rounded hover:bg-slate-100 text-slate-500 hover:text-slate-700 transition-colors"
+            className="p-1.5 rounded hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-500 dark:text-gray-400 hover:text-slate-700 dark:hover:text-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
             title={t('vault.actions.download')}
+            aria-label={t('vault.actions.downloadAriaLabel', { title: document.title, defaultValue: `Download ${document.title}` })}
           >
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </td>
     </tr>
+  );
+}
+
+// ============================================================================
+// Document Card Component (Mobile View)
+// ============================================================================
+
+interface DocumentCardProps {
+  document: VaultDocument;
+  onView: (doc: VaultDocument) => void;
+}
+
+function DocumentCard({ document, onView }: DocumentCardProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className="bg-white dark:bg-component-dark rounded-lg border border-slate-200 dark:border-border-dark p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0 flex-1">
+          <FileTypeIcon type={document.fileType} />
+          <div className="min-w-0">
+            <p className="font-medium text-slate-900 dark:text-gray-200 text-sm truncate">{document.title}</p>
+            <p className="text-xs text-slate-500 dark:text-gray-500 truncate">{document.filename}</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <button
+            onClick={() => onView(document)}
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-500 dark:text-gray-400 transition-colors"
+            title={t('vault.actions.view')}
+            aria-label={t('vault.actions.viewAriaLabel', { title: document.title, defaultValue: `Vis ${document.title}` })}
+          >
+            <Eye className="w-5 h-5" aria-hidden="true" />
+          </button>
+          <button
+            className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-gray-700 text-slate-500 dark:text-gray-400 transition-colors"
+            title={t('vault.actions.download')}
+            aria-label={t('vault.actions.downloadAriaLabel', { title: document.title, defaultValue: `Download ${document.title}` })}
+          >
+            <Download className="w-5 h-5" aria-hidden="true" />
+          </button>
+        </div>
+      </div>
+      <div className="flex flex-wrap items-center gap-2">
+        <SecurityBadge level={document.securityLevel} />
+        <StatusBadge status={document.status} />
+        <span className="text-xs text-slate-500 dark:text-gray-500">
+          {formatFileSize(document.size)}
+        </span>
+      </div>
+      <div className="flex items-center justify-between text-xs text-slate-500 dark:text-gray-500">
+        <span className="capitalize">{t(`vault.category.${document.category}`)}</span>
+        <span>{new Date(document.updatedAt).toLocaleDateString()}</span>
+      </div>
+    </div>
   );
 }
 
@@ -511,46 +568,69 @@ export default function IntelVaultView() {
         </div>
       </div>
 
-      {/* Documents Table */}
-      <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+      {/* Documents - Mobile Card View */}
+      <div className="md:hidden space-y-3">
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
-            <RefreshCw className="w-6 h-6 text-slate-400 animate-spin" />
+            <RefreshCw className="w-6 h-6 text-slate-400 animate-spin" aria-label={t('common.loading', 'Indlæser...')} />
           </div>
         ) : documents.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-            <FolderOpen className="w-12 h-12 mb-3 text-slate-300" />
-            <p className="text-lg font-medium">{t('vault.empty.title')}</p>
-            <p className="text-sm">{t('vault.empty.description')}</p>
+          <div className="empty-state" role="status" aria-live="polite">
+            <FolderOpen className="empty-state-icon" aria-hidden="true" />
+            <h3 className="empty-state-title">{t('vault.empty.title')}</h3>
+            <p className="empty-state-description">{t('vault.empty.description')}</p>
+          </div>
+        ) : (
+          documents.map((doc) => (
+            <DocumentCard
+              key={doc.id}
+              document={doc}
+              onView={setViewingDocument}
+            />
+          ))
+        )}
+      </div>
+
+      {/* Documents - Desktop Table View */}
+      <div className="hidden md:block bg-white dark:bg-component-dark rounded-lg border border-slate-200 dark:border-border-dark overflow-hidden">
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <RefreshCw className="w-6 h-6 text-slate-400 animate-spin" aria-label={t('common.loading', 'Indlæser...')} />
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="empty-state" role="status" aria-live="polite">
+            <FolderOpen className="empty-state-icon" aria-hidden="true" />
+            <h3 className="empty-state-title">{t('vault.empty.title')}</h3>
+            <p className="empty-state-description">{t('vault.empty.description')}</p>
           </div>
         ) : (
           <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-200">
+            <thead className="bg-slate-50 dark:bg-gray-800/50 border-b border-slate-200 dark:border-border-dark">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('vault.table.document')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
                   {t('vault.table.category')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('vault.table.security')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                   {t('vault.table.status')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider hidden lg:table-cell">
                   {t('vault.table.size')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider hidden md:table-cell">
                   {t('vault.table.modified')}
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('vault.table.actions')}
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200">
+            <tbody className="divide-y divide-slate-200 dark:divide-border-dark">
               {documents.map((doc) => (
                 <DocumentRow
                   key={doc.id}
