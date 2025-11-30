@@ -24,18 +24,25 @@ import { CaseSelector } from '../Shared/CaseSelector';
 import { NotificationDrawer } from '../../domains/notifications/components/NotificationDrawer';
 import { useNotifications } from '../../domains/notifications/hooks';
 import { PreferencesPanel } from '../Shared/PreferencesPanel';
-import { Subject, View } from '../../types';
+import { View } from '../../types';
 import { TenantSwitcher } from '../../domains/tenant/TenantSwitcher';
+import type { AuthUser } from '../../domains/auth/types';
+import type { CaseMeta } from '../../types';
+import type { CaseRegistrySource } from '../../hooks/useCaseRegistry';
 
 interface TopBarProps {
   onToggleNav: () => void;
-  activeSubject: Subject;
-  onSubjectChange: (subject: Subject) => void;
+  caseOptions: CaseMeta[];
+  selectedCaseId?: string | null;
+  onSelectCase: (caseId: string, options?: { redirectToDashboard?: boolean }) => void;
+  isCaseListLoading?: boolean;
+  caseSource?: CaseRegistrySource;
+  onOpenCaseLibrary?: () => void;
   currentView: View;
   currentBreadcrumbs?: string[];
   onNavigate?: (view: View, options?: { fromDashboard?: boolean; breadcrumbs?: string[] }) => void;
   onHeightChange?: (height: number) => void;
-  user?: { id: string; role: 'admin' | 'user' } | null;
+  user?: AuthUser | null;
   onTenantChange?: (tenantId: string) => void;
   onOpenCommandDeck: () => void;
   onLogout?: () => void;
@@ -43,8 +50,12 @@ interface TopBarProps {
 
 export const TopBar: React.FC<TopBarProps> = ({
   onToggleNav,
-  activeSubject,
-  onSubjectChange,
+  caseOptions = [],
+  selectedCaseId,
+  onSelectCase,
+  isCaseListLoading,
+  caseSource,
+  onOpenCaseLibrary,
   currentView,
   currentBreadcrumbs,
   onNavigate,
@@ -119,8 +130,9 @@ export const TopBar: React.FC<TopBarProps> = ({
       ? t('auth.roles.user', { defaultValue: 'Bruger' })
       : null;
 
-  const userDisplayName = user?.id ?? t('auth.guest', { defaultValue: 'Guest' });
-  const userInitials = (user?.id ?? '?').slice(0, 2).toUpperCase();
+  const userDisplayName = user?.name ?? user?.id ?? t('auth.guest', { defaultValue: 'Guest' });
+  const initialsSource = user?.name ?? user?.id ?? '?';
+  const userInitials = initialsSource.slice(0, 2).toUpperCase();
   const toggleUserMenu = () => setIsUserMenuOpen((prev) => !prev);
   const handleLogoutClick = () => {
     onLogout?.();
@@ -148,7 +160,14 @@ export const TopBar: React.FC<TopBarProps> = ({
           <div className="topbar__divider hidden lg:block" />
 
           <div className="hidden sm:block">
-            <CaseSelector activeSubject={activeSubject} onSubjectChange={onSubjectChange} />
+            <CaseSelector
+              cases={caseOptions}
+              selectedCaseId={selectedCaseId}
+              onSelectCase={onSelectCase}
+              isLoading={isCaseListLoading}
+              source={caseSource}
+              onOpenCaseLibrary={onOpenCaseLibrary}
+            />
           </div>
         </div>
 
@@ -225,7 +244,14 @@ export const TopBar: React.FC<TopBarProps> = ({
 
       {/* Mobile Controls Row */}
       <div className="topbar__mobile lg:hidden">
-        <CaseSelector activeSubject={activeSubject} onSubjectChange={onSubjectChange} />
+        <CaseSelector
+          cases={caseOptions}
+          selectedCaseId={selectedCaseId}
+          onSelectCase={onSelectCase}
+          isLoading={isCaseListLoading}
+          source={caseSource}
+          onOpenCaseLibrary={onOpenCaseLibrary}
+        />
         <TenantSwitcher variant="compact" onTenantChange={onTenantChange} />
       </div>
 

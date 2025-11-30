@@ -1,13 +1,15 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import { Loader2 } from 'lucide-react';
-import { Subject, CaseData, RiskScore, RiskCategory } from '../types';
+import { AlertTriangle, Loader2 } from 'lucide-react';
+import { Subject, CaseData, RiskScore, RiskCategory, CaseDataSource } from '../types';
 import { getDataForSubject } from '../data';
 import { enrichTimelineWithViews, groupRisksByCategory } from '../data/transformers';
 import { useTranslation } from 'react-i18next';
 import { useTenantId, createAuditEntry } from '../domains/tenant';
+import { fetchCase } from '../domains/api/client';
 
 interface DataContextValue {
   caseData: CaseData;
+  caseId: string;
   enrichedCaseData: {
     timelineData: CaseData['timelineData'];
     actionsData: CaseData['actionsData'];
@@ -16,17 +18,21 @@ interface DataContextValue {
   };
   subject: Subject;
   tenantId: string | null;
+  dataSource: CaseDataSource;
 }
 
 export const DataContext = createContext<DataContextValue | null>(null);
 
 interface DataProviderProps {
   children: React.ReactNode;
+  activeCaseId: string;
   activeSubject: Subject;
 }
 
-const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) => {
+const DataProvider: React.FC<DataProviderProps> = ({ children, activeCaseId, activeSubject }) => {
   const [caseData, setCaseData] = useState<CaseData | null>(null);
+  const [resolvedCaseId, setResolvedCaseId] = useState<string>(activeCaseId);
+  const [dataSource, setDataSource] = useState<CaseDataSource | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorKey, setErrorKey] = useState<string | null>(null);
   const { t } = useTranslation('data');
@@ -39,57 +45,76 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) 
     setIsLoading(true);
     setErrorKey(null);
     setCaseData(null);
+    setDataSource(null);
+    setResolvedCaseId(activeCaseId);
 
-    getDataForSubject(activeSubject)
-      .then(data => {
-        if (!isActive) {
-          return;
-        }
+    const applyCaseData = (data: CaseData, source: CaseDataSource) => {
+      if (!isActive) {
+        return;
+      }
 
-        // Filter data by tenant ID for multi-tenant isolation
-        // Allow 'default-tenant' in development mode for mock data compatibility
-        const isDefaultTenant = data.tenantId === 'default-tenant';
-        const isDevelopment = import.meta.env.DEV;
+      const isDefaultTenant = data.tenantId === 'default-tenant';
+      const isDevelopment = import.meta.env.DEV;
 
-        if (tenantId && data.tenantId !== tenantId && !(isDefaultTenant && isDevelopment)) {
-          console.warn(`Case data tenantId (${data.tenantId}) does not match active tenantId (${tenantId})`);
-          setErrorKey('tenantMismatch');
-          setIsLoading(false);
-          return;
-        }
-
-        // Log data access for audit trail (if tenant context exists)
-        if (tenantId) {
-          createAuditEntry(
-            tenantId,
-            'system', // Replace with actual user ID from TenantContext
-            'read',
-            'case',
-            activeSubject,
-            { subjectName: activeSubject }
-          );
-        }
-
-        setCaseData(data);
+      if (tenantId && data.tenantId !== tenantId && !(isDefaultTenant && isDevelopment)) {
+        console.warn(`Case data tenantId (${data.tenantId}) does not match active tenantId (${tenantId})`);
+        setErrorKey('tenantMismatch');
         setIsLoading(false);
-      })
-      .catch(err => {
-        console.error('Failed to load subject data', err);
+        return;
+      }
+
+      if (tenantId) {
+        createAuditEntry(
+          tenantId,
+          'system',
+          'read',
+          'case',
+          activeSubject,
+          { subjectName: activeSubject, dataSource: source, caseId: activeCaseId }
+        );
+      }
+
+      setCaseData(data);
+      setResolvedCaseId(activeCaseId);
+      setDataSource(source);
+      setIsLoading(false);
+    };
+
+    const loadCaseData = async () => {
+      try {
+        const apiData = await fetchCase(activeCaseId);
+        applyCaseData(apiData, 'api');
+        return;
+      } catch (apiError) {
         if (!isActive) {
           return;
         }
+        console.warn('[DataContext] Falling back to mock data after API error.', apiError);
+      }
+
+      try {
+        const fallbackData = await getDataForSubject(activeSubject);
+        applyCaseData(fallbackData, 'mock');
+      } catch (fallbackError) {
+        if (!isActive) {
+          return;
+        }
+        console.error('Failed to load subject data', fallbackError);
         setErrorKey('loadError');
         setIsLoading(false);
-      });
+      }
+    };
+
+    loadCaseData();
 
     return () => {
       isActive = false;
     };
-  }, [activeSubject, tenantId]);
+  }, [activeCaseId, activeSubject, tenantId]);
 
   const value = useMemo<DataContextValue | null>(
     () => {
-      if (!caseData) return null;
+      if (!caseData || !dataSource) return null;
 
       // Enrich data using transformers
       const enrichedTimelineData = enrichTimelineWithViews(caseData.timelineData);
@@ -100,6 +125,7 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) 
 
       return {
         caseData,
+        caseId: resolvedCaseId,
         enrichedCaseData: {
           timelineData: enrichedTimelineData,
           actionsData: caseData.actionsData,
@@ -108,24 +134,51 @@ const DataProvider: React.FC<DataProviderProps> = ({ children, activeSubject }) 
         },
         subject: activeSubject,
         tenantId,
+        dataSource,
       };
     },
-    [caseData, activeSubject, tenantId],
+    [caseData, activeSubject, tenantId, dataSource, resolvedCaseId],
   );
 
   if (isLoading) {
     return (
-      <div className="flex h-64 items-center justify-center text-gray-400">
-        <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-        {t('loading')}
+      <div
+        className="space-y-6 rounded-2xl border border-white/10 bg-black/30 p-8 shadow-xl"
+        role="status"
+        aria-live="polite"
+      >
+        <div className="flex items-center gap-3 text-sm text-gray-200">
+          <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+          <span>{t('loading')}</span>
+        </div>
+        <div className="skeleton skeleton--text w-48" aria-hidden="true" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="skeleton skeleton--card h-32" aria-hidden="true" />
+          <div className="skeleton skeleton--card h-32" aria-hidden="true" />
+        </div>
+        <div className="skeleton skeleton--card h-48" aria-hidden="true" />
       </div>
     );
   }
 
   if (errorKey || !value) {
     return (
-      <div className="rounded-lg border border-red-600/60 bg-red-900/40 p-6 text-sm text-red-200">
-        {errorKey ? t(errorKey) : t('unknownError')}
+      <div className="empty-state" role="alert" aria-live="assertive">
+        <AlertTriangle className="empty-state-icon" aria-hidden="true" />
+        <h3 className="empty-state-title">{t('loadErrorTitle', { defaultValue: 'Kunne ikke hente data' })}</h3>
+        <p className="empty-state-description">
+          {errorKey ? t(errorKey) : t('unknownError')}
+        </p>
+        <p className="empty-state-description text-xs text-gray-400">
+          {t('loadErrorHint', { defaultValue: 'Se konsollen for detaljer eller prøv at genindlæse.' })}
+        </p>
+        <button
+          type="button"
+          className="mt-4 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-gold)]"
+          onClick={() => window.location.reload()}
+        >
+          {t('retry', { defaultValue: 'Prøv igen' })}
+        </button>
       </div>
     );
   }

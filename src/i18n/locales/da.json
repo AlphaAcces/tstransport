@@ -52,6 +52,15 @@
     "configuration": "Konfiguration",
     "saveView": "Gem visning"
   },
+  "caseSelector": {
+    "liveData": "Live data",
+    "offlineData": "Offline data",
+    "caseCount": "{{count}} sager",
+    "noResults": "Ingen sager tilgængelige",
+    "selectPlaceholder": "Vælg en case",
+    "openCaseLibrary": "Åbn caseliste",
+    "noCaseSelected": "Ingen sager"
+  },
   "theme": {
     "light": "Lyst",
     "dark": "Mørkt",
@@ -168,6 +177,19 @@
       "tsl": {
         "short": "TSL"
       },
+    "caseLibrary": {
+      "title": "Casebibliotek",
+      "subtitle": "Vælg en aktiv sag til dashboardet, AI-loggen og overvågning.",
+      "offlineTitle": "Viser lokale case-data",
+      "offlineBody": "API'et for cases er utilgængeligt, så biblioteket viser den seneste indbyggede kopi.",
+      "apiErrorTitle": "Kunne ikke hente cases fra API",
+      "apiErrorBody": "Falder tilbage til lokale data indtil API'et svarer igen.",
+      "caseCount": "{{count}} sager",
+      "regionFallback": "Global",
+      "idLabel": "ID",
+      "activeLabel": "Aktiv case",
+      "unknownUpdated": "Ukendt opdateringstid"
+    },
       "umit": {
         "short": "ÜC"
       }
@@ -178,6 +200,8 @@
     "logo": {
       "alt": "TS24 Intelligence"
     },
+    "loading": "Indlæser…",
+    "lastUpdated": "Sidst opdateret",
     "copy": "Kopiér",
     "copied": "Kopieret"
   },
@@ -223,8 +247,18 @@
         "withReason": "Forespørgslen fejlede: {{reason}}"
       }
     },
+    "sso": {
+      "title": "Sikker single sign-on",
+      "verifying": "Validerer sikkert token…",
+      "progress": "Godkender adgang…",
+      "success": "SSO-token verificeret. Omdirigerer…",
+      "missing": "SSO-token mangler. Prøv igen.",
+      "invalid": "SSO-token er ugyldigt eller udløbet. Log ind manuelt.",
+      "fallbackCta": "Tilbage til login"
+    },
     "error": {
-      "invalidCredentials": "Forkert brugernavn eller adgangskode"
+      "invalidCredentials": "Forkert brugernavn eller adgangskode",
+      "ssoFailed": "Sessionen kunne ikke overføres – log ind manuelt."
     }
   },
   "data": {

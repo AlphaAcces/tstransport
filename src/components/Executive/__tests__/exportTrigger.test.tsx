@@ -18,7 +18,7 @@ describe('Executive export trigger', () => {
     render(
       <ReduxProvider store={store}>
         <TenantProvider>
-          <DataProvider activeSubject="tsl">
+          <DataProvider activeSubject="tsl" activeCaseId="tsl">
             <ExecutiveSummaryView />
           </DataProvider>
         </TenantProvider>

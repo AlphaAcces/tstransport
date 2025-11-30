@@ -12,7 +12,8 @@
     "preview-shots": "start-server-and-test \"npm run dev\" http://localhost:5173 \"npm run screenshot\"",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "test": "vitest",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:sso-smoke": "playwright test e2e/sso-smoke.spec.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -21,12 +22,14 @@
     "express": "^4.18.2",
     "html2canvas": "^1.4.1",
     "i18next": "^25.6.3",
+    "jose": "^6.1.2",
     "jspdf": "^3.0.4",
     "lucide-react": "^0.378.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^16.3.5",
     "react-redux": "^8.1.1",
+    "react-router-dom": "^7.9.6",
     "react-window": "^2.2.3",
     "react-window-infinite-loader": "^2.0.0",
     "recharts": "^2.12.7"

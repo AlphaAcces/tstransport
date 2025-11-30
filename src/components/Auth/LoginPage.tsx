@@ -16,9 +16,12 @@ import {
   Shield,
   ShieldCheck,
   UserRound,
+  Info,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { tenantApi } from '../../domains/tenant';
+import { authenticateDemoUser } from '../../domains/auth/demoUsers';
+import type { AuthUser } from '../../domains/auth/types';
 
 // Available systems for the platform
 type SystemType = 'intel24' | 'greyeye' | 'blackboxeye';
@@ -172,15 +175,11 @@ const SecureInput: React.FC<SecureInputProps> = ({
 );
 
 interface LoginPageProps {
-  onLoginSuccess: (user: { id: string; role: 'admin' | 'user' }) => void;
+  onLoginSuccess: (user: AuthUser) => void;
+  ssoFailed?: boolean;
 }
 
-const users: { [key: string]: { password: string; role: 'admin' | 'user' } } = {
-  'AlphaGrey': { password: 'Nex212325', role: 'admin' },
-  'cetin.umit.TS': { password: '26353569', role: 'user' },
-};
-
-export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, ssoFailed }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
@@ -313,9 +312,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
     setErrorKey(null);
 
     setTimeout(() => {
-      const user = users[username];
-      if (user && user.password === password) {
-        onLoginSuccess({ id: username, role: user.role });
+      const authenticatedUser = authenticateDemoUser(username, password);
+      if (authenticatedUser) {
+        onLoginSuccess(authenticatedUser);
       } else {
         setErrorKey('auth.error.invalidCredentials');
       }
@@ -465,6 +464,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
               {t('auth.heroSubline')}
             </p>
           </div>
+
+          {ssoFailed && (
+              <div className="flex items-center gap-2 p-3 rounded-lg border border-[var(--color-accent-blue)]/40 bg-[var(--color-accent-blue)]/10 text-[var(--color-text)] text-sm" role="status" data-testid="sso-failure-banner">
+              <Info className="w-4 h-4 text-[var(--color-accent-blue)]" />
+              <span>{t('auth.error.ssoFailed')}</span>
+            </div>
+          )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>
             <SecureInput

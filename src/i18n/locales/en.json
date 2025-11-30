@@ -52,6 +52,15 @@
     "configuration": "Configuration",
     "saveView": "Save view"
   },
+  "caseSelector": {
+    "liveData": "Live data",
+    "offlineData": "Offline data",
+    "caseCount": "{{count}} cases",
+    "noResults": "No cases available",
+    "selectPlaceholder": "Select a case",
+    "openCaseLibrary": "Open case library",
+    "noCaseSelected": "No cases"
+  },
   "theme": {
     "light": "Light",
     "dark": "Dark",
@@ -178,6 +187,8 @@
     "logo": {
       "alt": "TS24 Intelligence"
     },
+    "loading": "Loading…",
+    "lastUpdated": "Last updated",
     "copy": "Copy",
     "copied": "Copied"
   },
@@ -223,8 +234,18 @@
         "withReason": "Request failed: {{reason}}"
       }
     },
+    "sso": {
+      "title": "Secure single sign-on",
+      "verifying": "Verifying secure token…",
+      "progress": "Validating access…",
+      "success": "Secure token verified. Redirecting…",
+      "missing": "SSO token missing. Please try again.",
+      "invalid": "SSO token invalid or expired. Please log in manually.",
+      "fallbackCta": "Back to login"
+    },
     "error": {
-      "invalidCredentials": "Invalid username or password"
+      "invalidCredentials": "Invalid username or password",
+      "ssoFailed": "Session could not be transferred – please sign in manually."
     }
   },
   "data": {
@@ -365,6 +386,19 @@
         "label": "Currency"
       }
     }
+  },
+  "caseLibrary": {
+    "title": "Case Library",
+    "subtitle": "Select an active case for the dashboard, AI command log, and monitoring.",
+    "offlineTitle": "Displaying offline case data",
+    "offlineBody": "The case API is unavailable, so the library is showing the bundled metadata snapshot.",
+    "apiErrorTitle": "Unable to fetch cases from API",
+    "apiErrorBody": "Falling back to the local dataset until the API responds again.",
+    "caseCount": "{{count}} cases",
+    "regionFallback": "Global",
+    "idLabel": "ID",
+    "activeLabel": "Active case",
+    "unknownUpdated": "Unknown update time"
   },
   "person": {
     "profile": {

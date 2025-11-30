@@ -141,6 +141,7 @@ import type { TimelineEvent } from './timeline';
 import type { ActionItem, Hypothesis, Scenario } from './actions';
 import type { ExecutiveSummaryData as ExecutiveSummaryDataImport } from './executive';
 import type { NetworkNode, NetworkEdge } from './network';
+import type { Subject } from './core';
 
 /**
  * Complete case data for an investigation subject.
@@ -169,6 +170,19 @@ export interface CaseData {
   scenariosData: Scenario[];
   executiveSummary: ExecutiveSummaryDataImport;
 }
+
+export interface CaseMeta {
+  id: string;
+  name: string;
+  type: string;
+  defaultSubject: Subject;
+  summary?: string;
+  region?: string;
+  updatedAt?: string;
+  tags?: string[];
+}
+
+export type CaseDataSource = 'api' | 'mock';
 
 // ============================================================================
 // Legacy Type Aliases (for backward compatibility)

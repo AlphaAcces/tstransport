@@ -9,6 +9,7 @@ import { ThemeToggle } from '../Shared/ThemeToggle';
 import { AiCommandPanel } from '../Dashboard/AiCommandPanel';
 import { CountrySelector } from '../../domains/settings/components/CountrySelector';
 import { useUserSettings } from '../../domains/settings/hooks/useUserSettings';
+import type { AuthUser } from '../../domains/auth/types';
 
 const FOCUSABLE_SELECTORS = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 const QUICK_LINKS: View[] = ['dashboard', 'executive', 'person', 'companies', 'risk', 'timeline', 'actions', 'vault', 'accessRequests'];
@@ -17,7 +18,7 @@ interface CommandDeckProps {
   activeSubject: Subject;
   currentView: View;
   onNavigate: (view: View, options?: { fromDashboard?: boolean }) => void;
-  user?: { id: string; role: 'admin' | 'user' } | null;
+  user?: AuthUser | null;
   onLogout?: () => void;
   topOffset?: number;
   isOpen: boolean;
@@ -271,7 +272,7 @@ export const CommandDeck: React.FC<CommandDeckProps> = ({
                 <div className="rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-hover)]/40 p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-text-muted)]">{t('commandDeck.session.label', { defaultValue: 'Session' })}</p>
-                    <p className="text-base font-semibold text-[var(--color-text)]">{user?.id ?? t('auth.guest', { defaultValue: 'Guest' })}</p>
+                    <p className="text-base font-semibold text-[var(--color-text)]">{user?.name ?? user?.id ?? t('auth.guest', { defaultValue: 'Guest' })}</p>
                     <p className="text-xs text-[var(--color-text-muted)]">{user?.role ? t(`auth.roles.${user.role}`, { defaultValue: user.role }) : t('auth.roles.user', { defaultValue: 'User' })}</p>
                   </div>
                   {onLogout && (

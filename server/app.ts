@@ -1,7 +1,14 @@
 import express from 'express';
+import { getSsoMetricsSnapshot } from '../shared/ssoMetrics';
 import storage, { logAudit, getAuditLog } from './storage';
 import { encrypt, decrypt } from './crypto';
 import monitoringRoutes from './monitoring';
+import { listCases, getCaseById } from '../src/domains/cases/caseStore';
+
+const SSO_EXPECTED_ISS = 'ts24-intel';
+const SSO_EXPECTED_AUD = 'ts24-intel';
+const SSO_CONFIG_VERSION = 'v1';
+const PROTECT_SSO_HEALTH = process.env.NODE_ENV === 'production' || process.env.TS24_SSO_HEALTH_PROTECTED === 'true';
 
 const app = express();
 app.use(express.json());
@@ -10,6 +17,47 @@ const DEFAULT_PUBLIC_TENANT_ID = process.env.DEFAULT_PUBLIC_TENANT_ID || 'tenant
 
 // Mount monitoring routes
 app.use('/api', monitoringRoutes);
+
+app.get('/api/auth/sso-health', (req, res) => {
+  if (PROTECT_SSO_HEALTH) {
+    const expectedKey = process.env.TS24_SSO_HEALTH_KEY;
+    const providedKey = req.header('x-sso-health-key');
+    if (!expectedKey || providedKey !== expectedKey) {
+      return res.status(403).json({ error: 'forbidden', message: 'SSO health endpoint restricted' });
+    }
+  }
+
+  const secretConfigured = Boolean(process.env.VITE_SSO_JWT_SECRET || process.env.SSO_JWT_SECRET);
+
+  res.json({
+    expectedIss: SSO_EXPECTED_ISS,
+    expectedAud: SSO_EXPECTED_AUD,
+    secretConfigured,
+    usesHS256: true,
+    configVersion: SSO_CONFIG_VERSION,
+    recentErrors: getSsoMetricsSnapshot(),
+  });
+  // TODO: Move SSO metrics persistence out of process (Redis/Prometheus) for multi-instance parity.
+});
+
+// ============================================================================
+// Case API
+// ============================================================================
+
+app.get('/api/cases', (_req, res) => {
+  res.json(listCases());
+  // TODO: Replace caseStore with persistent storage when backend is ready.
+});
+
+app.get('/api/cases/:id', (req, res) => {
+  const caseData = getCaseById(req.params.id);
+  if (!caseData) {
+    return res.status(404).json({ error: 'CASE_NOT_FOUND' });
+  }
+
+  res.json(caseData);
+  // TODO: Add auth/authorization when exposing the case API beyond mocks.
+});
 
 // ============================================================================
 // Middleware
