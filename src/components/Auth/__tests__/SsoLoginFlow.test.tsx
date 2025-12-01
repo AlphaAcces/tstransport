@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { SsoLoginPage } from '../SsoLoginPage';
 import { LoginRoute } from '../../../App';
 import type { AuthUser } from '../../../domains/auth/types';
-import { verifySsoToken, SsoError } from '../../../domains/auth/sso';
+import { verifySsoTokenViaBackend, BackendSsoError } from '../../../domains/auth/ssoBackend';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -13,15 +13,16 @@ vi.mock('react-i18next', () => ({
   }),
 }));
 
-vi.mock('../../../domains/auth/sso', async () => {
-  const actual = await vi.importActual<typeof import('../../../domains/auth/sso')>('../../../domains/auth/sso');
+vi.mock('../../../domains/auth/ssoBackend', async () => {
+  const actual = await vi.importActual<typeof import('../../../domains/auth/ssoBackend')>('../../../domains/auth/ssoBackend');
   return {
     ...actual,
-    verifySsoToken: vi.fn(),
+    verifySsoTokenViaBackend: vi.fn(),
+    getSsoSession: vi.fn(() => null), // No existing session
   };
 });
 
-const mockedVerify = vi.mocked(verifySsoToken);
+const mockedVerify = vi.mocked(verifySsoTokenViaBackend);
 
 const mockUser: AuthUser = {
   id: 'agent-47',
@@ -64,8 +65,8 @@ describe('SSO login flow', () => {
     await waitFor(() => expect(screen.getByTestId('captured-location').textContent).toBe('/sso-login?sso=alias-token'));
   });
 
-  it('surfaces SSO failures via LoginPage banner after redirect', async () => {
-    mockedVerify.mockRejectedValue(new SsoError('SSO_INVALID_SIGNATURE', 'bad signature'));
+  it('surfaces SSO failures via SsoErrorDisplay after verification fails', async () => {
+    mockedVerify.mockRejectedValue(new BackendSsoError('TOKEN_INVALID', 'bad signature'));
 
     render(
       <MemoryRouter initialEntries={['/sso-login?sso=broken-token']}>
@@ -76,7 +77,11 @@ describe('SSO login flow', () => {
       </MemoryRouter>
     );
 
-    await waitFor(() => expect(screen.getByText('auth.error.ssoFailed')).toBeInTheDocument());
+    // Should show error display on SSO login page
+    await waitFor(() => expect(screen.getByTestId('sso-error-display')).toBeInTheDocument(), { timeout: 5000 });
+
+    // Error title should mention invalid token
+    expect(screen.getByText('auth.sso.errors.invalid.title')).toBeInTheDocument();
   });
 });
 

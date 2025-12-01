@@ -39,6 +39,8 @@ This document provides a high-level overview of the main flows and architecture 
                     │  /api/cases/:id/kpis               │
                     │  /api/cases/:id/export             │
                     │  /api/tenant/:id/aiKey             │
+                    │  /api/auth/verify                  │
+                    │  /sso-login (server-side handler)  │
                     └────────────────────────────────────┘
 ```
 
@@ -52,6 +54,7 @@ This document provides a high-level overview of the main flows and architecture 
 |-------------|-----|
 | SSO (kanonisk) | `https://intel24.blackbox.codes/sso-login?sso=<JWT>` |
 | Manuel login | `https://intel24.blackbox.codes/login` |
+| SSO verify (API) | `https://intel24.blackbox.codes/api/auth/verify` |
 
 ```text
 User → Browser
@@ -64,19 +67,48 @@ User → Browser
     │
     └─── SSO Login (/sso-login?sso=<JWT>)
             │
-            └── SsoLoginPage.tsx
-                    ├── Verify JWT (jose library, HS256)
-                    ├── Success → sessionStorage → Dashboard (/)
-                    └── Failure → /login with ssoFailed=true banner
+            └── server/app.ts (server-side handler)
+                    │
+                    ├── verifySsoTokenServerSide() (server/ssoAuth.ts)
+                    │       ├── Verify HS256 signature
+                    │       ├── Validate iss/aud claims
+                    │       ├── Check exp/iat timestamps
+                    │       └── Lookup known user
+                    │
+                    ├── Success:
+                    │       ├── Set ts24_sso_session cookie
+                    │       ├── Log audit: sso:login_success
+                    │       └── Redirect to /
+                    │
+                    └── Failure:
+                            ├── Log audit: sso:login_failed
+                            └── Redirect to /login?ssoFailed=true
+```
+
+### SSO Verify Endpoint (GDI Preflight)
+
+```text
+GDI → GET /api/auth/verify
+      │
+      ├── Header: Authorization: Bearer <JWT>
+      │
+      └── server/app.ts
+              │
+              ├── Success (200):
+              │       { status: "ok", ts24_user_id, role, tenant, ts }
+              │
+              └── Failure (400/401):
+                      { status: "error", error: "TOKEN_*" }
 ```
 
 **Key files:**
 
+- `server/ssoAuth.ts` (server-side token verification)
+- `server/app.ts` (`/api/auth/verify`, `/sso-login` handler, `/api/health`, `/api/auth/sso-health`)
 - `src/components/Auth/LoginPage.tsx`
-- `src/components/Auth/SsoLoginPage.tsx`
-- `src/domains/auth/sso.ts` (token verification)
+- `src/components/Auth/SsoLoginPage.tsx` (client-side fallback)
+- `src/domains/auth/sso.ts` (client-side token verification)
 - `src/App.tsx` (auth state, LoginRoute)
-- `server/app.ts` (`/api/health`, `/api/auth/sso-health`)
 
 **Docs:** [ts24_login_flow.md](ts24_login_flow.md), [sso_v1_signoff_ts24.md](sso_v1_signoff_ts24.md), [ts24_dns_and_cert_ops.md](ts24_dns_and_cert_ops.md) (DNS/cert ops-runbook)
 
@@ -236,3 +268,4 @@ ExecutiveSummaryView → handleExport()
 - [events_timeline.md](events_timeline.md) – Event engine and CaseTimeline
 - [kpi_module.md](kpi_module.md) – KPI derivation and dashboard
 - [export_module.md](export_module.md) – Export pipeline and Executive PDF
+- [deployment_guide.md](deployment_guide.md) – Server/infra deployment steps for intel24.blackbox.codes

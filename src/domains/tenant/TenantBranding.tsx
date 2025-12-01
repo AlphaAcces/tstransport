@@ -210,7 +210,8 @@ export const TenantColorProvider: React.FC<{ children: React.ReactNode }> = ({ c
  */
 export const useTenantColor = (colorKey: keyof TenantColorScheme): string => {
   const branding = useBranding();
-  return branding.colors[colorKey];
+  const fallback = branding.colors.primary ?? '#000000';
+  return branding.colors[colorKey] ?? fallback;
 };
 
 // ============================================================================

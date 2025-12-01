@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useId } from 'react';
 import type { CSSProperties } from 'react';
 import { useTranslation } from 'react-i18next';
+import { useLocation } from 'react-router-dom';
 import {
   ChevronDown,
   ChevronUp,
@@ -16,12 +17,13 @@ import {
   Shield,
   ShieldCheck,
   UserRound,
-  Info,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { tenantApi } from '../../domains/tenant';
 import { authenticateDemoUser } from '../../domains/auth/demoUsers';
 import type { AuthUser } from '../../domains/auth/types';
+import { SsoErrorBanner } from './SsoErrorDisplay';
+import type { BackendSsoErrorCode } from '../../domains/auth/ssoBackend';
 
 // Available systems for the platform
 type SystemType = 'intel24' | 'greyeye' | 'blackboxeye';
@@ -174,12 +176,22 @@ const SecureInput: React.FC<SecureInputProps> = ({
   </div>
 );
 
+interface LocationState {
+  ssoFailed?: boolean;
+  errorCode?: BackendSsoErrorCode;
+}
+
 interface LoginPageProps {
   onLoginSuccess: (user: AuthUser) => void;
   ssoFailed?: boolean;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, ssoFailed }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, ssoFailed: propSsoFailed }) => {
+  const location = useLocation();
+  const locationState = (location.state as LocationState | null) ?? {};
+  const ssoFailed = propSsoFailed || locationState.ssoFailed;
+  const ssoErrorCode = locationState.errorCode;
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [pin, setPin] = useState('');
@@ -466,10 +478,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, ssoFailed 
           </div>
 
           {ssoFailed && (
-              <div className="flex items-center gap-2 p-3 rounded-lg border border-[var(--color-accent-blue)]/40 bg-[var(--color-accent-blue)]/10 text-[var(--color-text)] text-sm" role="status" data-testid="sso-failure-banner">
-              <Info className="w-4 h-4 text-[var(--color-accent-blue)]" />
-              <span>{t('auth.error.ssoFailed')}</span>
-            </div>
+            <SsoErrorBanner errorCode={ssoErrorCode ?? 'TOKEN_INVALID'} />
           )}
 
           <form className="space-y-4" onSubmit={handleSubmit}>

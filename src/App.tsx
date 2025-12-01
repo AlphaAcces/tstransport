@@ -8,7 +8,7 @@ import { useAppNavigation } from './hooks/useAppNavigation';
 import DataProvider from './context/DataContext';
 import { LoginPage } from './components/Auth/LoginPage';
 import { SsoLoginPage } from './components/Auth/SsoLoginPage';
-import { Loader } from 'lucide-react';
+import { Loader, ShieldCheck } from 'lucide-react';
 import { View } from './types';
 import './i18n';
 import { Provider as ReduxProvider } from 'react-redux';
@@ -21,6 +21,12 @@ import type { AuthUser } from './domains/auth/types';
 import { useCaseRegistry } from './hooks/useCaseRegistry';
 import { DEFAULT_CASE_ID } from './domains/cases/caseMetadata';
 import CaseLibraryView from './components/Cases/CaseLibraryView';
+import {
+  getSsoSession,
+  buildAuthUserFromSession,
+  clearSsoSessionCookie,
+  hasValidSsoSession,
+} from './domains/auth/ssoBackend';
 
 // Lazy load heavy components
 const DashboardView = lazy(() => import('./components/Dashboard/DashboardView').then(module => ({ default: module.DashboardView })));
@@ -46,6 +52,7 @@ export const App: React.FC = () => {
   const [tenantUser, setTenantUser] = useState<TenantUser | null>(null);
   const [isTenantLoading, setIsTenantLoading] = useState(true);
   const [isCommandDeckOpen, setIsCommandDeckOpen] = useState(false);
+  const [isVerifyingSession, setIsVerifyingSession] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
   const routerNavigate = useNavigate();
   const { cases, isLoading: isCaseRegistryLoading, source: caseRegistrySource, error: caseRegistryError } = useCaseRegistry();
@@ -69,17 +76,42 @@ export const App: React.FC = () => {
     initTenant();
   }, []);
 
-  // TODO: Håndter token-refresh/expiry via backend i stedet for ren client-side sessionStorage.
+  // SSO Session verification on app load
+  // Priority: 1) SSO session cookie (server-verified), 2) sessionStorage (legacy fallback)
   useEffect(() => {
-    try {
-      const storedUser = sessionStorage.getItem('authUser');
-      if (storedUser) {
-        setAuthUser(JSON.parse(storedUser));
+    const verifySession = () => {
+      try {
+        // Check for valid SSO session cookie (set by backend after server-side verification)
+        if (hasValidSsoSession()) {
+          const session = getSsoSession();
+          if (session) {
+            const user = buildAuthUserFromSession(session);
+            setAuthUser(user);
+            // Sync to sessionStorage for backward compatibility
+            sessionStorage.setItem('authUser', JSON.stringify(user));
+            console.log('[auth] Restored session from SSO cookie:', user.id);
+            setIsVerifyingSession(false);
+            return;
+          }
+        }
+
+        // Fallback: Check sessionStorage (legacy client-side sessions)
+        const storedUser = sessionStorage.getItem('authUser');
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          setAuthUser(user);
+          console.log('[auth] Restored session from sessionStorage (legacy):', user.id);
+        }
+      } catch (error) {
+        console.error('[auth] Session verification failed:', error);
+        sessionStorage.removeItem('authUser');
+        clearSsoSessionCookie();
+      } finally {
+        setIsVerifyingSession(false);
       }
-    } catch (error) {
-      console.error("Could not parse auth user from session storage", error);
-      sessionStorage.removeItem('authUser');
-    }
+    };
+
+    verifySession();
   }, []);
 
   // Handle tenant change from TenantSwitcher
@@ -103,7 +135,9 @@ export const App: React.FC = () => {
   const handleLogout = () => {
     setAuthUser(null);
     sessionStorage.removeItem('authUser');
+    clearSsoSessionCookie();
     setIsCommandDeckOpen(false);
+    routerNavigate('/login', { replace: true });
   };
 
 
@@ -173,6 +207,21 @@ export const App: React.FC = () => {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     (window as any).__navigateTo = navigateTo;
+  }
+
+  // Show loading state while verifying session
+  if (isVerifyingSession) {
+    return (
+      <div className="min-h-screen bg-[#0C0E1A] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <ShieldCheck className="w-12 h-12 text-[#E3B23C]" />
+            <Loader className="w-6 h-6 animate-spin text-[#E3B23C] absolute -bottom-1 -right-1" />
+          </div>
+          <p className="text-gray-400 text-sm">Verifying secure session…</p>
+        </div>
+      </div>
+    );
   }
 
   if (!authUser) {

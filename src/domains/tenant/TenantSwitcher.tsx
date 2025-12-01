@@ -12,6 +12,14 @@ import { useTenant, useBranding } from './TenantContext';
 import { tenantApi, TenantListItem } from './tenantApi';
 import type { TenantRole } from './types';
 
+const mapToTenantRole = (role?: string | null): TenantRole => {
+  const allowedRoles: TenantRole[] = ['owner', 'admin', 'analyst', 'viewer', 'guest'];
+  if (role && allowedRoles.includes(role as TenantRole)) {
+    return role as TenantRole;
+  }
+  return 'viewer';
+};
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -392,7 +400,7 @@ const TenantDropdown: React.FC<TenantDropdownProps> = ({
                 </p>
                 {showRole && tenant.role && (
                   <div className="mt-1">
-                    <RoleBadge role={tenant.role} />
+                    <RoleBadge role={mapToTenantRole(tenant.role)} />
                   </div>
                 )}
               </div>

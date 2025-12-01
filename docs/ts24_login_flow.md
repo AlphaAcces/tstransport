@@ -103,11 +103,10 @@ Demo credentials (hard-coded in `LoginPage.tsx`):
 
 - Canonical route: `/sso-login?sso=<JWT>`. The legacy `/sso-login?ssoToken=<JWT>` and `/login?sso=<JWT>` aliases still work, but they immediately 302/`navigate()` into the canonical URI so dashboards, bookmarks and telemetry only see one entry-point.
 - Tokens are HS256 JWTs minted by ALPHA-Interface-GUI (see `sso_notes.md` in that repo) after a successful GDI login.
-- Verification happens entirely in the browser using [`jose`](https://github.com/panva/jose). The shared secret **must** be supplied through `VITE_SSO_JWT_SECRET` at build time.
+- **Server-side verification (v1.1+):** Token verification now happens server-side in `server/ssoAuth.ts` using the [`jose`](https://github.com/panva/jose) library. The shared secret **must** be supplied through `SSO_JWT_SECRET` environment variable at runtime.
 - Required claims: `sub` (agent identifier matching the existing demo user map), `name` (shown in the UI), `role` (`admin`/`user`), plus standard `iat`/`exp` managed by the PHP helper.
-- Success path mirrors manual login: the decoded `{ id, role, name }` payload is persisted to `sessionStorage` and the dashboard shell mounts instantly.
-- Failure (missing/invalid/expired token or unknown subject) funnels into the localized banner on `/login` (visible thanks to `location.state.ssoFailed = true`). Operators always land on the manual form after a few seconds, so there is a single fallback UX for every SSO problem.
-- Future improvement (documented inline as TODO): move away from the static user map and swap the client-side verification for a backend-issued session + refresh token.
+- Success path: Server validates token → sets `ts24_sso_session` cookie → redirects to `/` → client reads cookie and syncs to `sessionStorage`.
+- Failure (missing/invalid/expired token or unknown subject) redirects to `/login?ssoFailed=true`. Operators always land on the manual form, so there is a single fallback UX for every SSO problem.
 
 ### SSO Healthcheck (TS24-side)
 
@@ -138,6 +137,129 @@ curl http://localhost:4001/api/auth/sso-health | jq
 ```
 
 - Cross-check this output with `sso_health.php` from ALPHA-Interface-GUI to ensure both sides agree on issuer/audience/secrets before testing redirects end-to-end. In prod, include the `X-SSO-Health-Key` header to avoid `403` responses.
+
+---
+
+## TS24 Backend SSO Bridge (server-side)
+
+**Added:** 1 Dec 2025
+
+The TS24 backend now implements server-side SSO token verification as part of the SSO bridge with ALPHA-GUI.
+
+### Endpoint: GET /api/auth/verify
+
+Verifies a JWT token and returns user information. Used by GDI as a preflight check.
+
+**Request:**
+
+```http
+GET /api/auth/verify HTTP/1.1
+Host: intel24.blackbox.codes
+Authorization: Bearer <JWT>
+```
+
+**Success Response (200):**
+
+```json
+{
+  "status": "ok",
+  "ts": 1701432000000,
+  "ts24_user_id": "AlphaGrey",
+  "role": "admin",
+  "tenant": "default"
+}
+```
+
+**Error Responses (400/401):**
+
+| Error Code | HTTP Status | Description |
+|------------|-------------|-------------|
+| `TOKEN_MISSING` | 400 | No Authorization header or empty Bearer token |
+| `TOKEN_INVALID` | 401 | Malformed JWT or signature verification failed |
+| `TOKEN_EXPIRED` | 401 | Token `exp` claim is in the past |
+| `TOKEN_ISSUER_MISMATCH` | 401 | Token `iss` doesn't match `ts24-intel` |
+| `TOKEN_AUDIENCE_MISMATCH` | 401 | Token `aud` doesn't match `ts24-intel` |
+| `TOKEN_UNKNOWN_AGENT` | 401 | Token `sub` not in known user list |
+
+**Example error response:**
+
+```json
+{
+  "status": "error",
+  "error": "TOKEN_EXPIRED"
+}
+```
+
+### Server-side /sso-login Flow
+
+When a request hits `/sso-login?sso=<JWT>`:
+
+1. **Token extraction:** Server reads `?sso=` (or legacy `?ssoToken=`) query parameter
+2. **Validation:** `verifySsoTokenServerSide()` validates:
+   - HS256 signature with `SSO_JWT_SECRET`
+   - Issuer = `ts24-intel`
+   - Audience = `ts24-intel`
+   - Not expired (`exp`)
+   - Not issued in future (`iat`)
+   - Subject in known users list
+3. **On success:**
+   - Sets `ts24_sso_session` cookie (base64url-encoded JSON)
+   - Logs audit event: `sso:login_success`
+   - Redirects to `/`
+4. **On failure:**
+   - Logs audit event: `sso:login_failed`
+   - Redirects to `/login?ssoFailed=true`
+
+### JWT Token Requirements
+
+| Claim | Required | Value |
+|-------|----------|-------|
+| `sub` | Yes | User identifier (e.g., `AlphaGrey`) |
+| `iss` | Yes | `ts24-intel` |
+| `aud` | Yes | `ts24-intel` |
+| `exp` | Yes | Unix timestamp (must be in future) |
+| `iat` | Yes | Unix timestamp (must not be >60s in future) |
+| `name` | No | Display name (falls back to known user name) |
+| `role` | No | `admin` or `user` (falls back to known user role) |
+| `tenant` | No | Tenant identifier (defaults to `default`) |
+
+### Token Lifetime
+
+- Recommended: 5-15 minutes
+- Maximum accepted: No hard limit, but shorter is better for security
+- Minimum: Must be valid at time of verification (not expired)
+
+### Environment Variables
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `SSO_JWT_SECRET` | Yes | Shared HS256 secret (same as ALPHA-GUI) |
+| `VITE_SSO_JWT_SECRET` | Fallback | Used if `SSO_JWT_SECRET` not set |
+
+### Session Cookie Format
+
+The `ts24_sso_session` cookie contains base64url-encoded JSON:
+
+```json
+{
+  "userId": "AlphaGrey",
+  "role": "admin",
+  "name": "Alpha Grey",
+  "tenant": "default",
+  "ssoAuth": true,
+  "authTime": 1701432000000
+}
+```
+
+Cookie attributes:
+
+- `httpOnly: false` (client JS needs to read for sessionStorage sync)
+- `secure: true` (in production)
+- `sameSite: lax`
+- `maxAge: 8 hours`
+- `path: /`
+
+---
 
 ## Submission, Validation & Errors
 

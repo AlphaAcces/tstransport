@@ -25,14 +25,66 @@ This document tracks the TS24-side acceptance criteria for SSO v1 before sign-of
 
 | Component/File | Path | Responsibility |
 |----------------|------|----------------|
-| SSO health endpoint | `server/app.ts` (line ~24) | `/api/auth/sso-health` returns config status |
-| Public health endpoint | `server/app.ts` (line ~20) | `/api/health` readiness probe for DNS/TLS |
-| SsoLoginPage | `src/components/Auth/SsoLoginPage.tsx` | Token verification + redirect |
-| SSO domain | `src/domains/auth/sso.ts` | `verifySsoToken()`, `SsoError`, HS256 verification |
+| SSO server auth | `server/ssoAuth.ts` | `verifySsoTokenServerSide()`, server-side HS256 verification |
+| SSO auth verify endpoint | `server/app.ts` | `GET /api/auth/verify` - token verification for GDI preflight |
+| SSO login handler | `server/app.ts` | `GET /sso-login` - server-side token validation + redirect |
+| SSO health endpoint | `server/app.ts` | `/api/auth/sso-health` returns config status |
+| Public health endpoint | `server/app.ts` | `/api/health` readiness probe for DNS/TLS |
+| **SSO Backend Service** | `src/domains/auth/ssoBackend.ts` | Client-side backend integration, cookie handling |
+| **SSO Error Display** | `src/components/Auth/SsoErrorDisplay.tsx` | User-friendly SSO error UI components |
+| SsoLoginPage | `src/components/Auth/SsoLoginPage.tsx` | Client-side SSO verification + error display |
+| SSO domain (legacy) | `src/domains/auth/sso.ts` | Legacy client-side HS256 verification (deprecated) |
 | SSO metrics | `shared/ssoMetrics.ts` → `server/app.ts` | `getSsoMetricsSnapshot()` for error counters |
 | LoginRoute | `src/App.tsx` (line ~350) | Redirects `?sso=` params to `/sso-login` |
 | Login flow check | `scripts/login-flow-check.mjs` | Automated smoke test script |
 | E2E SSO smoke | `e2e/sso-smoke.spec.ts` | Playwright SSO test |
+| **E2E Backend tests** | `e2e/sso-backend.spec.ts` | Playwright tests for backend verification flow |
+| SSO auth tests | `server/__tests__/ssoAuthApi.test.ts` | Vitest tests for SSO endpoints |
+
+---
+
+## Frontend SSO Integration (v1.1)
+
+### ssoBackend.ts Service
+
+The new `src/domains/auth/ssoBackend.ts` provides client-side integration with the backend SSO verification:
+
+```typescript
+// Verify token via backend API
+const user = await verifySsoTokenViaBackend(token);
+
+// Read SSO session from cookie
+const session = getSsoSession();
+const user = buildAuthUserFromSession(session);
+
+// Check if valid session exists
+if (hasValidSsoSession(8 * 60 * 60 * 1000)) {
+  // Session valid within 8 hours
+}
+
+// Clear session on logout
+clearSsoSessionCookie();
+```
+
+### Error Codes
+
+| Code | Description | User Message |
+|------|-------------|--------------|
+| `TOKEN_MISSING` | No token provided | Authentication required |
+| `TOKEN_INVALID` | Malformed/tampered token | Invalid session |
+| `TOKEN_EXPIRED` | Token TTL exceeded | Session expired |
+| `TOKEN_ISSUER_MISMATCH` | Wrong `iss` claim | Authentication error |
+| `TOKEN_AUDIENCE_MISMATCH` | Wrong `aud` claim | Authentication error |
+| `TOKEN_UNKNOWN_AGENT` | Subject not in allowlist | Access denied |
+| `NETWORK_ERROR` | Failed to reach backend | Connection error |
+
+### SSO Session Cookie
+
+```
+Name: ts24_sso_session
+Format: base64url-encoded JSON
+Fields: { userId, role, name, tenant, ssoAuth: true, authTime }
+```
 
 ---
 
@@ -44,19 +96,29 @@ This document tracks the TS24-side acceptance criteria for SSO v1 before sign-of
 
 ## Checks før "grøn" status
 
-### `/sso-login` happy path
+### `/sso-login` happy path (server-side v1.1)
 
 - Gyldigt `?sso=` token (signeret med HS256 og delt hemmelighed) skal:
-  1. Blive verificeret i `SsoLoginPage` → `lib/ai.ts` uden konsolfejl.
-  2. Redirecte brugeren til hoveddashboardet (`/`) med aktiv session og synkroniseret `case` query-param.
-  3. Logge audit-entry via `createAuditEntry` med `caseId`, `subject` og `dataSource` sat.
+  1. Blive verificeret server-side i `server/ssoAuth.ts` via `verifySsoTokenServerSide()`.
+  2. Sætte `ts24_sso_session` cookie med brugerdata.
+  3. Redirecte brugeren til hoveddashboardet (`/`) med aktiv session.
+  4. Logge audit-entry via `logAudit()` med `sso:login_success` action.
 - `scripts/login-flow-check.mjs` kan køres lokalt for et hurtig-run af broen (`node scripts/login-flow-check.mjs`).
+
+### `/api/auth/verify` endpoint (GDI preflight)
+
+- GDI kan kalde `GET /api/auth/verify` med `Authorization: Bearer <JWT>` header.
+- Ved gyldig token: returnerer `{ status: "ok", ts24_user_id, role, tenant, ts }`.
+- Ved ugyldig token: returnerer `401` + `{ status: "error", error: "<ERROR_CODE>" }`.
 
 ### Fejlhåndtering
 
-- Ugyldigt eller udløbet token skal trigge banneret "Session kunne ikke overføres" på login-siden og logge `[sso-login] Token verification failed (...)` i konsollen.
+- Ugyldigt eller udløbet token skal:
+  1. Logge `[sso-login] Token verification failed (...)` på serveren.
+  2. Logge audit-entry med `sso:login_failed` action.
+  3. Redirecte til `/login?ssoFailed=true`.
 - Manuel login skal stadig være synligt/tilgængeligt (url `/login`).
-- Der må ikke opstå redirect-loops – brugeren skal lande på `/login` med `state.ssoFailed=true`.
+- Der må ikke opstå redirect-loops – brugeren skal lande på `/login` med `ssoFailed=true` query param.
 
 ### `/api/auth/sso-health`
 

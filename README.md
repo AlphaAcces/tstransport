@@ -41,6 +41,8 @@ npm test -- --run    # Vitest unit/integration tests
 npm run test:e2e     # Playwright e2e tests
 ```
 
+> For production deployment behind `https://intel24.blackbox.codes`, follow [docs/deployment_guide.md](docs/deployment_guide.md) and use the drop-in configs in `deploy/pm2.config.cjs` + `deploy/nginx-intel24.conf`.
+
 ---
 
 ## 🏗️ Architecture Overview

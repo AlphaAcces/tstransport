@@ -16,14 +16,15 @@ export type CaseExportPayload = {
 };
 
 export function buildCaseExportPayload(
+  caseId: string,
   caseData: CaseData,
   events: CaseEvent[],
   kpis: CaseKpiSummary | null,
 ): CaseExportPayload {
-  const caseId = caseData.id ?? 'unknown-case';
+  const effectiveCaseId = caseId || 'unknown-case';
 
   return {
-    caseId,
+    caseId: effectiveCaseId,
     format: 'json',
     generatedAt: new Date().toISOString(),
     source: 'api',

@@ -1,3 +1,5 @@
+import fs from 'node:fs';
+import path from 'node:path';
 import express from 'express';
 import { getSsoMetricsSnapshot } from '../shared/ssoMetrics';
 import storage, { logAudit, getAuditLog } from './storage';
@@ -7,6 +9,13 @@ import { listCases, getCaseById } from '../src/domains/cases/caseStore';
 import { deriveEventsFromCaseData } from '../src/domains/events/caseEvents';
 import { deriveKpisFromCaseData } from '../src/domains/kpi/caseKpis';
 import { buildCaseExportPayload } from '../src/domains/export/caseExport';
+import {
+  verifySsoTokenServerSide,
+  ServerSsoError,
+  isSsoSecretConfigured,
+  SSO_EXPECTED_ISS as SSO_AUTH_ISS,
+  SSO_EXPECTED_AUD as SSO_AUTH_AUD,
+} from './ssoAuth';
 
 const SSO_EXPECTED_ISS = 'ts24-intel';
 const SSO_EXPECTED_AUD = 'ts24-intel';
@@ -15,6 +24,16 @@ const PROTECT_SSO_HEALTH = process.env.NODE_ENV === 'production' || process.env.
 
 const app = express();
 app.use(express.json());
+
+const CLIENT_BUILD_DIR = process.env.TS24_CLIENT_DIST
+  ? path.resolve(process.cwd(), process.env.TS24_CLIENT_DIST)
+  : path.resolve(process.cwd(), 'dist');
+const CLIENT_INDEX_FILE = path.join(CLIENT_BUILD_DIR, 'index.html');
+const hasClientBuild = fs.existsSync(CLIENT_BUILD_DIR);
+
+if (!hasClientBuild) {
+  console.warn('[ts24] Client build directory missing. Run "npm run build" before serving /login or /sso-login routes.');
+}
 
 const DEFAULT_PUBLIC_TENANT_ID = process.env.DEFAULT_PUBLIC_TENANT_ID || 'tenant-001';
 
@@ -64,6 +83,168 @@ app.get('/api/auth/sso-health', (req, res) => {
 });
 
 // ============================================================================
+// SSO Authentication Endpoints (TS24 Backend SSO Bridge)
+// ============================================================================
+
+/**
+ * GET /api/auth/verify
+ *
+ * Verifies a JWT token from the Authorization header.
+ * Used by GDI as a preflight check before SSO handoff.
+ *
+ * Header: Authorization: Bearer <JWT>
+ *
+ * Success Response (200):
+ * {
+ *   "status": "ok",
+ *   "ts": <timestamp>,
+ *   "ts24_user_id": "<string>",
+ *   "role": "admin" | "user",
+ *   "tenant": "<string>"
+ * }
+ *
+ * Error Response (400/401):
+ * {
+ *   "status": "error",
+ *   "error": "TOKEN_MISSING" | "TOKEN_INVALID" | "TOKEN_EXPIRED" | ...
+ * }
+ */
+app.get('/api/auth/verify', async (req, res) => {
+  const authHeader = req.header('authorization');
+
+  // Extract Bearer token
+  if (!authHeader || !authHeader.toLowerCase().startsWith('bearer ')) {
+    return res.status(400).json({
+      status: 'error',
+      error: 'TOKEN_MISSING',
+    });
+  }
+
+  const token = authHeader.slice(7).trim(); // Remove 'Bearer ' prefix
+
+  if (!token) {
+    return res.status(400).json({
+      status: 'error',
+      error: 'TOKEN_MISSING',
+    });
+  }
+
+  try {
+    const user = await verifySsoTokenServerSide(token);
+
+    return res.status(200).json({
+      status: 'ok',
+      ts: Date.now(),
+      ts24_user_id: user.userId,
+      role: user.role,
+      tenant: user.tenant,
+    });
+  } catch (error) {
+    if (error instanceof ServerSsoError) {
+      console.error(`[auth/verify] Token verification failed: ${error.code}`, error.details);
+      return res.status(401).json({
+        status: 'error',
+        error: error.code,
+      });
+    }
+
+    console.error('[auth/verify] Unexpected error during token verification:', error);
+    return res.status(401).json({
+      status: 'error',
+      error: 'TOKEN_INVALID',
+    });
+  }
+});
+
+/**
+ * GET /sso-login (with query param handling)
+ *
+ * Server-side SSO login handler. When accessed with ?sso=<JWT>:
+ * - Validates the token server-side
+ * - On success: establishes session and redirects to /
+ * - On failure: redirects to /login?ssoFailed=true
+ *
+ * This endpoint is mounted BEFORE the static SPA handler to intercept
+ * SSO requests and handle them server-side.
+ */
+app.get('/sso-login', async (req, res, next) => {
+  const token = req.query.sso as string | undefined;
+  const legacyToken = req.query.ssoToken as string | undefined;
+
+  // Use canonical token or fall back to legacy
+  const ssoToken = token || legacyToken;
+
+  // If no token provided, let the SPA handle it (shows error UI)
+  if (!ssoToken) {
+    console.warn('[sso-login] No SSO token provided. Redirecting to login with ssoFailed=true.');
+    return res.redirect('/login?ssoFailed=true');
+  }
+
+  if (!token && legacyToken) {
+    console.warn('[sso-login] Deprecated ?ssoToken query parameter used. Use ?sso= instead.');
+  }
+
+  try {
+    const user = await verifySsoTokenServerSide(ssoToken);
+
+    // Log successful SSO login
+    console.log(`[sso-login] SSO login successful for user: ${user.userId} (role: ${user.role}, tenant: ${user.tenant})`);
+
+    // Audit log the SSO login
+    await logAudit({
+      timestamp: new Date().toISOString(),
+      tenantId: user.tenant,
+      userId: user.userId,
+      action: 'sso:login_success',
+      details: { role: user.role },
+    });
+
+    // Set session cookie with user info (for server-side session awareness)
+    // The actual session state is managed client-side in sessionStorage,
+    // but we set a cookie to indicate SSO success for server-side checks.
+    const sessionPayload = JSON.stringify({
+      userId: user.userId,
+      role: user.role,
+      name: user.name,
+      tenant: user.tenant,
+      ssoAuth: true,
+      authTime: Date.now(),
+    });
+
+    // Encode session for cookie (URL-safe base64)
+    const encodedSession = Buffer.from(sessionPayload).toString('base64url');
+
+    res.cookie('ts24_sso_session', encodedSession, {
+      httpOnly: false, // Allow client JS to read for sessionStorage sync
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 8 * 60 * 60 * 1000, // 8 hours
+      path: '/',
+    });
+
+    // Redirect to dashboard
+    return res.redirect('/');
+  } catch (error) {
+    const errorCode = error instanceof ServerSsoError ? error.code : 'TOKEN_INVALID';
+    const errorDetails = error instanceof ServerSsoError ? error.details : undefined;
+
+    console.error(`[sso-login] Token verification failed (${errorCode})`, errorDetails);
+
+    // Audit log the failed SSO attempt
+    await logAudit({
+      timestamp: new Date().toISOString(),
+      tenantId: 'unknown',
+      userId: 'anonymous',
+      action: 'sso:login_failed',
+      details: { errorCode, errorDetails },
+    });
+
+    // Redirect to login with failure flag
+    return res.redirect('/login?ssoFailed=true');
+  }
+});
+
+// ============================================================================
 // Case API
 // ============================================================================
 
@@ -110,7 +291,7 @@ app.post('/api/cases/:id/export', (req, res) => {
 
   const events = deriveEventsFromCaseData(caseData, { caseId: req.params.id });
   const kpis = deriveKpisFromCaseData(caseData, { caseId: req.params.id });
-  const exportPayload = buildCaseExportPayload(caseData, events, kpis);
+  const exportPayload = buildCaseExportPayload(req.params.id, caseData, events, kpis);
 
   console.log('[EXPORT]', req.params.id, exportPayload.generatedAt);
   res.json({ export: exportPayload });
@@ -524,5 +705,29 @@ app.delete('/api/access-requests/:tenantId/:requestId', async (req, res) => {
     res.status(500).json({ error: 'internal', message: 'Failed to delete access request' });
   }
 });
+
+if (hasClientBuild) {
+  app.use(express.static(CLIENT_BUILD_DIR, { index: false }));
+
+  const serveSpa = (_req: express.Request, res: express.Response) => {
+    if (!fs.existsSync(CLIENT_INDEX_FILE)) {
+      return res.status(503).send('Client build missing. Run "npm run build" and redeploy.');
+    }
+    return res.sendFile(CLIENT_INDEX_FILE);
+  };
+
+  // Note: /sso-login is handled above with server-side token validation
+  // Only mount SPA handler for / and /login here
+  ['/', '/login'].forEach(route => {
+    app.get(route, serveSpa);
+  });
+
+  app.get('*', (req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api') || req.path.includes('.')) {
+      return next();
+    }
+    return serveSpa(req, res);
+  });
+}
 
 export default app;
