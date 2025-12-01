@@ -8,6 +8,7 @@
 
 import { jwtVerify, errors as joseErrors } from 'jose';
 import { recordSsoMetric, type SsoMetricKey } from '../shared/ssoMetrics';
+import { qaSignal } from './qaSignals';
 
 // SSO Configuration Constants (must match ALPHA-GUI)
 export const SSO_EXPECTED_ISS = 'ts24-intel';
@@ -121,6 +122,8 @@ const KNOWN_USERS: Record<string, { displayName: string; role: 'admin' | 'user' 
  * @throws ServerSsoError with specific error codes
  */
 export const verifySsoTokenServerSide = async (token: string): Promise<VerifiedSsoUser> => {
+  qaSignal('verify:start', { tokenLength: token?.length ?? 0 });
+
   if (!token || typeof token !== 'string' || token.trim() === '') {
     const error = new ServerSsoError('TOKEN_MISSING', 'SSO token must be provided');
     recordMetricForCode(error.code);
@@ -179,6 +182,8 @@ export const verifySsoTokenServerSide = async (token: string): Promise<VerifiedS
     const role = typedPayload.role === 'admin' ? 'admin' : knownUser.role;
     const tenant = typeof typedPayload.tenant === 'string' ? typedPayload.tenant : 'default';
 
+    qaSignal('verify:success', { userId: subject, role, tenant });
+
     return {
       userId: subject,
       name,
@@ -186,6 +191,10 @@ export const verifySsoTokenServerSide = async (token: string): Promise<VerifiedS
       tenant,
     };
   } catch (error) {
+    qaSignal('verify:failed', {
+      errorType: error instanceof Error ? error.constructor.name : 'unknown',
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
     // Re-throw our own errors
     if (error instanceof ServerSsoError) {
       throw error;

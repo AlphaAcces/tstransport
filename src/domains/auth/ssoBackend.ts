@@ -6,6 +6,7 @@
  */
 
 import type { AuthUser, AuthRole } from './types';
+import { qaSignal } from './qaSignals';
 
 // Error codes returned by the backend /api/auth/verify endpoint
 export type BackendSsoErrorCode =
@@ -88,7 +89,10 @@ export const SSO_ERROR_MESSAGES: Record<BackendSsoErrorCode, string> = {
  * @throws BackendSsoError if verification fails
  */
 export const verifySsoTokenViaBackend = async (token: string): Promise<AuthUser> => {
+  qaSignal('verify:start', { tokenLength: token?.length ?? 0 });
+
   if (!token || typeof token !== 'string' || token.trim() === '') {
+    qaSignal('verify:failed', { reason: 'TOKEN_MISSING' });
     throw new BackendSsoError('TOKEN_MISSING', SSO_ERROR_MESSAGES.TOKEN_MISSING);
   }
 
@@ -104,6 +108,7 @@ export const verifySsoTokenViaBackend = async (token: string): Promise<AuthUser>
     const data: BackendVerifyResponse = await response.json();
 
     if (data.status === 'ok') {
+      qaSignal('verify:success', { userId: data.ts24_user_id, role: data.role });
       return {
         id: data.ts24_user_id,
         role: data.role,
@@ -163,9 +168,12 @@ export const decodeSsoSessionCookie = (cookieValue: string): SsoSessionData | nu
       typeof data.ssoAuth !== 'boolean' ||
       typeof data.authTime !== 'number'
     ) {
+      qaSignal('cookie:invalid', { reason: 'invalid_structure' });
       console.warn('[sso] Invalid session cookie structure');
       return null;
     }
+
+    qaSignal('cookie:valid', { userId: data.userId, role: data.role });
 
     return {
       userId: data.userId,
@@ -209,6 +217,7 @@ export const getSsoSessionCookieValue = (): string | null => {
 export const getSsoSession = (): SsoSessionData | null => {
   const cookieValue = getSsoSessionCookieValue();
   if (!cookieValue) {
+    qaSignal('cookie:missing', {});
     return null;
   }
   return decodeSsoSessionCookie(cookieValue);
@@ -220,6 +229,7 @@ export const getSsoSession = (): SsoSessionData | null => {
  */
 export const clearSsoSessionCookie = (): void => {
   if (typeof document !== 'undefined') {
+    qaSignal('cookie:cleared', {});
     document.cookie = 'ts24_sso_session=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
   }
 };

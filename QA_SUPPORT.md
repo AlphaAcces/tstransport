@@ -640,6 +640,191 @@ For production monitoring, consider:
 
 ---
 
+## 🔄 TS24 Live QA Feedback Cycle
+
+### Feedback Flow
+
+```text
+┌──────────────────────────────────────────────────────────────────────────┐
+│                         QA FEEDBACK CYCLE                                │
+├──────────────────────────────────────────────────────────────────────────┤
+│                                                                          │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                │
+│  │  QA Team    │     │  TS24 Dev   │     │  Staging    │                │
+│  │  detects    │────>│  receives   │────>│  deployment │                │
+│  │  issue      │     │  report     │     │             │                │
+│  └─────────────┘     └─────────────┘     └─────────────┘                │
+│        │                   │                   │                         │
+│        │                   │                   │                         │
+│        ▼                   ▼                   ▼                         │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                │
+│  │  Post in    │     │  Create     │     │  QA verifies│                │
+│  │  #ts24-qa   │     │  hotfix     │     │  fix        │                │
+│  │  channel    │     │  branch     │     │             │                │
+│  └─────────────┘     └─────────────┘     └─────────────┘                │
+│        │                   │                   │                         │
+│        │                   │                   │                         │
+│        ▼                   ▼                   ▼                         │
+│  ┌─────────────┐     ┌─────────────┐     ┌─────────────┐                │
+│  │  Include:   │     │  PR review  │     │  Approve or │                │
+│  │  - Error    │     │  + merge    │     │  reopen     │                │
+│  │  - Steps    │     │             │     │             │                │
+│  │  - Logs     │     │             │     │             │                │
+│  └─────────────┘     └─────────────┘     └─────────────┘                │
+│                                                                          │
+└──────────────────────────────────────────────────────────────────────────┘
+```
+
+### Response Time SLAs
+
+| Priority | Issue Type | Acknowledge | Fix Deployed | Example |
+|----------|-----------|-------------|--------------|---------|
+| **P0** | SSO fully broken | ≤ 5 min | ≤ 20 min | Users can't login |
+| **P1** | SSO partially broken | ≤ 15 min | ≤ 1 hour | Some users affected |
+| **P2** | Non-critical SSO bug | ≤ 1 hour | ≤ 4 hours | Edge case failures |
+| **P3** | Cosmetic / minor | ≤ 4 hours | Next sprint | UI text issues |
+
+### How QA Reports Issues
+
+1. **Channel:** Post in `#ts24-qa` Slack/Teams channel
+2. **Format:** Use the following template:
+
+```text
+🐛 **QA Issue Report**
+━━━━━━━━━━━━━━━━━━━━━━
+
+**Priority:** P0 / P1 / P2 / P3
+**Environment:** Staging / Production
+**Time Detected:** 2025-12-01 14:32 UTC
+
+**Summary:**
+Brief one-line description
+
+**Steps to Reproduce:**
+1. Navigate to...
+2. Click on...
+3. Observe...
+
+**Expected Result:**
+What should happen
+
+**Actual Result:**
+What actually happened
+
+**Evidence:**
+- Screenshot: [link]
+- Console logs: [attached]
+- Network trace: [attached]
+
+**Affected Users:**
+- AlphaGrey ✓
+- cetin.umit.TS ✗
+```
+
+### How TS24 Responds
+
+1. **Acknowledge** in thread within SLA time
+2. **Create hotfix branch**: `hotfix/sso-<issue>-<description>`
+3. **Post updates** every 10 minutes during P0/P1
+4. **Link PR** when fix is ready for review
+5. **Notify QA** when deployed to staging
+6. **Close issue** after QA verification
+
+### Patch SLA Workflow
+
+```text
+Time=0     QA posts issue
+   │
+   ▼
+Time≤5m    TS24 acknowledges (P0)
+   │
+   ▼
+Time≤10m   Hotfix branch created
+   │
+   ▼
+Time≤15m   Fix implemented + tests pass
+   │
+   ▼
+Time≤18m   PR reviewed + merged
+   │
+   ▼
+Time≤20m   Deployed to staging ← QA VERIFIES HERE
+   │
+   ▼
+Time≤25m   (If approved) Deployed to production
+```
+
+### QA Monitor Mode
+
+TS24 provides real-time endpoint monitoring:
+
+```bash
+# Start monitoring (run on dev machine)
+npm run qa:monitor
+
+# Environment variables
+QA_BASE_URL=https://intel24.blackbox.codes  # Target URL
+QA_POLL_INTERVAL=10000                       # Poll every 10s
+QA_VERBOSE=1                                 # Show detailed errors
+```
+
+**Monitor Output:**
+
+```text
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         TS24 QA MONITOR MODE                                  ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+[2025-12-01T14:32:00.000Z] Endpoint Status:
+
+  Endpoint         Status     Latency      Cookie   Result
+  ────────────────────────────────────────────────────────────
+  SSO Verify       200        45ms         N/A      PASS
+  SSO Login        302        62ms         N/A      PASS
+  Health Check     200        12ms         N/A      PASS
+  Dashboard Load   200        234ms        ✓        PASS
+
+Cumulative Stats:
+
+  Endpoint         Total    Pass     Fail     Avg Lat    Success %
+  ────────────────────────────────────────────────────────────────
+  SSO Verify       150      148      2        47ms       98%
+  SSO Login        150      150      0        58ms       100%
+  Health Check     150      150      0        11ms       100%
+  Dashboard Load   150      149      1        245ms      99%
+```
+
+### QA Signal Hooks
+
+Enable detailed logging during QA:
+
+**Server-side:** Set `QA_MODE=1` in environment
+
+```bash
+QA_MODE=1 pm2 restart ts24-server
+```
+
+**Client-side:** Run in browser console
+
+```javascript
+enableQaMode()  // Enables qa-signal logging
+disableQaMode() // Disables qa-signal logging
+```
+
+**Signal Types:**
+
+| Signal | Meaning |
+|--------|---------|
+| `[qa-signal] verify:start` | Token verification initiated |
+| `[qa-signal] verify:success` | Token verified successfully |
+| `[qa-signal] verify:failed` | Token verification failed |
+| `[qa-signal] cookie:valid` | Session cookie decoded OK |
+| `[qa-signal] cookie:missing` | No session cookie found |
+| `[qa-signal] cookie:invalid` | Session cookie malformed |
+| `[qa-signal] cookie:cleared` | Session cookie deleted |
+
+---
+
 ## 📞 Kontakter
 
 | Role | Contact | Responsibility |
@@ -654,6 +839,7 @@ For production monitoring, consider:
 ## 📎 Relateret Dokumentation
 
 - [OPS_READY.md](OPS_READY.md) – Deployment guide
+- [hotfix/README.md](hotfix/README.md) – Hotfix procedures
 - [docs/sso_v1_signoff_ts24.md](docs/sso_v1_signoff_ts24.md) – SSO sign-off checklist
 - [docs/ts24_login_flow.md](docs/ts24_login_flow.md) – Login flow details
 - [docs/system_overview.md](docs/system_overview.md) – System architecture

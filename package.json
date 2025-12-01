@@ -14,7 +14,8 @@
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "test": "vitest",
     "test:e2e": "playwright test",
-    "test:sso-smoke": "playwright test e2e/sso-smoke.spec.ts"
+    "test:sso-smoke": "playwright test e2e/sso-smoke.spec.ts",
+    "qa:monitor": "tsx scripts/qa-monitor.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

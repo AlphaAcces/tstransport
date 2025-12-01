@@ -1,8 +1,8 @@
 # TS24 Ops Ready – Deployment Greenlight
 
-**Status:** ✅ READY FOR PRODUCTION  
-**Last Updated:** 1 Dec 2025  
-**SSO Version:** v1.1 (Backend Bridge)  
+**Status:** ✅ READY FOR PRODUCTION
+**Last Updated:** 1 Dec 2025
+**SSO Version:** v1.1 (Backend Bridge)
 **Tests:** 411/411 passing
 
 ---
@@ -208,7 +208,7 @@ server {
 
     # Trust Cloudflare IP headers
     real_ip_header CF-Connecting-IP;
-    
+
     # API routes
     location /api/ {
         proxy_pass http://127.0.0.1:3001/api/;
