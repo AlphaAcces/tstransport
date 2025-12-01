@@ -36,6 +36,34 @@ interface MonitorStats {
   successRate: number;
 }
 
+// Extended tracking for QA Standby Mode
+interface LatencyLogEntry {
+  timestamp: string;
+  endpoint: string;
+  latency: number;
+  status: number | 'ERROR';
+}
+
+interface CookieConsistencyLog {
+  timestamp: string;
+  present: boolean;
+  consecutive: number;
+}
+
+interface VerifyCounters {
+  success: number;
+  fail: number;
+  lastSuccess: string | null;
+  lastFail: string | null;
+}
+
+interface SsoLoginObservation {
+  timestamp: string;
+  status: number | 'ERROR';
+  redirectLocation: string | null;
+  cookieSet: boolean;
+}
+
 const ENDPOINTS: EndpointConfig[] = [
   {
     name: 'SSO Verify',
@@ -91,6 +119,20 @@ const stats: Map<string, MonitorStats> = new Map();
 const resultHistory: MonitorResult[] = [];
 const MAX_HISTORY = 1000;
 
+// QA Standby Mode: Extended logging (read-only)
+const latencyLog: LatencyLogEntry[] = [];
+const cookieConsistencyLog: CookieConsistencyLog[] = [];
+const verifyCounters: VerifyCounters = {
+  success: 0,
+  fail: 0,
+  lastSuccess: null,
+  lastFail: null,
+};
+const ssoLoginObservations: SsoLoginObservation[] = [];
+let consecutiveCookiePresent = 0;
+let consecutiveCookieMissing = 0;
+const MAX_LOG_ENTRIES = 500;
+
 function initStats(): void {
   ENDPOINTS.forEach((ep) => {
     stats.set(ep.name, {
@@ -124,6 +166,80 @@ function updateStats(result: MonitorResult): void {
   resultHistory.push(result);
   if (resultHistory.length > MAX_HISTORY) {
     resultHistory.shift();
+  }
+
+  // QA Standby: Extended logging (read-only observations)
+  logLatencyEntry(result);
+  if (result.endpoint === 'SSO Verify') {
+    updateVerifyCounters(result);
+  }
+  if (result.cookiePresent !== null) {
+    logCookieConsistency(result.cookiePresent);
+  }
+}
+
+// QA Standby: Timestamped latency logging
+function logLatencyEntry(result: MonitorResult): void {
+  const entry: LatencyLogEntry = {
+    timestamp: new Date().toISOString(),
+    endpoint: result.endpoint,
+    latency: result.latency,
+    status: result.status,
+  };
+  latencyLog.push(entry);
+  if (latencyLog.length > MAX_LOG_ENTRIES) {
+    latencyLog.shift();
+  }
+}
+
+// QA Standby: Verify success/fail counters
+function updateVerifyCounters(result: MonitorResult): void {
+  const timestamp = new Date().toISOString();
+  if (result.status === 200) {
+    verifyCounters.success++;
+    verifyCounters.lastSuccess = timestamp;
+  } else if (result.status === 401 || result.status === 'ERROR') {
+    verifyCounters.fail++;
+    verifyCounters.lastFail = timestamp;
+  }
+}
+
+// QA Standby: Cookie consistency tracking
+function logCookieConsistency(present: boolean): void {
+  if (present) {
+    consecutiveCookiePresent++;
+    consecutiveCookieMissing = 0;
+  } else {
+    consecutiveCookieMissing++;
+    consecutiveCookiePresent = 0;
+  }
+
+  const entry: CookieConsistencyLog = {
+    timestamp: new Date().toISOString(),
+    present,
+    consecutive: present ? consecutiveCookiePresent : -consecutiveCookieMissing,
+  };
+  cookieConsistencyLog.push(entry);
+  if (cookieConsistencyLog.length > MAX_LOG_ENTRIES) {
+    cookieConsistencyLog.shift();
+  }
+}
+
+// QA Standby: SSO Login flow observation
+function observeSsoLogin(
+  status: number | 'ERROR',
+  redirectLocation: string | null,
+  cookieSet: boolean
+): void {
+  const observation: SsoLoginObservation = {
+    timestamp: new Date().toISOString(),
+    status,
+    redirectLocation,
+    cookieSet,
+  };
+  ssoLoginObservations.push(observation);
+  if (ssoLoginObservations.length > MAX_LOG_ENTRIES) {
+    ssoLoginObservations.shift();
   }
 }
 
@@ -177,6 +293,14 @@ async function checkEndpoint(config: EndpointConfig): Promise<MonitorResult> {
 
     if (!success) {
       result.error = `Unexpected status: ${response.status}`;
+    }
+
+    // QA Standby: Observe SSO Login flow
+    if (config.name === 'SSO Login') {
+      const redirectLocation = response.headers.get('location');
+      const setCookie = response.headers.get('set-cookie') || '';
+      const cookieSet = setCookie.includes('ts24_sso_session');
+      observeSsoLogin(response.status, redirectLocation, cookieSet);
     }
   } catch (error) {
     const latency = Math.round(performance.now() - start);
@@ -291,6 +415,61 @@ function printStats(): void {
 
     console.log(`  ${endpoint} ${total} ${success} ${failed} ${avgLat} ${rate}`);
   });
+
+  // QA Standby: Print extended metrics
+  printQaStandbyMetrics();
+}
+
+// QA Standby: Display extended monitoring metrics
+function printQaStandbyMetrics(): void {
+  console.log(`\n${colors.bright}QA Standby Metrics:${colors.reset}\n`);
+
+  // Verify counters
+  const verifySuccess = verifyCounters.success;
+  const verifyFail = verifyCounters.fail;
+  const verifyTotal = verifySuccess + verifyFail;
+  const verifyRate = verifyTotal > 0 ? Math.round((verifySuccess / verifyTotal) * 100) : 100;
+
+  console.log(`  ${colors.cyan}Verify Endpoint:${colors.reset}`);
+  console.log(`    Success: ${colors.green}${verifySuccess}${colors.reset}  Fail: ${verifyFail > 0 ? colors.red : ''}${verifyFail}${colors.reset}  Rate: ${verifyRate >= 95 ? colors.green : colors.yellow}${verifyRate}%${colors.reset}`);
+  if (verifyCounters.lastSuccess) {
+    console.log(`    ${colors.dim}Last success: ${verifyCounters.lastSuccess}${colors.reset}`);
+  }
+  if (verifyCounters.lastFail) {
+    console.log(`    ${colors.dim}Last fail: ${verifyCounters.lastFail}${colors.reset}`);
+  }
+
+  // Cookie consistency
+  console.log(`\n  ${colors.cyan}Cookie Consistency:${colors.reset}`);
+  if (consecutiveCookiePresent > 0) {
+    console.log(`    ${colors.green}✓${colors.reset} Present for ${consecutiveCookiePresent} consecutive checks`);
+  } else if (consecutiveCookieMissing > 0) {
+    console.log(`    ${colors.red}✗${colors.reset} Missing for ${consecutiveCookieMissing} consecutive checks`);
+  } else {
+    console.log(`    ${colors.dim}No cookie checks yet${colors.reset}`);
+  }
+
+  // SSO Login observations
+  const recentSsoObs = ssoLoginObservations.slice(-5);
+  if (recentSsoObs.length > 0) {
+    console.log(`\n  ${colors.cyan}Recent SSO Login Observations:${colors.reset}`);
+    recentSsoObs.forEach((obs) => {
+      const statusColor = obs.status === 302 ? colors.green : obs.status === 400 ? colors.yellow : colors.red;
+      const cookieIcon = obs.cookieSet ? `${colors.green}🍪${colors.reset}` : '';
+      const redirect = obs.redirectLocation ? `→ ${obs.redirectLocation.substring(0, 30)}` : '';
+      console.log(`    ${colors.dim}${obs.timestamp.substring(11, 19)}${colors.reset} ${statusColor}${obs.status}${colors.reset} ${redirect} ${cookieIcon}`);
+    });
+  }
+
+  // Latency trend (last 10)
+  const recentLatency = latencyLog.slice(-10);
+  if (recentLatency.length > 0) {
+    const avgRecent = Math.round(recentLatency.reduce((sum, e) => sum + e.latency, 0) / recentLatency.length);
+    const maxRecent = Math.max(...recentLatency.map((e) => e.latency));
+    const minRecent = Math.min(...recentLatency.map((e) => e.latency));
+    console.log(`\n  ${colors.cyan}Recent Latency (last ${recentLatency.length}):${colors.reset}`);
+    console.log(`    Avg: ${avgRecent}ms  Min: ${minRecent}ms  Max: ${maxRecent}ms`);
+  }
 }
 
 function printFooter(): void {
