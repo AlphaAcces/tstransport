@@ -92,6 +92,7 @@ docs/                 # Documentation
 | [system_overview.md](docs/system_overview.md) | High-level flow diagrams |
 | [ts24_login_flow.md](docs/ts24_login_flow.md) | Login & SSO implementation details |
 | [sso_v1_signoff_ts24.md](docs/sso_v1_signoff_ts24.md) | SSO v1 sign-off checklist |
+| [TS24_SSO_STATUSRAPPORT.md](docs/TS24_SSO_STATUSRAPPORT.md) | 🇩🇰 Komplet SSO server statusrapport (Danish) |
 | [cases_api.md](docs/cases_api.md) | Case API & DataContext integration |
 | [events_timeline.md](docs/events_timeline.md) | Event engine & CaseTimeline UI |
 | [kpi_module.md](docs/kpi_module.md) | KPI derivation & dashboard |

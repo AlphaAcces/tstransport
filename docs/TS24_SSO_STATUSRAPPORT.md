@@ -1,6 +1,6 @@
 # TS24 SSO Server - Statusrapport
 
-**Dato:** 2. december 2025  
+**Dato:** 2. december 2024  
 **Version:** 1.0  
 **Status:** Operationel med begrænsninger
 
@@ -220,7 +220,7 @@ Response:
 {
   "service": "TS24 Intel Console",
   "status": "ok",
-  "timestamp": "2025-12-02T12:00:00.000Z",
+  "timestamp": "2024-12-02T12:00:00.000Z",
   "version": "0.0.0"
 }
 ```
@@ -683,7 +683,7 @@ SSO Flow:
 
 | Dato | Version | Ændringer |
 |------|---------|-----------|
-| 2025-12-02 | 1.0 | Initial statusrapport oprettet |
+| 2024-12-02 | 1.0 | Initial statusrapport oprettet |
 
 ---
 
