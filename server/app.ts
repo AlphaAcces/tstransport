@@ -110,7 +110,7 @@ app.post('/api/cases/:id/export', (req, res) => {
 
   const events = deriveEventsFromCaseData(caseData, { caseId: req.params.id });
   const kpis = deriveKpisFromCaseData(caseData, { caseId: req.params.id });
-  const exportPayload = buildCaseExportPayload(caseData, events, kpis);
+  const exportPayload = buildCaseExportPayload(caseData, events, kpis, req.params.id);
 
   console.log('[EXPORT]', req.params.id, exportPayload.generatedAt);
   res.json({ export: exportPayload });

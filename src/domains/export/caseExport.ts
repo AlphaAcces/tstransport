@@ -19,9 +19,8 @@ export function buildCaseExportPayload(
   caseData: CaseData,
   events: CaseEvent[],
   kpis: CaseKpiSummary | null,
+  caseId = 'unknown-case',
 ): CaseExportPayload {
-  const caseId = caseData.id ?? 'unknown-case';
-
   return {
     caseId,
     format: 'json',

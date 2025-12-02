@@ -125,6 +125,7 @@ export default defineConfig({
     setupFiles: './src/test/setup.ts',
     include: [
       'src/**/*.{test,spec}.{ts,tsx}',
+      'server/**/*.{test,spec}.{ts,tsx}',
       'test/**/*.{test,spec}.{ts,tsx}',
       'scripts/**/*.{test,spec}.{ts,tsx}',
     ],

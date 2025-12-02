@@ -392,7 +392,7 @@ const TenantDropdown: React.FC<TenantDropdownProps> = ({
                 </p>
                 {showRole && tenant.role && (
                   <div className="mt-1">
-                    <RoleBadge role={tenant.role} />
+                    <RoleBadge role={tenant.role as TenantRole} />
                   </div>
                 )}
               </div>
