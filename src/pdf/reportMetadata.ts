@@ -33,7 +33,7 @@ export const buildExecutiveReportMetadata = ({
     caseId,
     caseName,
     subject,
-    exportedBy: exportedBy ?? 'TS24 Operator',
+    exportedBy: exportedBy ?? 'Intel24 Operator',
     exportedAt: exportedAt ?? new Date().toISOString(),
     reportVersion: reportVersion ?? 'v1',
     classification: classification ?? 'INTERN / FORTROLIG',

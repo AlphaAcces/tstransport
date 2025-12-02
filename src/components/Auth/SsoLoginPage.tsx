@@ -104,7 +104,7 @@ export const SsoLoginPage: React.FC<SsoLoginPageProps> = ({ onLoginSuccess }) =>
       <div className="login-card max-w-md w-full space-y-4 text-center p-6">
         <div className="flex justify-center">
           <div className="inline-flex items-center gap-2 px-4 py-1 rounded-full border border-[var(--color-border-gold)] bg-[var(--color-background)]/40 text-[var(--color-text-muted)] text-[0.65rem] font-semibold tracking-[0.35em] uppercase">
-            <span>TS24</span>
+            <span>Intel24</span>
             <span className="text-[var(--color-gold)]">SSO</span>
           </div>
         </div>

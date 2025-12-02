@@ -1,13 +1,13 @@
 <#
 .SYNOPSIS
-    TS24 Intel Console - Production Deployment Script
+    Intel24 Console - Production Deployment Script
 
 .DESCRIPTION
-    Deploys TS24 Intel Console to production with SSO configuration.
+    Deploys Intel24 Console to production with SSO configuration.
     Ensures SSO_JWT_SECRET is set and validates the deployment.
 
 .NOTES
-    Author: TS24 Development Team
+    Author: Intel24 Development Team
     Date: 2 Dec 2025
     Version: 1.0.0
 #>
@@ -29,7 +29,7 @@ $ProjectRoot = Split-Path -Parent $ScriptRoot
 
 Write-Host ""
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
-Write-Host "  TS24 Intel Console - Production Deployment" -ForegroundColor Cyan
+Write-Host "  Intel24 Console - Production Deployment" -ForegroundColor Cyan
 Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Cyan
 Write-Host ""
 

@@ -17,7 +17,7 @@ export const drawReportHeader = ({ doc, theme, metadata, pageNumber, totalPages 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(theme.typography.small);
   doc.setTextColor(theme.colors.textMuted[0], theme.colors.textMuted[1], theme.colors.textMuted[2]);
-  doc.text('TS24 · Intel24', theme.layout.margin, top);
+  doc.text('Intel24', theme.layout.margin, top);
 
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(theme.typography.sectionTitle);

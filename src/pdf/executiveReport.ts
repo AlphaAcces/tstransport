@@ -43,8 +43,8 @@ export const generateExecutiveReportPdf = async (
     title: `${metadata.caseName} · Executive Summary`,
     subject: metadata.classification,
     author: metadata.exportedBy,
-    creator: 'TS24 Intel Console',
-    keywords: `${metadata.caseId}, TS24, Intel24`,
+    creator: 'Intel24 Console',
+    keywords: `${metadata.caseId}, Intel24`,
   });
 
   let cursorY = getContentStartY(reportTheme);

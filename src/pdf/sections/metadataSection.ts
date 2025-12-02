@@ -24,7 +24,7 @@ export const renderMetadataSection: SectionRenderer = ({ doc, theme, metadata, c
   doc.setFont('helvetica', 'italic');
   doc.setFontSize(theme.typography.small);
   doc.text(
-    'TS24 Data Intel™ – rapporten er udarbejdet på baggrund af tilgængelige data og må ikke distribueres uden skriftligt samtykke.',
+    'Intel24 Data Intel™ – rapporten er udarbejdet på baggrund af tilgængelige data og må ikke distribueres uden skriftligt samtykke.',
     theme.layout.margin,
     currentY,
     { maxWidth: doc.internal.pageSize.getWidth() - theme.layout.margin * 2 },

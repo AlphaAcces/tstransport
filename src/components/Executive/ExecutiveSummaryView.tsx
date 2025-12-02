@@ -35,11 +35,11 @@ interface ExecutiveSummaryViewProps {
 }
 
 const badgeToneClassMap: Record<BadgeTone, string> = {
-  danger: 'ts24-badge ts24-badge--danger',
-  warning: 'ts24-badge ts24-badge--warning',
-  info: 'ts24-badge ts24-badge--info',
-  success: 'ts24-badge ts24-badge--success',
-  neutral: 'ts24-badge',
+  danger: 'i24-badge i24-badge--danger',
+  warning: 'i24-badge i24-badge--warning',
+  info: 'i24-badge i24-badge--info',
+  success: 'i24-badge i24-badge--success',
+  neutral: 'i24-badge',
 };
 
 const riskStatusLabels: Record<'monitor' | 'escalate' | 'contain', string> = {
@@ -49,21 +49,21 @@ const riskStatusLabels: Record<'monitor' | 'escalate' | 'contain', string> = {
 };
 
 const riskStatusTone: Record<'monitor' | 'escalate' | 'contain', string> = {
-  monitor: 'ts24-badge ts24-badge--info',
-  escalate: 'ts24-badge ts24-badge--danger',
-  contain: 'ts24-badge ts24-badge--warning',
+  monitor: 'i24-badge i24-badge--info',
+  escalate: 'i24-badge i24-badge--danger',
+  contain: 'i24-badge i24-badge--warning',
 };
 
 const impactToneClass: Record<'low' | 'medium' | 'high', string> = {
-  low: 'ts24-badge ts24-badge--success',
-  medium: 'ts24-badge ts24-badge--warning',
-  high: 'ts24-badge ts24-badge--danger',
+  low: 'i24-badge i24-badge--success',
+  medium: 'i24-badge i24-badge--warning',
+  high: 'i24-badge i24-badge--danger',
 };
 
 const likelihoodToneClass: Record<'low' | 'medium' | 'high', string> = {
-  low: 'ts24-badge ts24-badge--success',
-  medium: 'ts24-badge ts24-badge--warning',
-  high: 'ts24-badge ts24-badge--danger',
+  low: 'i24-badge i24-badge--success',
+  medium: 'i24-badge i24-badge--warning',
+  high: 'i24-badge i24-badge--danger',
 };
 
 const actionStatusLabels: Record<'onTrack' | 'atRisk' | 'blocked', string> = {

@@ -71,6 +71,14 @@ export interface AccessRequestStats {
 }
 
 // Storage paths
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+// Opret __filename og __dirname for ES-moduler
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Korrekt sti til data-mappen
 const DATA_DIR = path.join(__dirname, 'data');
 const getRequestsFile = (tenantId: string) => path.join(DATA_DIR, `access-requests-${tenantId}.json`);
 

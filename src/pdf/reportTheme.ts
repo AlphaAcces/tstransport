@@ -35,7 +35,7 @@ export interface ReportTheme {
 
 export const reportTheme: ReportTheme = {
   brand: {
-    name: 'TS24 Data Intel™',
+    name: 'Intel24 Data Intel™',
     suite: 'Executive Intelligence Brief',
     classification: 'INTERN / FORTROLIG',
   },

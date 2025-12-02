@@ -4,7 +4,7 @@
 
 Guiden dækker, hvordan **TS24 Intel Console** deployes i produktion bag `https://intel24.blackbox.codes`, inklusive krav til origin-serveren, Node/Express-processen og nginx-proxyen foran.
 
-- QA evidence og release dokumentation findes i [`QA_RUN_R1_TEMPLATE.md`](../QA_RUN_R1_TEMPLATE.md) og [`RELEASE_READY.md`](../RELEASE_READY.md).
+- QA evidence og release dokumentation findes i `QA_RUN_R1_TEMPLATE.md` og `RELEASE_READY.md` i denne mappe.
 
 ## Forudsætninger
 
@@ -80,10 +80,10 @@ Tilpas selv `listen 80`/`listen 443 ssl`, Cloudflare real-IP-opsætning og event
 
 ## QA PASS — RELEASE-HANDOFF FLOW
 
-1. Udfyld [`QA_RUN_R1_TEMPLATE.md`](../QA_RUN_R1_TEMPLATE.md) med seneste QA-resultater (48/48 bekræftelse, metrics, loglinks).
-2. Opdater [`RELEASE_READY.md`](../RELEASE_READY.md) med build/lint/test-status, endpoint-sundhed og Stage 3 readiness.
+1. Udfyld `QA_RUN_R1_TEMPLATE.md` med seneste QA-resultater (48/48 bekræftelse, metrics, loglinks).
+2. Opdater `RELEASE_READY.md` med build/lint/test-status, endpoint-sundhed og Stage 3 readiness.
 3. Del begge dokumenter i #ts24-release + ALPHA QA channel.
-4. Placér kopier i `release/v1.1-QA-PASS/` sammen med opdateret `deployment_guide.md` og artefakter (SSO diagram, WAR ROOM overview).
+4. Sørg for, at denne mappe (`release/v1.1-QA-PASS/`) uploades til release-arkivet sammen med SSO diagram og WAR ROOM overview.
 5. Når ALPHA kvitterer, åbnes Blue/Green vinduet og instrukserne i denne guide følges.
 
 ## Health & verifikation

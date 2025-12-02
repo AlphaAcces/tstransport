@@ -1,7 +1,7 @@
 {
-  "name": "tsl-intelligence-console",
+  "name": "intel24-console",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "start": "tsx server/index.ts",
@@ -15,7 +15,8 @@
     "test": "vitest",
     "test:e2e": "playwright test",
     "test:sso-smoke": "playwright test e2e/sso-smoke.spec.ts",
-    "qa:monitor": "tsx scripts/qa-monitor.ts"
+    "qa:monitor": "tsx scripts/qa-monitor.ts",
+    "qa:watchdog": "tsx scripts/war-room-watchdog.ts"
   },
   "dependencies": {
     "@fontsource/inter": "^5.2.8",

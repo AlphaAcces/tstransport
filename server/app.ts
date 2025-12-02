@@ -43,7 +43,7 @@ app.use('/api', monitoringRoutes);
 // Public readiness endpoint for DNS/TLS verification
 app.get('/api/health', (_req, res) => {
   res.status(200).json({
-    service: 'TS24 Intel Console',
+    service: 'Intel24 Console',
     status: 'ok',
     timestamp: new Date().toISOString(),
     version: process.env.npm_package_version ?? 'dev',

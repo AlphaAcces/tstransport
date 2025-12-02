@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'ts24-intel-console',
+      name: 'intel24-console',
       script: 'server/index.ts',
       interpreter: 'node_modules/.bin/tsx',
       instances: 1,

@@ -1,6 +1,6 @@
-# TS24 Intel Console
+# Intel24 Console
 
-**TS24 Intel Console** (Intel24) is a multi-tenant React + Vite application for financial investigations, network analysis, and executive reporting. It provides case management, KPI dashboards, event timelines, and branded PDF exports for operators and analysts.
+**Intel24 Console** is a multi-tenant React + Vite application for financial investigations, network analysis, and executive reporting. It provides case management, KPI dashboards, event timelines, and branded PDF exports for operators and analysts.
 
 ---
 
@@ -8,7 +8,7 @@
 
 | Feature | Description | Docs |
 |---------|-------------|------|
-| **SSO v1 Login** | JWT-based SSO from ALPHA-Interface-GUI + manual login fallback | [ts24_login_flow.md](docs/ts24_login_flow.md), [sso_v1_signoff_ts24.md](docs/sso_v1_signoff_ts24.md) |
+| **SSO v1 Login** | JWT-based SSO from ALPHA-Interface-GUI + manual login fallback | [login_flow.md](docs/login_flow.md), [sso_v1_signoff.md](docs/sso_v1_signoff.md) |
 | **Case Library** | Browse and switch cases via `/api/cases`; URL routing with `?case=` | [cases_api.md](docs/cases_api.md) |
 | **Timeline / Events** | Case event engine + `CaseTimeline` UI grouped by day | [events_timeline.md](docs/events_timeline.md) |
 | **KPI Dashboard** | Derived KPI metrics displayed in `ExecutiveSummaryView` | [kpi_module.md](docs/kpi_module.md) |
@@ -92,8 +92,8 @@ docs/                 # Documentation
 | Document | Content |
 |----------|---------|
 | [system_overview.md](docs/system_overview.md) | High-level flow diagrams |
-| [ts24_login_flow.md](docs/ts24_login_flow.md) | Login & SSO implementation details |
-| [sso_v1_signoff_ts24.md](docs/sso_v1_signoff_ts24.md) | SSO v1 sign-off checklist |
+| [login_flow.md](docs/login_flow.md) | Login & SSO implementation details |
+| [sso_v1_signoff.md](docs/sso_v1_signoff.md) | SSO v1 sign-off checklist |
 | [cases_api.md](docs/cases_api.md) | Case API & DataContext integration |
 | [events_timeline.md](docs/events_timeline.md) | Event engine & CaseTimeline UI |
 | [kpi_module.md](docs/kpi_module.md) | KPI derivation & dashboard |

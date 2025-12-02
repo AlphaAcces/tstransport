@@ -36,7 +36,7 @@ interface SystemConfig {
 }
 
 const SYSTEMS: SystemConfig[] = [
-  { id: 'intel24', name: 'Intel24', displayName: 'TS24', tagline: 'Intelligence Console' },
+  { id: 'intel24', name: 'Intel24', displayName: 'Intel24', tagline: 'Intelligence Console' },
   { id: 'greyeye', name: 'GreyEYE', displayName: 'GreyEYE', tagline: 'Data Intelligence Portal' },
   { id: 'blackboxeye', name: 'BlackboxEYE', displayName: 'BlackboxEYE', tagline: 'Deep Analysis Suite' },
 ];
@@ -337,16 +337,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, ssoFailed:
   // Render system-specific logo
   const renderLogo = () => {
     if (selectedSystem === 'intel24') {
-      // TS24 Logo - Gold gradient T mark
+      // Intel24 Logo - Gold gradient i mark
       return (
         <div className="flex flex-col items-center">
           <div className="relative mb-4">
             <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--color-gold)] to-[var(--color-copper)] shadow-lg">
-              <span className="text-4xl font-black text-[var(--color-background)] tracking-tighter">T</span>
+              <span className="text-4xl font-black text-[var(--color-background)] tracking-tighter">i</span>
             </div>
             <div className="absolute inset-0 rounded-2xl bg-[var(--color-gold)] opacity-20 blur-xl -z-10" />
           </div>
-          <h1 className="text-3xl font-bold text-[var(--color-text)] tracking-tight">TS24</h1>
+          <h1 className="text-3xl font-bold text-[var(--color-text)] tracking-tight">Intel24</h1>
           <p className="text-sm font-medium text-[var(--color-gold)] uppercase tracking-[0.2em]">Intelligence</p>
         </div>
       );

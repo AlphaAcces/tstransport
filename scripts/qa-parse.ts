@@ -15,6 +15,7 @@
  */
 
 import * as fs from 'fs';
+import * as path from 'path';
 import * as readline from 'readline';
 
 // Severity levels
@@ -22,6 +23,14 @@ type Severity = 'P0' | 'P1' | 'P2' | 'P3';
 
 // Test categories
 type Category = 'SSO' | 'Cookie' | 'Routing' | 'UI' | 'API' | 'Auth' | 'Unknown';
+
+// War Room anomaly classifier
+type AnomalyType = 'TOKEN_FLOW' | 'COOKIE_FLOW' | 'ROUTING_FLOW' | 'NGINX_FLOW' | 'UI_FLOW';
+
+interface AnomalyClassification {
+  type: AnomalyType;
+  patchZone: string;
+}
 
 // Parsed test result
 interface ParsedTestResult {
@@ -108,6 +117,190 @@ const categoryToFiles: Record<Category, string[]> = {
   ],
   Unknown: [],
 };
+
+function classifyAnomaly(result: ParsedTestResult): AnomalyClassification {
+  const combined = `${result.testName} ${result.errorMessage || ''}`;
+
+  if (result.category === 'Cookie') {
+    return {
+      type: 'COOKIE_FLOW',
+      patchZone: 'server/app.ts cookie writer + src/domains/auth/session',
+    };
+  }
+
+  if (result.category === 'Routing') {
+    return {
+      type: 'ROUTING_FLOW',
+      patchZone: 'src/App.tsx router + server/app.ts redirect handlers',
+    };
+  }
+
+  if (result.category === 'UI') {
+    return {
+      type: 'UI_FLOW',
+      patchZone: 'src/components/Auth/* entrypoints',
+    };
+  }
+
+  if (result.category === 'API' || /502|504|nginx|gateway/i.test(combined)) {
+    return {
+      type: 'NGINX_FLOW',
+      patchZone: 'deploy/nginx-intel24.conf + server/api middleware',
+    };
+  }
+
+  // Default catch for SSO/Auth/Unknown = token issues
+  return {
+    type: 'TOKEN_FLOW',
+    patchZone: 'server/ssoAuth.ts + src/domains/auth/*',
+  };
+}
+
+interface AlphaQaEntry {
+  name: string;
+  detail: string;
+}
+
+function resolveAlphaQaPath(args: string[]): { filePath: string | null; explicit: boolean } {
+  const alphaFlagIndex = args.indexOf('--alpha-json');
+  if (alphaFlagIndex > -1) {
+    return { filePath: args[alphaFlagIndex + 1] ?? null, explicit: true };
+  }
+
+  if (process.env.ALPHA_QA_FILE) {
+    return { filePath: process.env.ALPHA_QA_FILE, explicit: true };
+  }
+
+  const defaults = [
+    path.join('test-results', 'alpha-qa-report.json'),
+    'alpha-qa-report.json',
+  ];
+
+  for (const candidate of defaults) {
+    if (fs.existsSync(candidate)) {
+      return { filePath: candidate, explicit: false };
+    }
+  }
+
+  return { filePath: null, explicit: false };
+}
+
+function normalizeAlphaEntry(item: unknown, index: number): AlphaQaEntry | null {
+  if (typeof item === 'string') {
+    return { name: `alpha-${index + 1}`, detail: item };
+  }
+
+  if (typeof item === 'object' && item !== null) {
+    const obj = item as Record<string, unknown>;
+    const name =
+      typeof obj.testName === 'string' ? obj.testName :
+      typeof obj.title === 'string' ? obj.title :
+      typeof obj.name === 'string' ? obj.name :
+      `alpha-${index + 1}`;
+
+    const detail =
+      typeof obj.error === 'string' ? obj.error :
+      typeof obj.message === 'string' ? obj.message :
+      typeof obj.details === 'string' ? obj.details :
+      JSON.stringify(obj);
+
+    return { name, detail };
+  }
+
+  return null;
+}
+
+function extractAlphaQaEntries(report: unknown): AlphaQaEntry[] {
+  const entries: AlphaQaEntry[] = [];
+
+  const considerArray = (arr: unknown[]): void => {
+    arr.forEach((item, idx) => {
+      const entry = normalizeAlphaEntry(item, entries.length + idx);
+      if (entry) {
+        entries.push(entry);
+      }
+    });
+  };
+
+  if (Array.isArray(report)) {
+    considerArray(report);
+    return entries;
+  }
+
+  if (typeof report === 'object' && report !== null) {
+    const obj = report as Record<string, unknown>;
+    const candidateKeys = ['issues', 'tests', 'results', 'failures', 'entries'];
+    for (const key of candidateKeys) {
+      const value = obj[key];
+      if (Array.isArray(value)) {
+        considerArray(value);
+      }
+    }
+
+    if (entries.length === 0) {
+      const single = normalizeAlphaEntry(report, 0);
+      if (single) {
+        entries.push(single);
+      }
+    }
+  }
+
+  return entries;
+}
+
+function analyzeAlphaQaInput(args: string[]): void {
+  const { filePath, explicit } = resolveAlphaQaPath(args);
+  if (!filePath) {
+    return;
+  }
+
+  if (!fs.existsSync(filePath)) {
+    if (explicit) {
+      console.warn(`${colors.yellow}ALPHA-QA file not found:${colors.reset} ${filePath}`);
+    }
+    return;
+  }
+
+  try {
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    const json = JSON.parse(raw);
+    const entries = extractAlphaQaEntries(json);
+
+    if (entries.length === 0) {
+      console.log(`${colors.yellow}ALPHA-QA file contains no actionable entries.${colors.reset}`);
+      return;
+    }
+
+    console.log(`\n${colors.bright}${colors.cyan}ALPHA-QA INPUT ANALYSIS${colors.reset}`);
+    console.log(`  Source: ${filePath}`);
+
+    entries.forEach((entry, index) => {
+      const category = detectCategory(entry.name, entry.detail);
+      const severity = inferSeverity(entry.name, entry.detail);
+      const pseudoResult: ParsedTestResult = {
+        testName: entry.name,
+        status: 'fail',
+        category,
+        severity,
+        errorMessage: entry.detail,
+        suggestedFixArea: getSuggestedFixArea(category, entry.detail),
+        filesToCheck: categoryToFiles[category],
+      };
+
+      const { type, patchZone } = classifyAnomaly(pseudoResult);
+      const severityColor =
+        severity === 'P0' ? colors.bgRed + colors.white :
+        severity === 'P1' ? colors.bgYellow + colors.white :
+        colors.dim;
+      const badge = `${severityColor} ${severity} ${colors.reset}`;
+
+      console.log(`  ${index + 1}. ${badge} ${entry.name}`);
+      console.log(`     Flow: ${type} | Patch Zone: ${patchZone}`);
+    });
+  } catch (error) {
+    console.error(`${colors.red}Failed to parse ALPHA-QA input:${colors.reset}`, error);
+  }
+}
 
 // Detect category from test name/error
 function detectCategory(testName: string, errorMessage?: string): Category {
@@ -398,6 +591,21 @@ function printSummary(summary: ParseSummary): void {
     }
   }
 
+  const failedForClassification = summary.allResults.filter((r) => r.status === 'fail');
+  if (failedForClassification.length > 0) {
+    console.log(`\n${colors.bright}${colors.blue}Anomaly Classifier:${colors.reset}`);
+    for (const failed of failedForClassification) {
+      const { type, patchZone } = classifyAnomaly(failed);
+      const severityColor =
+        failed.severity === 'P0' ? colors.bgRed + colors.white :
+        failed.severity === 'P1' ? colors.bgYellow + colors.white :
+        colors.dim;
+      const severityLabel = `${severityColor} ${failed.severity} ${colors.reset}`;
+      console.log(`  ${severityLabel} ${type} → ${failed.testName}`);
+      console.log(`    Patch Zone: ${patchZone}`);
+    }
+  }
+
   // Failed tests summary
   const failedTests = summary.allResults.filter((r) => r.status === 'fail');
   if (failedTests.length > 0 && failedTests.length <= 20) {
@@ -459,6 +667,7 @@ async function main(): Promise<void> {
 
   const summary = parseQaOutput(input);
   printSummary(summary);
+  analyzeAlphaQaInput(args);
 
   // Exit with error code if P0/P1 issues
   if (summary.bySeverity.P0 > 0) {

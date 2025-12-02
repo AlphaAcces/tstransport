@@ -115,6 +115,23 @@ const colors = {
   bgGreen: '\x1b[42m',
 };
 
+type WarRoomEventType =
+  | 'latency-spike'
+  | 'verify-fail'
+  | 'cookie-desync'
+  | 'redirect-anomaly'
+  | 'health-degraded'
+  | 'health-recovered';
+
+const WAR_ROOM_CONFIG = {
+  latencySpikeMs: parseInt(process.env.QA_LATENCY_SPIKE || '200', 10),
+  healthSuccessFloor: parseFloat(process.env.QA_HEALTH_SUCCESS || '99'),
+};
+
+const warRoomState = {
+  healthDegraded: false,
+};
+
 const stats: Map<string, MonitorStats> = new Map();
 const resultHistory: MonitorResult[] = [];
 const MAX_HISTORY = 1000;
@@ -132,6 +149,11 @@ const ssoLoginObservations: SsoLoginObservation[] = [];
 let consecutiveCookiePresent = 0;
 let consecutiveCookieMissing = 0;
 const MAX_LOG_ENTRIES = 500;
+
+const logWarRoomEvent = (type: WarRoomEventType, details: Record<string, unknown>) => {
+  const timestamp = new Date().toISOString();
+  console.info(`[war-room] ${type}`, { timestamp, ...details });
+};
 
 function initStats(): void {
   ENDPOINTS.forEach((ep) => {
@@ -176,6 +198,8 @@ function updateStats(result: MonitorResult): void {
   if (result.cookiePresent !== null) {
     logCookieConsistency(result.cookiePresent);
   }
+
+  monitorHealthDegradation();
 }
 
 // QA Standby: Timestamped latency logging
@@ -190,6 +214,14 @@ function logLatencyEntry(result: MonitorResult): void {
   if (latencyLog.length > MAX_LOG_ENTRIES) {
     latencyLog.shift();
   }
+
+  if (result.latency > WAR_ROOM_CONFIG.latencySpikeMs) {
+    logWarRoomEvent('latency-spike', {
+      endpoint: result.endpoint,
+      latency: result.latency,
+      status: result.status,
+    });
+  }
 }
 
 // QA Standby: Verify success/fail counters
@@ -201,6 +233,10 @@ function updateVerifyCounters(result: MonitorResult): void {
   } else if (result.status === 401 || result.status === 'ERROR') {
     verifyCounters.fail++;
     verifyCounters.lastFail = timestamp;
+    logWarRoomEvent('verify-fail', {
+      status: result.status,
+      latency: result.latency,
+    });
   }
 }
 
@@ -223,6 +259,12 @@ function logCookieConsistency(present: boolean): void {
   if (cookieConsistencyLog.length > MAX_LOG_ENTRIES) {
     cookieConsistencyLog.shift();
   }
+
+  if (!present && consecutiveCookieMissing === 1) {
+    logWarRoomEvent('cookie-desync', {
+      consecutiveMissing: consecutiveCookieMissing,
+    });
+  }
 }
 
 // QA Standby: SSO Login flow observation
@@ -240,6 +282,34 @@ function observeSsoLogin(
   ssoLoginObservations.push(observation);
   if (ssoLoginObservations.length > MAX_LOG_ENTRIES) {
     ssoLoginObservations.shift();
+  }
+
+  if (!cookieSet) {
+    logWarRoomEvent('cookie-desync', {
+      context: 'sso-login-response',
+      status,
+      redirectLocation,
+    });
+  }
+}
+
+// QA Standby: Health success-rate monitoring
+function monitorHealthDegradation(): void {
+  const healthStat = stats.get('Health Check');
+  if (!healthStat || healthStat.total === 0) {
+    return;
+  }
+
+  const successRate = Math.round((healthStat.success / healthStat.total) * 100);
+
+  if (successRate < WAR_ROOM_CONFIG.healthSuccessFloor) {
+    if (!warRoomState.healthDegraded) {
+      warRoomState.healthDegraded = true;
+      logWarRoomEvent('health-degraded', { successRate });
+    }
+  } else if (warRoomState.healthDegraded) {
+    warRoomState.healthDegraded = false;
+    logWarRoomEvent('health-recovered', { successRate });
   }
 }
 
@@ -301,6 +371,14 @@ async function checkEndpoint(config: EndpointConfig): Promise<MonitorResult> {
       const setCookie = response.headers.get('set-cookie') || '';
       const cookieSet = setCookie.includes('ts24_sso_session');
       observeSsoLogin(response.status, redirectLocation, cookieSet);
+
+       const redirectOk = response.status === 302 && typeof redirectLocation === 'string';
+       if (!redirectOk) {
+         logWarRoomEvent('redirect-anomaly', {
+           status: response.status,
+           redirectLocation,
+         });
+       }
     }
   } catch (error) {
     const latency = Math.round(performance.now() - start);

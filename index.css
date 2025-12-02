@@ -1645,7 +1645,7 @@ body::-webkit-scrollbar,
  * Standardized badges for impact, probability, security
  * ============================================ */
 
-.ts24-badge {
+.i24-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -1660,81 +1660,81 @@ body::-webkit-scrollbar,
 }
 
 /* Severity/Impact badges */
-.ts24-badge--low {
+.i24-badge--low {
   background-color: rgba(52, 211, 153, 0.15);
   color: var(--color-success);
   border-color: rgba(52, 211, 153, 0.3);
 }
 
-.ts24-badge--medium {
+.i24-badge--medium {
   background-color: rgba(245, 158, 11, 0.15);
   color: var(--color-warning);
   border-color: rgba(245, 158, 11, 0.3);
 }
 
-.ts24-badge--high {
+.i24-badge--high {
   background-color: rgba(248, 113, 113, 0.15);
   color: var(--color-danger);
   border-color: rgba(248, 113, 113, 0.3);
 }
 
-.ts24-badge--extreme {
+.i24-badge--extreme {
   background-color: rgba(248, 113, 113, 0.25);
   color: var(--color-danger);
   border-color: rgba(248, 113, 113, 0.5);
 }
 
 /* Status badges */
-.ts24-badge--success {
+.i24-badge--success {
   background-color: rgba(52, 211, 153, 0.15);
   color: var(--color-success);
   border-color: rgba(52, 211, 153, 0.3);
 }
 
-.ts24-badge--warning {
+.i24-badge--warning {
   background-color: rgba(245, 158, 11, 0.15);
   color: var(--color-warning);
   border-color: rgba(245, 158, 11, 0.3);
 }
 
-.ts24-badge--danger {
+.i24-badge--danger {
   background-color: rgba(248, 113, 113, 0.15);
   color: var(--color-danger);
   border-color: rgba(248, 113, 113, 0.3);
 }
 
-.ts24-badge--info {
+.i24-badge--info {
   background-color: rgba(79, 140, 201, 0.15);
   color: var(--color-info);
   border-color: rgba(79, 140, 201, 0.3);
 }
 
-.ts24-badge--muted {
+.i24-badge--muted {
   background-color: rgba(255, 255, 255, 0.05);
   color: var(--color-text-muted);
   border-color: var(--color-border);
 }
 
 /* Security level badges */
-.ts24-badge--unclassified {
+.i24-badge--unclassified {
   background-color: rgba(255, 255, 255, 0.08);
   color: var(--color-text-muted);
   border-color: var(--color-border);
 }
 
-.ts24-badge--confidential {
+.i24-badge--confidential {
   background-color: rgba(79, 140, 201, 0.15);
   color: var(--color-info);
   border-color: rgba(79, 140, 201, 0.3);
 }
 
-.ts24-badge--secret {
+.i24-badge--secret {
   background-color: rgba(245, 158, 11, 0.15);
   color: var(--color-warning);
   border-color: rgba(245, 158, 11, 0.3);
 }
 
-.ts24-badge--top-secret {
+.i24-badge--top-secret {
   background-color: rgba(248, 113, 113, 0.2);
   color: var(--color-danger);
   border-color: rgba(248, 113, 113, 0.4);
