@@ -1,8 +1,8 @@
-# TS24 Deployment Guide
+# Intel24 Deployment Guide
 
 ## Formål
 
-Guiden dækker, hvordan **TS24 Intel Console** deployes i produktion bag `https://intel24.blackbox.codes`, inklusive krav til origin-serveren, Node/Express-processen og nginx-proxyen foran.
+Guiden dækker, hvordan **Intel24 Console** deployes i produktion bag `https://intel24.blackbox.codes`, inklusive krav til origin-serveren, Node/Express-processen og nginx-proxyen foran.
 
 - QA evidence og release dokumentation findes i `QA_RUN_R1_TEMPLATE.md` og `RELEASE_READY.md` i denne mappe.
 
@@ -16,8 +16,8 @@ Guiden dækker, hvordan **TS24 Intel Console** deployes i produktion bag `https:
 ## Serverdeploy (Node/Express)
 
 ```bash
-git clone https://github.com/AlphaAcces/ts24-intel-console.git
-cd ts24-intel-console
+git clone https://github.com/blackbox-eye/intel24-console.git
+cd intel24-console
 
 npm install
 npm run build
@@ -31,11 +31,11 @@ npm start
 
 ```bash
 npm install -g pm2
-pm2 start dist/server/index.js --name ts24-intel-console
+pm2 start dist/server/index.js --name intel24-console
 pm2 save
 ```
 
-> Hvis du ikke transpilerer serverkoden til `dist`, så brug `pm2 start npm --name ts24-intel-console -- start` eller lav en systemd-unit. Målet er blot at holde processen kørende efter logout.
+> Hvis du ikke transpilerer serverkoden til `dist`, så brug `pm2 start npm --name intel24-console -- start` eller lav en systemd-unit. Målet er blot at holde processen kørende efter logout.
 
 ## nginx reverse proxy (eksempel)
 
@@ -82,7 +82,7 @@ Tilpas selv `listen 80`/`listen 443 ssl`, Cloudflare real-IP-opsætning og event
 
 1. Udfyld `QA_RUN_R1_TEMPLATE.md` med seneste QA-resultater (48/48 bekræftelse, metrics, loglinks).
 2. Opdater `RELEASE_READY.md` med build/lint/test-status, endpoint-sundhed og Stage 3 readiness.
-3. Del begge dokumenter i #ts24-release + ALPHA QA channel.
+3. Del begge dokumenter i #intel24-release + ALPHA QA channel.
 4. Sørg for, at denne mappe (`release/v1.1-QA-PASS/`) uploades til release-arkivet sammen med SSO diagram og WAR ROOM overview.
 5. Når ALPHA kvitterer, åbnes Blue/Green vinduet og instrukserne i denne guide følges.
 

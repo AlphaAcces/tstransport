@@ -24,6 +24,10 @@ For a high-level flow diagram, see [system_overview.md](docs/system_overview.md)
 **Prerequisites:** Node.js 18+ and Git.
 
 ```pwsh
+# 0. Clone repository
+git clone https://github.com/blackbox-eye/intel24-console.git
+cd intel24-console
+
 # 1. Install dependencies
 npm install
 

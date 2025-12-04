@@ -26,7 +26,7 @@ The export module aggregates case data, events, and KPIs into downloadable forma
 | Component/File | Path | Responsibility |
 |----------------|------|----------------|
 | Main composer | `src/pdf/executiveReport.ts` | `generateExecutiveReportPdf()` orchestrates sections |
-| Theme | `src/pdf/reportTheme.ts` | `ReportTheme` interface, TS24 branding colors |
+| Theme | `src/pdf/reportTheme.ts` | `ReportTheme` interface, Intel24 branding colors |
 | Metadata | `src/pdf/reportMetadata.ts` | `buildExecutiveReportMetadata()` |
 | Filename | `src/pdf/reportFilename.ts` | `buildReportFilename()` → `<CASE>_ExecutiveSummary_<ver>_<date>.pdf` |
 | Header | `src/pdf/reportHeader.ts` | `drawReportHeader()` – per-page header chrome |
@@ -78,9 +78,9 @@ The export module aggregates case data, events, and KPIs into downloadable forma
 
 Each Executive PDF contains:
 
-1. **Header** (per page) – TS24·Intel24 badge, report title, case name, page count, classification
+1. **Header** (per page) – Intel24 badge, report title, case name, page count, classification
 2. **Sections** (6 total) – Each uses `drawSectionTitle` with accent color (#F7B500)
-3. **Footer** (per page) – TS24 Data Intel™, page numbers, export metadata
+3. **Footer** (per page) – Intel24 Data Intel™, page numbers, export metadata
 
 ### Filename Format
 

@@ -1,4 +1,4 @@
-# TS24 Case API
+# Intel24 Case API
 
 **Last updated:** 30 Nov 2025
 
@@ -75,7 +75,7 @@ Returns the full `CaseData` object for the requested case. A 404 is returned whe
 - A typed API client lives at `src/domains/api/client.ts`.
   - `fetchCases()` returns `CaseMeta[]`
   - `fetchCase(id)` returns `CaseData`
-  - Failures throw an `ApiError` that logs to the console with the `[TS24 API]` prefix.
+  - Failures throw an `ApiError` that logs to the console with the `[Intel24 API]` prefix.
 - The `DataContext` component now loads case data via `fetchCase` on mount/subject changes.
   - While the request is pending, the provider renders a global skeleton loader.
   - On success, `dataSource` inside the context is set to `'api'`.

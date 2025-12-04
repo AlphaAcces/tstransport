@@ -1,7 +1,7 @@
 # Intel24 Repo Rename Cleanup Report
 
-**Dato:** 2. december 2025  
-**Udført af:** Copilot (Claude Opus 4.5)  
+**Dato:** 2. december 2025
+**Udført af:** Copilot (Claude Opus 4.5)
 **Branch:** `feature/qa-release-prep`
 
 ---
@@ -9,6 +9,12 @@
 ## 📋 Overblik
 
 Dette dokument dokumenterer den systematiske omdøbning fra **TS24** til **Intel24** på tværs af codebasen.
+
+### Aktuel repoidentitet
+
+- GitHub-organisation: `blackbox-eye`
+- Repository: `intel24-console`
+- Remote URL: `https://github.com/blackbox-eye/intel24-console`
 
 ### Navnekonvention
 
@@ -114,18 +120,21 @@ Følgende er **IKKE** ændret, da de er del af SSO-protokollen med ALPHA Team:
 ## ✅ Verifikation
 
 ### Builds
+
 ```bash
 npm run build  # Verificér at frontend bygger
 npm test       # Kør unit tests
 ```
 
 ### Søgning efter resterende referencer
+
 ```bash
 # Skal kun returnere SSO-relaterede (ts24-intel, ts24_sso_session, TS24_JWT)
 grep -r "TS24\|ts24" --include="*.ts" --include="*.tsx" --include="*.json" .
 ```
 
 ### CI/CD
+
 - GitHub Actions skal køre grønt efter push
 
 ---
@@ -135,8 +144,9 @@ grep -r "TS24\|ts24" --include="*.ts" --include="*.tsx" --include="*.json" .
 1. **GitHub Repo Rename** (admin): `ts24-intel-console` → `intel24-console`
 2. **Branch Protection**: Aktiver på `main` branch
 3. **Update Git Remotes** (lokalt):
+
    ```bash
-   git remote set-url origin https://github.com/AlphaAcces/intel24-console.git
+   git remote set-url origin https://github.com/blackbox-eye/intel24-console.git
    ```
 
 ---
@@ -149,5 +159,5 @@ grep -r "TS24\|ts24" --include="*.ts" --include="*.tsx" --include="*.json" .
 
 ---
 
-**Status:** ✅ Cleanup Complete  
+**Status:** ✅ Cleanup Complete
 **Næste:** Push til remote + aktivér branch protection
